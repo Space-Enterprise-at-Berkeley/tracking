@@ -1,0 +1,21 @@
+classdef CombinedTracker
+    properties
+        Time = 0
+        State = [0;0;0;0;0;0;0;0;0]
+        Filter = trackingKF("MotionModel","3D Constant Acceleration")
+
+        GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0]
+        GPSNoise = [1 0 0; 0 1 0; 0 0 1]
+
+        AccelModel = [0 0 1 0 0 0 0 0 0; 0 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 0 1]
+        AccelNoise = [1 0 0; 0 1 0; 0 0 1]
+    end
+    methods
+        function obj = CombinedTracker()
+            obj.Filter.initialize(obj.Filter, State, zeros(9))
+        end
+        function obj = GPSUpdate(obj, time, value)
+            
+        end
+    end
+end
