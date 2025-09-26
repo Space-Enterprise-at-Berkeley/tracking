@@ -1,0 +1,437 @@
+[
+  {
+    "id": 0,
+    "name": "Ack",
+    "payload": "Ack",
+    "reads": "all",
+    "writes": "all"
+  },
+  {
+    "id": 1,
+    "name": "24VSupplyStats",
+    "payload": "24VSupplyStats",
+    "reads": [ "GD*" ],
+    "writes": [ "PT*", "TC*", "LC*", "AC*" ]
+  },
+  {
+    "id": 1,
+    "name": "CFCapacitance",
+    "payload": "CFCapacitance",
+    "reads": [ "GD*" ],
+    "writes": [ "CF*" ]
+  },
+  {
+    "id": 1,
+    "name": "ERPressureTelemetry",
+    "payload": "ERPressureTelemetry",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 2,
+    "name": "PTValues",
+    "payload": "PTValues",
+    "reads": [ "GD*" ],
+    "writes": [ "PT*" ]
+  },
+  {
+    "id": 2,
+    "name": "LCValues",
+    "payload": "LCValues",
+    "reads": [ "GD*" ],
+    "writes": [ "LC*" ]
+  },
+  {
+    "id": 2,
+    "name": "TCValues",
+    "payload": "TCValues",
+    "reads": [ "GD*" ],
+    "writes": [ "TC*" ]
+  },
+  {
+    "id": 2,
+    "name": "ACActuatorStates",
+    "payload": "ACActuatorStates",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 2,
+    "name": "ERMotorTelemetry",
+    "payload": "ERMotorTelemetry",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 102,
+    "name": "PTCalibrationSettings",
+    "payload": "PTCalibrationSettings",
+    "reads": [ "GD*" ],
+    "writes": [ "PT*" ]
+  },
+  {
+    "id": 102,
+    "name": "LCCalibrationSettings",
+    "payload": "LCCalibrationSettings",
+    "reads": [ "GD*" ],
+    "writes": [ "LC*" ]
+  },
+  {
+    "id": 3,
+    "name": "TCColdJunctionTemperatures",
+    "payload": "TCColdJunctionTemperatures",
+    "reads": [ "GD*" ],
+    "writes": [ "TC*" ]
+  },
+  {
+    "id": 3,
+    "name": "ACActuatorContinuities",
+    "payload": "ACActuatorContinuities",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 3,
+    "name": "ERConfig",
+    "payload": "ERConfig",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 3,
+    "name": "PTChamberAutomation",
+    "payload": "PTChamberAutomation",
+    "reads": [ "GD*" , "AC*" ],
+    "writes": [ "PT*" ]
+  },
+  {
+    "id": 4,
+    "name": "PTAutomationData",
+    "payload": "PTAutomationData",
+    "reads": [ "GD*", "AC*" ],
+    "writes": [ "PT*" ]
+  },
+  {
+    "id": 4,
+    "name": "TCFaults",
+    "payload": "TCFaults",
+    "reads": [ "GD*" ],
+    "writes": [ "TC*" ]
+  },
+  {
+    "id": 4,
+    "name": "ACActuatorCurrents",
+    "payload": "ACActuatorCurrents",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 4,
+    "name": "ERDiagnostic",
+    "payload": "ERDiagnostic",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 5,
+    "name": "ACAutoventPressures",
+    "payload": "ACAutoventPressures",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 5,
+    "name": "ERStateTransitionError",
+    "payload": "ERStateTransitionError",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 6,
+    "name": "ACPotentiometers",
+    "payload": "ACPotentiometers",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 6,
+    "name": "ERFlowState",
+    "payload": "ERFlowState",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 7,
+    "name": "ACAutomationInfo",
+    "payload": "ACAutomationInfo",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 7,
+    "name": "ERLimitSwitch",
+    "payload": "ERLimitSwitch",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 8,
+    "name": "GemsDutyCycle",
+    "payload": "DutyCycle",
+    "reads": [ "GD*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 8,
+    "name": "ERPhaseCurrents",
+    "payload": "ERPhaseCurrents",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 9,
+    "name": "ERTemperatures",
+    "payload": "ERTemperatures",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 10,
+    "name": "EROvercurrentTrigger",
+    "payload": "EROvercurrentTrigger",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 102,
+    "name": "ERCalibrationSettings",
+    "payload": "ERCalibrationSettings",
+    "reads": [ "GD*" ],
+    "writes": [ "ER*" ]
+  },
+  {
+    "id": 100,
+    "name": "ACActuateActuator",
+    "payload": "ACActuateActuator",
+    "reads": [ "AC*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 100,
+    "name": "FirstPointCalibration",
+    "payload": "ChannelPoint",
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 101,
+    "name": "SecondPointCalibration",
+    "payload": "ChannelPoint",
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 102,
+    "name": "RequestCalibrationSettings",
+    "payload": null,
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 103,
+    "name": "ResetCalibration",
+    "payload": "Channel",
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 104,
+    "name": "SetCalibrationOffset",
+    "payload": "ChannelPoint",
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 105,
+    "name": "SetCalibrationMultiplier",
+    "payload": "ChannelPoint",
+    "reads": [ "PT*", "LC*", "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 124,
+    "name": "ACSetAutoventThreshold",
+    "payload": "ACAutoventPressures",
+    "reads": [ "AC*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 133,
+    "name": "Abort",
+    "payload": "Abort",
+    "reads": [ "*" ],
+    "writes": [ "*" ]
+  },
+  {
+    "id": 149,
+    "name": "Launch", // Sent to AC, which forwards it after aborts. Used if there's a burnwire
+    "payload": "Launch",
+    "reads": [ "*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 200,
+    "name": "BeginFlow", // Begin the flow for everything immediately. Used if there is not a burnwire
+    "payload": "Launch",
+    "reads": [ "*" ],
+    "writes": [ "AC*", "GD*" ]
+  },
+  {
+    "id": 201,
+    "name": "ERStopFlow",
+    "payload": null,
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 202,
+    "name": "ERPartialOpen",
+    "payload": "ERPartialOpen",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 203,
+    "name": "ERStaticPress",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 204,
+    "name": "ERRunCheckoutSequence",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 205,
+    "name": "ERZero",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 206,
+    "name": "ERSetP",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 207,
+    "name": "ERSetI",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 208,
+    "name": "ERSetD",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 209,
+    "name": "ERSetPOuter",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 210,
+    "name": "ERSetIOuter",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 211,
+    "name": "ERSetDOuter",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 212,
+    "name": "ERSetPressureSetpointStart",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 213,
+    "name": "ERSetPressureSetpointDropRate",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 214,
+    "name": "ERSetPressureSetpointMinimum",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 215,
+    "name": "ERSetStaticPressureSetpoint",
+    "payload": "ERSet",
+    "reads": [ "ER*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 201,
+    "name": "EndFlow",
+    "reads": [ "*" ],
+    "writes": [ "AC*" ]
+  },
+  {
+    "id": 249,
+    "name": "Heartbeat",
+    "payload": "Heartbeat",
+    "reads": [ "*" ],
+    "writes": [ "*" ]
+  },
+  {
+    "id": 251,
+    "name": "SetCommsAbort",
+    "payload": "SetCommsAbort",
+    "reads": [ "*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 120,
+    "name": "TCSetAbortLimit",
+    "payload": "TCSetAbort",
+    "reads": [ "TC*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 121,
+    "name": "TCRequestAbortLimits",
+    "reads": [ "TC*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 122,
+    "name": "TCResetAbortLimits",
+    "reads": [ "TC*" ],
+    "writes": [ "GD*" ]
+  },
+  {
+    "id": 123,
+    "name": "TCAbortLimits",
+    "payload": "TCAbortLimits",
+    "reads": [ "GD*" ],
+    "writes": [ "TC*" ]
+  }
+]
