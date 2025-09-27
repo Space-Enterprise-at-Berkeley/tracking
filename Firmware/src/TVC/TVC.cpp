@@ -69,6 +69,8 @@ namespace TVC {
         x_Controller.reset();
         y_Controller.reset();
         delay(3000); 
+        analogWriteFrequency(HAL::x_pwm, 20000); // 20 kHz recommended for motors
+        analogWriteFrequency(HAL::y_pwm, 20000);
     }
 
     void setRadius(Comms::Packet packet, uint8_t ip) {
@@ -151,11 +153,16 @@ namespace TVC {
         //     Serial.printf("speedX @ %d, speedY @ %d\n", speed_x + MID_SPD, speed_y + MID_SPD);
         // }
         #ifdef DISABLE_ENCODER_CHECK
-        ledcWrite(0, MID_SPD);
-        ledcWrite(1, MID_SPD);
+        //ledcWrite(0, MID_SPD);
+        //ledcWrite(1, MID_SPD);
+        analogWrite(HAL::x_pwm, MID_SPD);
+        analogWrite(HAL::y_pwm, MID_SPD);
+
         #else
-        ledcWrite(0, speed_x + MID_SPD);
-        ledcWrite(1, speed_y + MID_SPD);
+        //ledcWrite(0, speed_x + MID_SPD);
+        //ledcWrite(1, speed_y + MID_SPD);
+        analogWrite(HAL::x_pwm, speed_x + MID_SPD);
+        analogWrite(HAL::y_pwm, speed_y + MID_SPD);
         #endif
         return tvcUpdatePeriod;
     }
@@ -235,6 +242,7 @@ namespace TVC {
                 return 0;
                 break;
             }
+            return 0;
         }
 
     }

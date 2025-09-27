@@ -92,7 +92,8 @@ namespace Comms
 
   void emitPacket(Packet *packet, HardwareSerial *serialBus);
 
-  void emitPacket(Packet *packet, HardwareSerial *serialBus, char *delim, int dlen);
+  //void emitPacket(Packet *packet, HardwareSerial *serialBus, char *delim, int dlen);
+  void emitPacket(Packet *packet, HardwareSerial *serialBus, const char *delim, int dlen);
 
   bool verifyPacket(Packet *packet);
 

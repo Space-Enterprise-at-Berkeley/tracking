@@ -19,14 +19,23 @@ namespace HAL {
         pinMode(x_pwm, OUTPUT); 
         pinMode(y_pwm, OUTPUT);
 
-        ledcSetup(0, 200, 12);
-        ledcAttachPin(x_pwm, 0);
-        ledcWrite(0, 1229);
+        //ledcSetup(0, 200, 12);
+        //ledcAttachPin(x_pwm, 0);
+        //ledcWrite(0, 1229);
 
-        ledcSetup(1, 200, 12);
-        ledcAttachPin(y_pwm, 1);
-        ledcWrite(1, 1229);
-        
+        analogWriteResolution(12);
+        analogWriteFrequency(x_pwm, 200);
+        analogWrite(x_pwm, 1229);
+
+        //ledcSetup(1, 200, 12);
+        //ledcAttachPin(y_pwm, 1);
+        //ledcWrite(1, 1229);
+        //analogWriteResolution(12);
+
+        analogWriteFrequency(y_pwm, 200);
+        analogWrite(y_pwm, 1229);
+
+
         setupEncoders();
         setEncoderCount_0(0);
         setEncoderCount_1(0);
