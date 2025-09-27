@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Common.h>
-#include <EspComms.h>
+//#include <EspComms.h>
+#include <TeensyComms.h>
 #include "TVC.h"
 #include "HAL.h"
 
@@ -44,7 +45,7 @@ void setup() {
   Serial.begin(115200);
   HAL::init();
   Serial.printf("hii!!\n");
-  Comms::init();
+  //Comms::init();
   Serial.printf("setup comms!\n");
   HAL::setupEncoders();
   HAL::resetEncoders();
@@ -78,7 +79,7 @@ void setup() {
       }
     }
     // delayMicroseconds(10);
-    Comms::processWaitingPackets();
+    //Comms::processWaitingPackets();
   }
 }
 

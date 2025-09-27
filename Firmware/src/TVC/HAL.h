@@ -4,12 +4,14 @@
 #include <Arduino.h>
 #include "SPI.h"
 #include "Common.h"
-#include "EspComms.h"
+#include "TeensyComms.h"
 #include "TVC.h"
 
 namespace HAL {
 
-    const int x_pwm = 39; //sparkmax0
+    //check pinouts!!!!
+
+    const int x_pwm = 39; //sparkmax0 comments
     const int y_pwm = 15; //sparkmax1
 
     const int encA_0 = 34; //encoder A blue
