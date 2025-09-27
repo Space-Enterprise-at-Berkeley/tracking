@@ -69,8 +69,8 @@ namespace TVC {
         x_Controller.reset();
         y_Controller.reset();
         delay(3000); 
-        analogWriteFrequency(HAL::x_pwm, 20000); // 20 kHz recommended for motors
-        analogWriteFrequency(HAL::y_pwm, 20000);
+        analogWriteFrequency(HAL::x_pwm, 200); // 200 Hz recommended for motors
+        analogWriteFrequency(HAL::y_pwm, 200);
     }
 
     void setRadius(Comms::Packet packet, uint8_t ip) {
