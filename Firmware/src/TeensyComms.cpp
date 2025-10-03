@@ -297,7 +297,7 @@ namespace Comms {
 
     // Send over UDP
     // Udp.resetSendOffset();
-    Udp.beginPacket(IPAddress(10,0,0,255), bcast_port);
+    Udp.beginPacket(mcast, bcast_port);
     Udp.write(packet->id);
     Udp.write(packet->len);
     Udp.write(packet->timestamp, 4);
@@ -314,32 +314,32 @@ namespace Comms {
     // Send over UDP
     // Udp.resetSendOffset();
     // Udp.resetSendOffset(1);
-    Udp.beginPacket(IPAddress(10,0,0,255), bcast_port);
-    Udp.write(1, packet->id);
-    Udp.write(1, packet->len);
-    Udp.write(1, packet->timestamp, 4);
-    Udp.write(1, packet->checksum, 2);
-    Udp.write(1, packet->data, packet->len);
+    Udp.beginPacket(bcast, bcast_port);
+    Udp.write(packet->id);
+    Udp.write(packet->len);
+    Udp.write(packet->timestamp, 4);
+    Udp.write(packet->checksum, 2);
+    Udp.write(packet->data, packet->len);
     Udp.endPacket(1);
   }
 
-  void emitPacketToExtra(Packet *packet) {
-    if (!extraSocketOpen){
-      Serial.println("Extra socket not open, packet not sent.");
-      return;
-    }
-    finishPacket(packet);
+  // void emitPacketToExtra(Packet *packet) {
+  //   if (!extraSocketOpen){
+  //     Serial.println("Extra socket not open, packet not sent.");
+  //     return;
+  //   }
+  //   finishPacket(packet);
 
-    // Send over UDP
-    // Udp.resetSendOffset();
-    Udp.resetSendOffset(2);
-    Udp.write(2, packet->id);
-    Udp.write(2, packet->len);
-    Udp.write(2, packet->timestamp, 4);
-    Udp.write(2, packet->checksum, 2);
-    Udp.write(2, packet->data, packet->len);
-    Udp.endPacket(2);
-  }
+  //   // Send over UDP
+  //   // Udp.resetSendOffset();
+  //   Udp.resetSendOffset(2);
+  //   Udp.write(2, packet->id);
+  //   Udp.write(2, packet->len);
+  //   Udp.write(2, packet->timestamp, 4);
+  //   Udp.write(2, packet->checksum, 2);
+  //   Udp.write(2, packet->data, packet->len);
+  //   Udp.endPacket(2);
+  // }
 
   // // Send packet to one specific IP address
   // void emitPacket(Packet *packet, uint8_t ip){
@@ -364,12 +364,12 @@ namespace Comms {
     // Send over UDP
     // Udp.resetSendOffset();
     // Udp.resetSendOffset(1);
-    Udp.beginPacket(1, IPAddress(10,0,0,ip), bcast_port);
-    Udp.write(1, packet->id);
-    Udp.write(1, packet->len);
-    Udp.write(1, packet->timestamp, 4);
-    Udp.write(1, packet->checksum, 2);
-    Udp.write(1, packet->data, packet->len);
+    Udp.beginPacket(IPAddress(10,0,0,ip), bcast_port);
+    Udp.write(packet->id);
+    Udp.write(packet->len);
+    Udp.write(packet->timestamp, 4);
+    Udp.write(packet->checksum, 2);
+    Udp.write(packet->data, packet->len);
     Udp.endPacket(1);
   }
 
