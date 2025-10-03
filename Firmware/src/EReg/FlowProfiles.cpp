@@ -7,8 +7,13 @@ namespace FlowProfiles {
         float p = float(flowTime)/float(Config::rampDuration);
         return min((p*Config::pressureSetpoint) + (1-p)*Config::rampStart, Config::pressureSetpoint);
     }
-    float pressurizationRamp(unsigned long flowTime) {
-        return min((Config::pressureSetpoint/Config::pressurizationRampDuration) * flowTime, Config::pressurizationCutoff);
+    //press starts from 0
+    float pressurizationRampFromZero(unsigned long flowTime) {
+        return pressurizationRamp(flowTime, 50);
+    }
+    //press starts from rampStartPressure - 50
+    float pressurizationRamp(unsigned long flowTime, float rampStartPressure) {
+        return max(min((rampStartPressure - 50) + Config::staticPressurizationRate * (flowTime*1.0F)/(1000*1000), Config::staticPressureSetpoint), (float) 0);
     }
     float constantPressure(unsigned long flowTime) {
         return Config::pressureSetpoint;
@@ -16,7 +21,7 @@ namespace FlowProfiles {
     float angleCvCharacterization(unsigned long flowTime) {
         const float steps[] = {500, 400, 300, 200, 150};
         const int numSteps = sizeof(steps)/sizeof(steps[0]);
-        unsigned long stepTime = Config::flowDuration/numSteps;
+        unsigned long stepTime = Config::getFlowDuration()/numSteps;
         unsigned int index = flowTime/stepTime;
         index = (index >= numSteps)?(numSteps-1):index;
         return steps[index];
@@ -30,7 +35,7 @@ namespace FlowProfiles {
             7*1000*1000UL,
             11*1000*1000UL,
             13*1000*1000UL,
-            Config::flowDuration
+            Config::getFlowDuration()
         };
         const float keyPointPressures[numKeypoints] = { // these correspond to keypoints
             0.0,
@@ -55,6 +60,11 @@ namespace FlowProfiles {
         return 0.9034 * throttledFlowLox(flowTime) + 12.32;
     }
 
+    float blowdownTestFlowIPA(unsigned long flowTime) {
+        float blowdownPressure = Config::pressureSetpoint - (flowTime * Config::boiloffDrop);
+        return max(blowdownPressure, Config::boiloffEnd);
+    }
+
     /*
     DONT USE FOR ACTUAL BURNS AND HOTFIRE!
     This gives pressure setpoint profile for a nominal rate test, for Lox side
@@ -69,7 +79,7 @@ namespace FlowProfiles {
             6*1000*1000UL,
             // 10*1000*1000UL,
             // 12*1000*1000UL,
-            Config::flowDuration
+            Config::getFlowDuration()
         };
         const float keyPointPressures[numKeypoints] = { // these correspond to keypoints
             0.0,
@@ -112,7 +122,7 @@ namespace FlowProfiles {
             7*1000*1000UL,
             11*1000*1000UL,
             13*1000*1000UL,
-            Config::flowDuration
+            Config::getFlowDuration()
         };
         const float keyPointPressures[numKeypoints] = { // these correspond to keypoints
             0.0,
@@ -155,7 +165,7 @@ namespace FlowProfiles {
             7*1000*1000UL,
             11*1000*1000UL,
             13*1000*1000UL,
-            Config::flowDuration
+            Config::getFlowDuration()
         };
         const float keyPointPressures[numKeypoints] = { // these correspond to keypoints
             0.0,
@@ -186,20 +196,8 @@ namespace FlowProfiles {
     }
 
     float flowPressureProfile(unsigned long flowTime) {
-        #if defined(FUEL)
-            #if defined(IS_INJECTOR)
-                return meopTestFlowFuel(flowTime);
-                // return throttledFlowFuel(flowTime);
-            #else
-                return linearRampup(flowTime);
-            #endif
-        #elif defined(LOX)
-            #if defined(IS_INJECTOR)
-                return meopTestFlowLox(flowTime);
-                // return throttledFlowLox(flowTime);
-            #else
-                return linearRampup(flowTime);
-            #endif
+        #if defined(IPA)
+            return blowdownTestFlowIPA(flowTime);
         #endif
     }
 

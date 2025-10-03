@@ -1,13 +1,14 @@
 #pragma once
 
-#include <Common.h>
-#include <Ethernet.h>
-#include <EthernetUdp.h>
+#include <common.h>
+//#include <Ethernet.h>
+//#include <EthernetUdp.h>
 
 #include <Arduino.h>
 
 #include <map>
 #include <vector>
+#include "../proto/include/common.h"
 
 namespace Comms
 {
@@ -69,6 +70,8 @@ namespace Comms
    * @param packet The packet in which the data is stored.
    */
   void emitPacket(Packet *packet);
+
+  // Send packet to a specified IP address
   void emitPacket(Packet *packet, uint8_t ip);
 
   /**
@@ -82,7 +85,8 @@ namespace Comms
   // Broadcast
   void emitPacketToAll(Packet *packet);
 
-  void redirectEmitPacketToAll(uint8_t ip);
+  void initExtraSocket(int port, uint8_t ip);
+  void emitPacketToExtra(Packet *packet, uint8_t ip);
 
   bool verifyPacket(Packet *packet);
 

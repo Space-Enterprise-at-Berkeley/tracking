@@ -23,6 +23,7 @@
 #include "utility/w5500.h"
 
 volatile bool INTnFlag;
+int ETH_intN_pin;
 
 int EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout)
 {
@@ -91,7 +92,6 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
 	begin(mac, ip, dns, gateway, subnet, -1, -1, -1, -1);
 }
 
-int ETH_intN_g;
 void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet, int spiMisoPin, int spiMosiPin, int spiSclkPin, int ETH_intN)
 {
 	if (W5500.init(spiMisoPin, spiMosiPin, spiSclkPin) == 0) return;
@@ -104,23 +104,19 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
 	W5500.writeSIMR(0x01);
 	W5500.writeSnIMR(0, 0x04);
 	// Set Interupprt
-	if (ETH_intN == -1) {
-		ETH_intN = 9;
-		ETH_intN_g = 9;
-	} else {
-		ETH_intN_g = ETH_intN;
+	ETH_intN_pin = ETH_intN;
+	if (ETH_intN_pin == -1) {
+		ETH_intN_pin = 9;
 	}
-	pinMode(ETH_intN, INPUT);
-	// attachInterrupt(ETH_intN, setRecvFlag, FALLING);
+	pinMode(ETH_intN_pin, INPUT);
+	//attachInterrupt(ETH_intN, setRecvFlag, FALLING);
 	SPI.endTransaction();
 }
 
 bool EthernetClass::detectRead() {
-
-	W5500.execCmdSn(0, Sock_RECV); //fix for dumb tvc issue
-
-	if (!digitalRead(ETH_intN_g)) {
-		W5500.writeSnIR(0, 0x04);
+	//if (INTnFlag) {
+	if (!digitalRead(ETH_intN_pin)) {
+		W5500.writeSnIR(1, 0xff);
 		INTnFlag = false;
 		return true;
 	} else {

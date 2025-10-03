@@ -305,7 +305,7 @@ int EthernetClass::socketRecv(uint8_t s, uint8_t *buf, int16_t len)
 		uint16_t rsr = getSnRX_RSR(s);
 		ret = rsr - state[s].RX_inc;
 		state[s].RX_RSR = ret;
-		// Serial.printf("in this1 Sock_RECV, RX_RSR=%d, RX_inc=%d\n", ret, state[s].RX_inc);
+		//Serial.printf("Sock_RECV, RX_RSR=%d, RX_inc=%d\n", ret, state[s].RX_inc);
 	}
 	if (ret == 0) {
 		// No data available.
@@ -320,7 +320,6 @@ int EthernetClass::socketRecv(uint8_t s, uint8_t *buf, int16_t len)
 			ret = -1;
 		}
 	} else {
-		// Serial.printf("in this2: ret = %d\n", ret);
 		if (ret > len) ret = len; // more data available than buffer length
 		uint16_t ptr = state[s].RX_RD;
 		if (buf) read_data(s, ptr, buf, ret);
@@ -332,7 +331,7 @@ int EthernetClass::socketRecv(uint8_t s, uint8_t *buf, int16_t len)
 			state[s].RX_inc = 0;
 			W5500.writeSnRX_RD(s, ptr);
 			W5500.execCmdSn(s, Sock_RECV);
-			// Serial.printf("Sock_RECV cmd, RX_RD=%d, RX_RSR=%d\n",
+			//Serial.printf("Sock_RECV cmd, RX_RD=%d, RX_RSR=%d\n",
 			//  state[s].RX_RD, state[s].RX_RSR);
 		} else {
 			state[s].RX_inc = inc;

@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "deviceIds": {
+    "AC_1": 11,
+    "AC_2": 12,
+    "AC_3": 13,
+    "LC_1": 21,
+    "LC_2": 22,
+    "PT_1": 31,
+    "PT_2": 32,
+    "PT_3": 33,
+    //"PT_HAD": 34,
+    "CF_NOS": 42,
+    "CF_IPA": 43,
+    "TC_1": 51,
+    "TC_2": 52,
+    "TC_3": 53,
+    "TC_4": 54,
+    "ER_IPA": 71
+  },
+  "AC_1": [
+    {
+      "channel": 0,
+      "measure": "AC_BURNWIRE"
+    },
+    {
+      "channel": 1,
+      "measure": "AC_BREAKWIRE"
+    },
+    {
+      "channel": 3,
+      "measure": "AC_ARM"
+    },
+    {
+      "channel": 4,
+      "measure": "AC_NOS_MAIN"
+    },
+    {
+      "channel": 5,
+      "measure": "AC_IPA_MAIN"
+    },
+    {
+      "channel": 7,
+      "measure": "AC_IGNITER"
+    }
+  ],
+  "AC_2": [
+    {
+      "channel": 0,
+      "measure": "AC_NOS_GEMS"
+    },
+    {
+      "channel": 3,
+      "measure": "AC_NOS_LINE_VENT"
+    },
+    {
+      "channel": 4,
+      "measure": "AC_NOS_EMERGENCY_VENT"
+    },
+    {
+      "channel": 5,
+      "measure": "AC_NOS_DRAIN"
+    },
+    {
+      "channel": 6,
+      "measure": "AC_NOS_SLOW_VENT"
+    },
+    {
+      "channel": 7,
+      "measure": "AC_NOS_FILL"
+    }
+  ],
+  "AC_3": [
+    {
+      "channel": 0,
+      "measure": "AC_IPA_GEMS"
+    },
+    {
+      "channel": 2,
+      "measure": "AC_IPA_SLOW_VENT"
+    },
+    {
+      "channel": 3,
+      "measure": "AC_IPA_DOME_RBV"
+    },
+    {
+      "channel": 4,
+      "measure": "AC_IPA_EMERGENCY_VENT"
+    },
+    {
+      "channel": 5,
+      "measure": "AC_IPA_DRAIN"
+    },
+    {
+      "channel": 6,
+      "measure": "AC_IPA_PRESS_FLOW"
+    }
+  ],
+  "PT_1": [
+    {
+      "channel": 0,
+      "measure": "PT_NOS_TANK"
+    },
+    {
+      "channel": 2,
+      "measure": "PT_MAIN_VALVE"
+    },
+    {
+      "channel": 3,
+      "measure": "PT_IPA_DOME"
+    },
+    {
+      "channel": 4,
+      "measure": "PT_IPA_TANK"
+    },
+    {
+      "channel": 5,
+      "measure": "PT_NOS_INJECTOR"
+    },
+    {
+      "channel": 6,
+      "measure": "PT_NOS_FILL_LINE"
+    },
+    {
+      "channel": 7,
+      "measure": "PT_IPA_INJECTOR"
+    }
+  ],
+  "PT_2": [
+    {
+      "channel": 0,
+      "measure": "PT_MANIFOLD_0"
+    },
+    {
+      "channel": 1,
+      "measure": "PT_MANIFOLD_1"
+    },
+    {
+      "channel": 2,
+      "measure": "PT_ENGINE_1-1"
+    },
+    {
+      "channel": 3,
+      "measure": "PT_ENGINE_1-2"
+    },
+    {
+      "channel": 4,
+      "measure": "PT_ENGINE_1-3"
+    },
+    {
+      "channel": 5,
+      "measure": "PT_ENGINE_1-4"
+    },
+    {
+      "channel": 6,
+      "measure": "PT_ENGINE_2-1"
+    },
+    {
+      "channel": 7,
+      "measure": "PT_ENGINE_2-2"
+    }
+  ],
+  "PT_3": [
+    {
+      "channel": 0,
+      "measure": "PT_MANIFOLD_2"
+    },
+    {
+      "channel": 1,
+      "measure": "PT_CHAMBER"
+    },
+    {
+      "channel": 2,
+      "measure": "PT_ENGINE_2-3"
+    },
+    {
+      "channel": 3,
+      "measure": "PT_ENGINE_2-4"
+    },
+    {
+      "channel": 4,
+      "measure": "PT_ENGINE_3-1"
+    },
+    {
+      "channel": 5,
+      "measure": "PT_ENGINE_3-2"
+    },
+    {
+      "channel": 6,
+      "measure": "PT_ENGINE_3-3"
+    },
+    {
+      "channel": 7,
+      "measure": "PT_ENGINE_3-4"
+    }
+  ],
+  "TC_1": [
+    {
+      "channel": 7,
+      "measure": "TC_NOS_INJ"
+    }
+  ],
+  "TC_2": [
+    {
+      "channel": 7,
+      "measure": "TC_IPA_INJ"
+    }
+  ],
+  "TC_3": [
+    {
+      "channel": 5,
+      "measure": "TC_NOS_TANK"
+    }
+  ],
+  "TC_4": [
+    {
+      "channel": 1,
+      "measure": "TC_ENGINE_2-1"
+    },
+    {
+      "channel": 2,
+      "measure": "TC_ENGINE_2-2"
+    },
+    {
+      "channel": 3,
+      "measure": "TC_ENGINE_2-4"
+    },
+    {
+      "channel": 4,
+      "measure": "TC_ENGINE_3-1"
+    },
+    {
+      "channel": 5,
+      "measure": "TC_ENGINE_3-2"
+    },
+    {
+      "channel": 6,
+      "measure": "TC_ENGINE_3-3"
+    },
+    {
+      "channel": 7,
+      "measure": "TC_ENGINE_3-4"
+    }
+  ],
+  "LC_1": [
+    {
+      "channel": 0,
+      "measure": "LC_ENGINE_2"
+    },
+    {
+      "channel": 2,
+      "measure": "LC_ENGINE_1"
+    },
+    {
+      "channel": 3,
+      "measure": "LC_ENGINE_3"
+    }
+  ],
+  "LC_2": [
+    {
+      "channel": 0,
+      "measure": "LC_NOS"
+    },
+    {
+      "channel": 2,
+      "measure": "LC_IPA"
+    }
+  ]
+}

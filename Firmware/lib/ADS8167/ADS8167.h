@@ -21,7 +21,7 @@ class ADS8167 {
         void setManualMode();
         void        setChannel(const uint8_t channelno);
         uint16_t    readChannel(uint8_t* channel_out = NULL);
-        long    readData(uint8_t channelno);
+        uint16_t    readData(uint8_t channelno);
         //Auto Sequence mode
         void setAutoSequenceMode();
 

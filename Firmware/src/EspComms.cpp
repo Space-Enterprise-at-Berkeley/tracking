@@ -1,47 +1,47 @@
 #include <EspComms.h>
 
+#include "../proto/include/Packet_Abort.h" // This can't go in the header or it will cause a circular import of headers
+
 namespace Comms {
   std::map<uint8_t, commFunction> callbackMap;
 
   // Define 3 UDP instances
   EthernetUDP Udp;
+  EthernetUDP Sender;
   char packetBuffer[sizeof(Packet)];
   bool multicast = false;
+  bool showPacketRecv = false;
+
+  IPAddress mcast(224, 0, 0, 3);
+  uint16_t mcast_port = 42080;
+  IPAddress bcast(10, 0, 0, 255);
+  uint16_t bcast_port = 42099;
 
   byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, ID};
-  // Define groundstation ips
-  const uint8_t groundStationCount = 4;
-  IPAddress groundStations[groundStationCount] = {IPAddress(10, 0, 0, GROUND1), IPAddress(10, 0, 0, GROUND2), IPAddress(10, 0, 0, GROUND3), IPAddress(10, 0, 0, 70)};
-  int ports[groundStationCount] = {42069, 42070, 42071, 42072};
+  
   // IPAddress groundStations[groundStationCount] = {IPAddress(10, 0, 0, GROUND1)};
   // int ports[groundStationCount] = {42069};
+  bool extraSocketOpen = false;
 
   IPAddress ip(10, 0, 0, ID);
 
-
-
   void init(int cs, int spiMisoPin, int spiMosiPin, int spiSclkPin, int ETH_intN)
   {
-    Serial.begin(115200);
+    Serial.begin(921600);
     Ethernet.init(cs);
     Ethernet.begin((uint8_t *)mac, ip, spiMisoPin, spiMosiPin, spiSclkPin, ETH_intN);
 
     // Configure W5500 pins destination/ports
-    for(int i = 0; i < groundStationCount; i++) {
-      Udp.begin(ports[i], i+1);
-      Udp.beginPacket(i+1, groundStations[i], ports[i]);
-    }
+    // for(int i = 0; i < groundStationCount; i++) {
+    //   Udp.begin(ports[i], i+1);
+    //   Udp.beginPacket(i+1, groundStations[i], ports[i]);
+    // }
 
-    Udp.begin(42099, 0);
-    Udp.beginPacket(0, IPAddress(10, 0, 0, 255), 42099);
+    // Udp.beginPacket(IPAddress(10, 0, 0, 255), 42099);
 
-    
-
-    // Udp.begin(42072, groundStationCount+1);
-
-    //listen on port 42098 as well
-    // Udp.begin(42098, 0);
-    // Udp.beginPacket(0, IPAddress(10, 0, 0, 255), 42098);
+    Udp.beginMulticast(mcast, mcast_port);
+    Udp.begin(bcast_port, 1);
+    Udp.beginPacket(1, bcast, bcast_port);
     
     // if (multicast) {
     //   Udp.beginMulticast(multiGround, port);
@@ -57,17 +57,22 @@ namespace Comms {
     init(10, -1, -1, -1, -1);
   }
 
+  void initExtraSocket(int port, uint8_t ip){
+    Udp.begin(port);
+    Udp.beginPacket(2, IPAddress(10, 0, 0, ip), port);
+    extraSocketOpen = true;
+  }
+
   void sendFirmwareVersionPacket(Packet unused, uint8_t ip)
   {
-    DEBUG("sending firmware version packet\n");
+    DEBUG("sending firmware version packet (not really, packet spec broke it)\n");
     DEBUG_FLUSH();
 
-    Packet version = {.id = FW_STATUS, .len = 7};
+    // Packet version = {.id = FW_STATUS, .len = 7};
 
     // char commit[] = FW_COMMIT;
-    char commit[] = "fixthislaterpls";
-    memcpy(&(version.data), &commit, 7);
-    emitPacket(&version);
+    // memcpy(&(version.data), &commit, 7);
+    // emitPacket(&version);
   }
 
   void registerCallback(uint8_t id, commFunction function)
@@ -86,9 +91,12 @@ namespace Comms {
     uint16_t checksum = *(uint16_t *)&packet->checksum;
     if (checksum == computePacketChecksum(packet))
     {
-      Serial.print("Packet with ID ");
-      Serial.print(packet->id);
-      Serial.print(" has correct checksum!\n");
+      if (showPacketRecv)
+      {
+        Serial.print("Packet with ID ");
+        Serial.print(packet->id);
+        Serial.print(" has correct checksum!\n");
+      }
       // try to access function, checking for out of range exception
       if (callbackMap.count(packet->id))
       {
@@ -96,102 +104,102 @@ namespace Comms {
       }
       else
       {
-        Serial.print("ID ");
-        Serial.print(packet->id);
-        Serial.print(" does not have a registered callback function.\n");
+        if (showPacketRecv)
+        {
+          Serial.print("ID ");
+          Serial.print(packet->id);
+          Serial.print(" does not have a registered callback function.\n");
+        }
       }
-    }
-    else
-    {
+    } else {
       Serial.print("Packet with ID ");
       Serial.print(packet->id);
-      Serial.print(" does not have correct checksum!\n");
+      Serial.print(" has incorrect checksum!\n");
     }
   }
 
   void processWaitingPackets()
   {
     if (Ethernet.detectRead()) {
-      for (int i = 0; i < 8; i++) {
-        if (Udp.parsePacket(i)) {
-          Udp.read(packetBuffer, sizeof(Comms::Packet), i);
-          Packet *packet = (Packet*) &packetBuffer;
-          evokeCallbackFunction(packet, Udp.remoteIP()[3]);
-        } 
+      if (Udp.parsePacket()) {
+        // if(Udp.remotePort() != port) return;
+        Udp.read(packetBuffer, sizeof(Comms::Packet));
+        Packet *packet = (Packet*) &packetBuffer;
+        
+        evokeCallbackFunction(packet, Udp.remoteIP()[3]);
       }
     }
 
-    // if (Serial.available())
-    //   {
-    //     //That was for reading full formed packets from the USB serial port
-    //     /*
-    //     int cnt = 0;
-    //     while (Serial.available() && cnt < sizeof(Packet))
-    //     {
-    //       packetBuffer[cnt] = Serial.read();
-    //       cnt++;
-    //     }
-    //     Packet *packet = (Packet *)&packetBuffer;
-    //     // DEBUG("Got unverified packet with ID ");
-    //     // DEBUG(packet->id);
-    //     // DEBUG('\n');
-    //     evokeCallbackFunction(packet, 255); // 255 signifies a USB packet
-    //     */
+    if (Serial.available())
+      {
+        //That was for reading full formed packets from the USB serial port
+        /*
+        int cnt = 0;
+        while (Serial.available() && cnt < sizeof(Packet))
+        {
+          packetBuffer[cnt] = Serial.read();
+          cnt++;
+        }
+        Packet *packet = (Packet *)&packetBuffer;
+        // DEBUG("Got unverified packet with ID ");
+        // DEBUG(packet->id);
+        // DEBUG('\n');
+        evokeCallbackFunction(packet, 255); // 255 signifies a USB packet
+        */
        
-    //    //Instead I want to read commands in the form of "id data"
-    //    //And then make the packet and trigger the callback
+       //Instead I want to read commands in the form of "id data"
+       //And then make the packet and trigger the callback
 
-    //     Serial.println("Got a command");
-    //     return;
-    //     uint8_t id = (uint8_t)Serial.parseInt();
-    //     Serial.print("id" + String(id));
-    //     if (id == -1) return;
-    //     Packet packet = {.id = id, .len = 0};
-    //     while(Serial.available()){
-    //       if (Serial.peek() == ' ') Serial.read();
-    //       if (Serial.peek() == '\n') {Serial.read(); break;}
-    //       //determine datatype of next value
-    //       if (Serial.peek() == 'f'){
-    //         Serial.read();
-    //         float val = Serial.parseFloat();
-    //         Serial.print(" float" + String(val));
-    //         packetAddFloat(&packet, val);
-    //       }
-    //       else if (Serial.peek() == 'i'){
-    //         Serial.read();
-    //         int val = Serial.parseInt();
-    //         Serial.print(" int" + String(val));
-    //         packetAddUint32(&packet, val);
-    //       }
-    //       else if (Serial.peek() == 's'){
-    //         Serial.read();
-    //         int val = Serial.parseInt();
-    //         Serial.print(" short" + String(val));
-    //         packetAddUint16(&packet, val);
-    //       }
-    //       else if (Serial.peek() == 'b'){
-    //         Serial.read();
-    //         int val = Serial.parseInt();
-    //         Serial.print(" byte" + String(val));
-    //         packetAddUint8(&packet, val);
-    //       } else{
-    //         Serial.read();
-    //       }
-    //     }
-    //     Serial.println();
-    //         // add timestamp to struct
-    //     uint32_t timestamp = millis();
-    //     packet.timestamp[0] = timestamp & 0xFF;
-    //     packet.timestamp[1] = (timestamp >> 8) & 0xFF;
-    //     packet.timestamp[2] = (timestamp >> 16) & 0xFF;
-    //     packet.timestamp[3] = (timestamp >> 24) & 0xFF;
+        Serial.println("Got a command");
+        uint8_t id = (uint8_t)Serial.parseInt();
+        Serial.print("id" + String(id));
+        if (id == -1) return;
+        Packet packet = {.id = id, .len = 0};
+        while(Serial.available()){
+          if (Serial.peek() == ' ') Serial.read();
+          if (Serial.peek() == '\n') {Serial.read(); break;}
+          //determine datatype of next value
+          if (Serial.peek() == 'f'){
+            Serial.read();
+            float val = Serial.parseFloat();
+            Serial.print(" float" + String(val));
+            packetAddFloat(&packet, val);
+          }
+          else if (Serial.peek() == 'i'){
+            Serial.read();
+            int val = Serial.parseInt();
+            Serial.print(" int" + String(val));
+            packetAddUint32(&packet, val);
+          }
+          else if (Serial.peek() == 's'){
+            Serial.read();
+            int val = Serial.parseInt();
+            Serial.print(" short" + String(val));
+            packetAddUint16(&packet, val);
+          }
+          else if (Serial.peek() == 'b'){
+            Serial.read();
+            int val = Serial.parseInt();
+            Serial.print(" byte" + String(val));
+            packetAddUint8(&packet, val);
+          } else{
+            Serial.read();
+          }
+        }
+        Serial.println();
+            // add timestamp to struct
+        uint32_t timestamp = millis();
+        packet.timestamp[0] = timestamp & 0xFF;
+        packet.timestamp[1] = (timestamp >> 8) & 0xFF;
+        packet.timestamp[2] = (timestamp >> 16) & 0xFF;
+        packet.timestamp[3] = (timestamp >> 24) & 0xFF;
 
-    //     // calculate and append checksum to struct
-    //     uint16_t checksum = computePacketChecksum(&packet);
-    //     packet.checksum[0] = checksum & 0xFF;
-    //     packet.checksum[1] = checksum >> 8;
-    //     evokeCallbackFunction(&packet, 255); // 255 signifies a USB packet
-    //   }
+        // calculate and append checksum to struct
+        uint16_t checksum = computePacketChecksum(&packet);
+        packet.checksum[0] = checksum & 0xFF;
+        packet.checksum[1] = checksum >> 8;
+        evokeCallbackFunction(&packet, 255); // 255 signifies a USB packet
+      }
   }
 
   void packetAddFloatArray(Packet *packet, float *arr, uint8_t len)
@@ -289,20 +297,14 @@ namespace Comms {
 
     // Send over UDP
     // Udp.resetSendOffset();
-    for (int i = 0; i < groundStationCount; i++){
-      Udp.resetSendOffset(i+1);
-      Udp.write(i+1, packet->id);
-      Udp.write(i+1, packet->len);
-      Udp.write(i+1, packet->timestamp, 4);
-      Udp.write(i+1, packet->checksum, 2);
-      Udp.write(i+1, packet->data, packet->len);
-      Udp.endPacket(i+1);
-    }
-  }
-
-  void redirectEmitPacketToAll(uint8_t ip){
-    Udp.beginPacket(0, IPAddress(10,0,0,ip), 42099);
-    //This changes where emitPacketToAll sends packets to
+    Udp.resetSendOffset(0);
+    Udp.write(0, packet->id);
+    Udp.write(0, packet->len);
+    Udp.write(0, packet->timestamp, 4);
+    Udp.write(0, packet->checksum, 2);
+    Udp.write(0, packet->data, packet->len);
+    Udp.endPacket(0);
+    
   }
 
   void emitPacketToAll(Packet *packet)
@@ -311,21 +313,42 @@ namespace Comms {
 
     // Send over UDP
     // Udp.resetSendOffset();
-    Udp.resetSendOffset(0);
-    Udp.write(0, packet->id);
-    Udp.write(0, packet->len);
-    Udp.write(0, packet->timestamp, 4);
-    Udp.write(0, packet->checksum, 2);
-    Udp.write(0, packet->data, packet->len);
-    Udp.endPacket(0);
+    // Udp.resetSendOffset(1);
+    Udp.beginPacket(1, IPAddress(10,0,0,255), bcast_port);
+    Udp.write(1, packet->id);
+    Udp.write(1, packet->len);
+    Udp.write(1, packet->timestamp, 4);
+    Udp.write(1, packet->checksum, 2);
+    Udp.write(1, packet->data, packet->len);
+    Udp.endPacket(1);
   }
+
+  void emitPacketToExtra(Packet *packet) {
+    if (!extraSocketOpen){
+      Serial.println("Extra socket not open, packet not sent.");
+      return;
+    }
+    finishPacket(packet);
+
+    // Send over UDP
+    // Udp.resetSendOffset();
+    Udp.resetSendOffset(2);
+    Udp.write(2, packet->id);
+    Udp.write(2, packet->len);
+    Udp.write(2, packet->timestamp, 4);
+    Udp.write(2, packet->checksum, 2);
+    Udp.write(2, packet->data, packet->len);
+    Udp.endPacket(2);
+  }
+
+  // // Send packet to one specific IP address
   // void emitPacket(Packet *packet, uint8_t ip){
   //   Serial.println("Emitting packet to " + String(ip));
   //   finishPacket(packet);
 
   //   // Send over UDP
   //   // Udp.resetSendOffset();
-  //   Udp.beginPacket(IPAddress(10,0,0,ip), port);
+  //   Udp.beginPacket(IPAddress(10,0,0,ip), bcast_port);
   //   Udp.write(packet->id);
   //   Udp.write(packet->len);
   //   Udp.write(packet->timestamp, 4);
@@ -333,6 +356,22 @@ namespace Comms {
   //   Udp.write(packet->data, packet->len);
   //   Udp.endPacket();
   // }
+
+  void emitPacket(Packet *packet, uint8_t ip)
+  {
+    finishPacket(packet);
+
+    // Send over UDP
+    // Udp.resetSendOffset();
+    // Udp.resetSendOffset(1);
+    Udp.beginPacket(1, IPAddress(10,0,0,ip), bcast_port);
+    Udp.write(1, packet->id);
+    Udp.write(1, packet->len);
+    Udp.write(1, packet->timestamp, 4);
+    Udp.write(1, packet->checksum, 2);
+    Udp.write(1, packet->data, packet->len);
+    Udp.endPacket(1);
+  }
 
   bool verifyPacket(Packet *packet)
   {
@@ -373,10 +412,13 @@ namespace Comms {
   }
 
   void sendAbort(uint8_t systemMode, uint8_t abortReason){
-    Packet packet = {.id = ABORT, .len = 0};
-    packetAddUint8(&packet, systemMode);
-    packetAddUint8(&packet, abortReason);
+    Packet packet;
+    PacketAbort::Builder()
+      .withSystemMode((SystemMode) systemMode)
+      .withAbortReason((AbortCode) abortReason)
+      .build()
+      .writeRawPacket(&packet);
     emitPacketToAll(&packet);
-    Serial.println("Abort sent, mode " + String((Mode)systemMode) + " reason " + String((AbortReason)abortReason));
+    Serial.println("Abort sent, mode " + String((SystemMode)systemMode) + " reason " + String((AbortCode)abortReason));
   }
 };

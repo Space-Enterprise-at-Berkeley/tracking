@@ -8,6 +8,9 @@
 #include "Common.h"
 #include "Packets.h"
 #include "EspComms.h"
+#include "RS422Comms.h"
+#include "../proto/include/Packet_ERPhaseCurrents.h"
+#include "../proto/include/Packet_ERTemperatures.h"
 
 namespace HAL {
     
@@ -59,8 +62,8 @@ namespace HAL {
     const int ETH_MOSI = 36;
     const int ETH_SCLK = 38;
 
-    const int eregAbortID = 201;
-
+    const int rs422_RX = 17;
+    const int rs422_TX = 18;
 
 
     int init();
@@ -72,11 +75,10 @@ namespace HAL {
     void disableMotorDriver();
     void handleMotorDriverFault();
     void printMotorDriverFaultAndDisable();
-    float getPhaseCurrent(uint8_t phase);
-    float readPTVoltage(uint8_t channel);
-    float readADC(SPIClass* spi, uint8_t csPin, int8_t channel);
-    float readUpstreamPT();
-    float readDownstreamPT();
+    void readPhaseCurrents();
+
+    void readAllDucers();
+    
     bool getMotorDriverFault();
     void clearMotorDriverFault();
     void setEncoderCount(int i);
@@ -90,4 +92,6 @@ namespace HAL {
     int getClosedLimitSwitchState();
     void packetizeTemperatures(Comms::Packet* packet);
     bool getOvercurrentStatus();
+
+    bool hardwareInitialized();
 }

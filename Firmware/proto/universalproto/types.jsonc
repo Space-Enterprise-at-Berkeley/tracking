@@ -1,0 +1,225 @@
+{
+  "SystemMode": {
+    "LAUNCH": 0,
+    "HOTFIRE": 1,
+    "COLDFLOW": 2,
+    "COLDFLOW_WITH_IGNITER": 3,
+    "GASFLOW": 4,
+    "WATERFLOW": 5
+  },
+  "AbortCode": {
+    "MANUAL": 0,
+    "NOS_OVERPRESSURE": 1,
+    "IPA_OVERPRESSURE": 2,
+    "ENGINE_OVERTEMP": 3, // TC abort
+    "FAILED_IGNITION": 4, // LC Underthrust
+    "IGNITER_NO_CONTINUITY": 5,
+    "BURNWIRE_NO_CONTINUITY": 6,
+    "BURNWIRE_NO_BURNT": 7,
+    "NO_DASHBOARD_COMMS": 8,
+    "PROPELLANT_RUNOUT": 9, // LC Underthrust
+    "BREAKWIRE_NO_CONTINUITY": 10,
+    "BREAKWIRE_BROKE_EARLY": 11
+  },
+  "Channel": [
+    { "type": "u8", "symbol": "channel" }
+  ],
+  "ChannelPoint": [
+    { "type": "u8", "symbol": "channel" },
+    { "type": "f32", "symbol": "value" }
+  ],
+  "OffsetMultiplier": [
+    { "type": "f32", "symbol": "offset" },
+    { "type": "f32", "symbol": "multiplier" }
+  ],
+  "Launch": [
+    { "enum": "SystemMode", "type": "u8", "symbol": "systemMode" },
+    { "type": "f32", "symbol": "burnTime" },
+    { "type": "u8", "symbol": "nitrousEnable" },
+    { "type": "u8", "symbol": "ipaEnable" }
+  ],
+  "Abort": [
+    { "enum": "SystemMode", "type": "u8", "symbol": "systemMode" },
+    { "enum": "AbortCode", "type": "u8", "symbol": "abortReason" }
+  ],
+  "Ack": [
+    { "array": 40, "type": "u8", "symbol": "protoVersion" }
+  ],
+  "24VSupplyStats": [
+    { "type": "f32", "symbol": "supply24Voltage" },
+    { "type": "f32", "symbol": "supply24Current" },
+    { "type": "f32", "symbol": "supply24Power" }
+  ],
+  "PTValues": [
+    { "array": 8, "type": "f32", "symbol": "values", "channel": true }
+  ],
+  "PTCalibrationSettings": [
+    { "array": 8, "type": "f32", "symbol": "channelInfoOffset", "channel": true },
+    { "array": 8, "type": "f32", "symbol": "channelInfoMultiplier", "channel": true }
+  ],
+  "PTAutomationData": [
+    { "type": "f32", "symbol": "nosTank" },
+    { "type": "f32", "symbol": "ipaTank" }
+  ],
+  "PTChamberAutomation": [
+    { "type": "f32", "symbol": "chamberP" }
+  ],
+  "LCValues": [
+    { "array": 4, "type": "f32", "symbol": "values", "channel": true }
+    // { "type": "f32", "symbol": "nos" },
+    // { "type": "f32", "symbol": "_reserved0" },
+    // { "type": "f32", "symbol": "ipa" },
+    // { "type": "f32", "symbol": "_reserved1" },
+    // { "type": "f32", "symbol": "summedValues1" },
+    // { "type": "f32", "symbol": "summedValues2" }
+  ],
+  "LCCalibrationSettings": [
+    { "array": 4, "type": "f32", "symbol": "channelInfoOffset", "channel": true },
+    { "array": 4, "type": "f32", "symbol": "channelInfoMultiplier", "channel": true }
+  ],
+  "TCValues": [
+    { "array": 8, "type": "f32", "symbol": "values", "channel": true }
+  ],
+  "TCColdJunctionTemperatures": [
+    { "array": 8, "type": "f32", "symbol": "values", "channel": true }
+  ],
+  "TCFaults": [
+    { "array": 8, "type": "u8", "symbol": "faults", "channel": true }
+  ],
+  "ACActuatorActions": {
+    "RETRACT_FULL": 0,
+    "EXTEND_FULL": 1,
+    "RETRACT_TIMED": 2,
+    "EXTEND_TIMED": 3,
+    "ON": 4,
+    "OFF": 5
+  },
+  "ACActuateActuator": [
+    { "type": "u8", "symbol": "actuatorNumber", "channel": true },
+    { "enum": "ACActuatorActions", "type": "u8", "symbol": "action" },
+    { "type": "u32", "symbol": "actuateTime" }
+  ],
+  "ACActuatorStatesType": {
+    "RETRACTING": 0,
+    "EXTENDING": 1,
+    "OFF_STATE": 2
+  },
+  "ACActuatorStates": [
+    { "array": 8, "enum": "ACActuatorStatesType", "type": "u8", "symbol": "states", "channel": true }
+  ],
+  "ACActuatorContinuities": [
+    { "array": 8, "type": "f32", "symbol": "continuities", "channel": true }
+  ],
+  "ACActuatorCurrents": [
+    { "array": 8, "type": "f32", "symbol": "currents", "channel": true }
+  ],
+  "ACAutoventPressures": [
+    { "type": "f32", "symbol": "nosAutoventPressure" },
+    { "type": "f32", "symbol": "ipaAutoventPressure" },
+    { "type": "u8", "symbol": "noCommsAbortEnabled" }
+  ],
+  "ACPotentiometers": [
+    { "array": 8, "type": "u16", "symbol": "potentiometers", "channel": true }
+  ],
+  "ACAutomationInfo": [
+    { "type": "u8", "symbol": "automationState" },
+    { "type": "f32", "symbol": "fillDp" }
+  ],
+  "DutyCycle": [
+    { "type": "f32", "symbol": "gemsDutyCycle" }
+  ],
+  "CFCapacitance": [
+    { "type": "f32", "symbol": "cap" },
+    { "type": "f32", "symbol": "ref" },
+    { "type": "f32", "symbol": "temperature" }
+  ],
+  "ERPressureTelemetry": [
+    { "type": "f32", "symbol": "filteredUpstreamPressure1" },
+    { "type": "f32", "symbol": "filteredUpstreamPressure2" },
+    { "type": "f32", "symbol": "filteredDownstreamPressure1" },
+    { "type": "f32", "symbol": "filteredDownstreamPressure2" },
+    { "type": "f32", "symbol": "rawUpstreamPressure1" },
+    { "type": "f32", "symbol": "rawUpstreamPressure2" },
+    { "type": "f32", "symbol": "rawDownstreamPressure1" },
+    { "type": "f32", "symbol": "rawDownstreamPressure2" }
+  ],
+  "ERMotorTelemetry": [
+    { "type": "f32", "symbol": "encoderAngle" },
+    { "type": "f32", "symbol": "angleSetpoint" },
+    { "type": "f32", "symbol": "pressureSetpoint" },
+    { "type": "f32", "symbol": "motorPower" },
+    { "type": "f32", "symbol": "pressureControlP" },
+    { "type": "f32", "symbol": "pressureControlI" },
+    { "type": "f32", "symbol": "pressureControlD" }
+    // { "type": "f32", "symbol": "_reserved0" }
+  ],
+  "ERConfig": [
+    { "type": "f32", "symbol": "pressureSetpointStart" },
+    { "type": "f32", "symbol": "pOuterNominal" },
+    { "type": "f32", "symbol": "iOuterNominal" },
+    { "type": "f32", "symbol": "dOuterNominal" },
+    { "type": "f32", "symbol": "pInner" },
+    { "type": "f32", "symbol": "iInner" },
+    { "type": "f32", "symbol": "dInner" },
+    { "type": "f32", "symbol": "pressureSetpointDropRate" },
+    { "type": "f32", "symbol": "pressureSetpointMinimum" },
+    { "type": "f32", "symbol": "staticPressureSetpoint" }
+  ],
+  "ERDiagnostic": [
+    { "type": "u8", "symbol": "motorDirPass" },
+    { "type": "u8", "symbol": "servoDirPass" }
+  ],
+  "ERStateTransitionError": [
+    { "type": "u8", "symbol": "errorCode" }
+  ],
+  "ERFlowState": [
+    { "type": "u8", "symbol": "flowState" }
+  ],
+  "ERLimitSwitch": [
+    { "type": "f32", "symbol": "fullyClosedSwitch" },
+    { "type": "f32", "symbol": "fullyOpenSwitch" }
+  ],
+  "ERPhaseCurrents": [
+    { "type": "f32", "symbol": "currentA" },
+    { "type": "f32", "symbol": "currentB" },
+    { "type": "f32", "symbol": "currentC" }
+  ],
+  "ERTemperatures": [
+    { "type": "f32", "symbol": "boardTemp1" },
+    { "type": "f32", "symbol": "boardTemp2" },
+    { "type": "f32", "symbol": "motorTemp" }
+  ],
+  "EROvercurrentTrigger": [
+    // { "type": "f32", "symbol": "avgCurrent" },
+    // { "type": "f32", "symbol": "bufferSize" }
+  ],
+  "ERCalibrationSettings": [
+    { "type": "f32", "symbol": "upstreamPt1Offset" },
+    { "type": "f32", "symbol": "upstreamPt1Multiplier" },
+    { "type": "f32", "symbol": "upstreamPt2Offset" },
+    { "type": "f32", "symbol": "upstreamPt2Multiplier" },
+    { "type": "f32", "symbol": "downstreamPt1Offset" },
+    { "type": "f32", "symbol": "downstreamPt1Multiplier" },
+    { "type": "f32", "symbol": "downstreamPt2Offset" },
+    { "type": "f32", "symbol": "downstreamPt2Multiplier" }
+  ],
+  "ERPartialOpen": [
+    { "type": "f32", "symbol": "encoderTicks" }
+  ],
+  "ERSet": [
+    { "type": "f32", "symbol": "value" }
+  ],
+  "Heartbeat": [
+    { "type": "u32", "symbol": "packetSpecVersion" }
+  ],
+  "SetCommsAbort": [
+    { "type": "u8", "symbol": "enabled" }
+  ],
+  "TCSetAbort": [
+    { "type": "u8", "symbol": "channel" },
+    { "type": "f32", "symbol": "temp" }
+  ],
+  "TCAbortLimits": [
+    { "array": 8, "type": "f32", "symbol": "temps", "channel": true }
+  ]
+}

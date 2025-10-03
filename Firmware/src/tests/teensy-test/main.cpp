@@ -4,13 +4,13 @@
 #include "EEPROM.h"
 
 
-const int x_pwm = 7; //sparkmax0
+const int x_pwm = 28; //sparkmax0
 
 void setup() {
     Serial.begin(115200);
     Serial.println("Hello World");
 
-    
+    delay(1000);
 
     pinMode(x_pwm, OUTPUT); 
 
@@ -24,6 +24,22 @@ void setup() {
 
     analogWriteResolution(12);
     analogWriteFrequency(x_pwm, 200);
+
+    Serial.println("Beginning neutral");
+    analogWrite(x_pwm, 1229);
+    delay(5000);
+
+    Serial.println("Moving around");
+    for (int i = 0; i < 100; i ++) {
+        Serial.println("fwd");
+        analogWrite(x_pwm, 1229*0.95);
+        delay(500);
+        Serial.println("back");
+        analogWrite(x_pwm, 1229*1.05);
+        delay(500);
+    }
+
+    Serial.println("Ending neutral");
     analogWrite(x_pwm, 1229);
 
     //ledcSetup(1, 50, 12);

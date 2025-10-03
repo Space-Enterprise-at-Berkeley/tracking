@@ -40,6 +40,19 @@ uint8_t delayedActuationCount = 0;
 namespace AC {
 
 // configure actuator driving pins here, in1, in2 from channels 1 to 8
+  #ifndef OLD_AC
+  uint8_t actuatorPins[16] = 
+  {
+    36, 37,
+    33, 7,
+    8, 14,
+    16, 15,
+    17, 18,
+    19, 20,
+    21, 38, 
+    39, 40
+  };
+  #else
   uint8_t actuatorPins[16] = 
   {
       36, 37,
@@ -51,27 +64,104 @@ namespace AC {
       21, 38,
       39, 40
   };
+  #endif
+
+  bool AC1Polarities[8] =
+  {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  };
+
+  bool AC2Polarities[8] =
+  {
+    false,
+    true,
+    true,
+    false, // NEW vdemo nitrous fill line vent = ac2 ch3
+    true,
+    false,
+    true,
+    false, // vdemo nos fill rbv = ac2 ch7
+  };
+
+// vdemo nos fill is reversed and needs to not be. 
+// vdemo fill line vent needs to be reversed. 
+
+  bool AC3Polarities[8] =
+  {
+    false,
+    true,
+    true,
+    true,
+    true,
+    false,
+    true,
+    false
+  };
+
+  bool polarities[8];
 
   // list of driver objects used to actuate each actuator
   MAX22201 actuators[8];
 
+  bool gems_override = false;
+
 
   // called when an actuation needs to begin, registered callback in init
   void beginActuation(Comms::Packet tmp, uint8_t ip) {
-    uint8_t channel = packetGetUint8(&tmp, 0);
-    uint8_t cmd = packetGetUint8(&tmp, 1);
-    uint32_t time = packetGetUint32(&tmp, 2);
+    PacketACActuateActuator parsed_packet = PacketACActuateActuator::fromRawPacket(&tmp);
+    uint8_t channel = parsed_packet.m_ActuatorNumber;
+    uint8_t cmd = parsed_packet.m_Action;
+    uint32_t time = parsed_packet.m_ActuateTime;
 
     Serial.println("Received command to actuate channel " + String(channel) + " with command " + String(cmd) + " w time " + String(time));
 
     actuate(channel, cmd, time);
   }
 
-  void actuate(uint8_t channel, uint8_t cmd, uint32_t time) {
-    //do not actuate breakwire
-    if (ID == AC1 && channel == 1) {
+  void actuate(uint8_t channel, uint8_t cmd) {
+    actuate(channel, cmd, 0);
+  }
+
+  void actuate(uint8_t channel, uint8_t cmd, uint32_t time, bool automated) {
+    //do not actuate burnwire
+    #ifdef CHANNEL_AC_BURNWIRE
+    if (IS_BOARD_FOR_AC_BURNWIRE && channel == CHANNEL_AC_BURNWIRE) {
       return;
     }
+    #endif
+
+    //do not actuate breakwire
+    #ifdef CHANNEL_AC_BREAKWIRE
+    if (IS_BOARD_FOR_AC_BREAKWIRE && channel == CHANNEL_AC_BREAKWIRE) {
+      return;
+    }
+    #endif
+
+    #ifdef CHANNEL_AC_IPA_GEMS
+    if ((IS_BOARD_FOR_AC_IPA_GEMS && channel == CHANNEL_AC_IPA_GEMS) && (cmd < 5) && !automated) {
+      gems_override = true;
+    }
+    else if (IS_BOARD_FOR_AC_IPA_GEMS && channel == CHANNEL_AC_IPA_GEMS && !automated) {
+      gems_override = false;
+    }
+    #endif
+
+    #ifdef CHANNEL_AC_NOS_GEMS
+    if ((IS_BOARD_FOR_AC_NOS_GEMS && channel == CHANNEL_AC_NOS_GEMS) && (cmd < 5) && !automated) {
+      gems_override = true;
+    }
+    else if (IS_BOARD_FOR_AC_NOS_GEMS && channel == CHANNEL_AC_NOS_GEMS && !automated) {
+      gems_override = false;
+    }
+    #endif
+
     // set states and timers of actuator
     actuators[channel].state = cmd;
     actuators[channel].timeLeft = time;
@@ -99,13 +189,35 @@ namespace AC {
     delayedActuationCount++;
   }
 
+  uint8_t getActuatorState(uint8_t channel) {
+    return actuators[channel].state;
+  }
+
   void init() {
+
+    if (ID == AC1) {
+      memcpy(polarities, AC1Polarities, sizeof(bool)*8);
+    }
+    else if (ID == AC2) {
+      memcpy(polarities, AC2Polarities, sizeof(bool)*8);
+    }
+    else if (ID == AC3) {
+      memcpy(polarities, AC3Polarities, sizeof(bool)*8);
+    }
+
+    for (int i = 0; i < 8; i++) {
+      if (polarities[i]) {
+        std::swap(actuatorPins[2*i], actuatorPins[2*i+1]);
+      }
+    }
+
+
     // Initialise every actuator channel, default state is 0
     for (int i = 0; i < 8; i++) {
       actuators[i].init(actuatorPins[2*i], actuatorPins[2*i+1]);
     }
     // Register the actuation task callback to packet 100
-    Comms::registerCallback(ACTUATE_CMD, beginActuation);
+    Comms::registerCallback(PACKET_ID_ACActuateActuator, beginActuation);
   }
 
   // Daemon task which should be run frequently
@@ -162,10 +274,15 @@ namespace AC {
 
   // gets every actuator state, formats it, and emits a packet
   uint32_t task_actuatorStates() {
-    Comms::Packet acStates = {.id = AC_STATE};
+    Comms::Packet acStates;
+    std::array<ACActuatorStatesType, 8> states;
     for (int i = 0; i < 8; i++) {
-      packetAddUint8(&acStates, formatActuatorState(actuators[i].state));
+      states[i] = (ACActuatorStatesType) formatActuatorState(actuators[i].state);
     }
+    PacketACActuatorStates::Builder()
+      .withStates(states)
+      .build()
+      .writeRawPacket(&acStates);
     Comms::emitPacketToGS(&acStates);
     return 250 * 1000;
   }
@@ -180,5 +297,11 @@ namespace AC {
     }
     return 2000 * 1000;
   }
+
+  #ifdef CHANNEL_AC_NOS_GEMS
+  bool get_gems_override() {
+    return gems_override;
+  }
+  #endif
 
 }

@@ -23,7 +23,9 @@ namespace ADS {
 
     float unrefreshedSample(uint8_t channel);
 
-    void zeroChannel(uint8_t i);
+    float zeroChannel(uint8_t i);
+    float calChannel(uint8_t i, float value);
+    void sendCal();
 
 
 }

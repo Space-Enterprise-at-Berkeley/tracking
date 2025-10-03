@@ -4,16 +4,41 @@
 
 #include <Arduino.h>
 #include "Ducers.h"
+#include "../proto/include/Packet_Heartbeat.h"
 
 uint8_t LED_0 = 18;
 uint8_t LED_1 = 19;
 uint8_t LED_2 = 20;
 uint8_t LED_3 = 21;
-uint8_t LED_4 = 7;
+uint8_t LED_4 = 26;
 uint8_t LED_5 = 33;
 uint8_t LED_6 = 34;
 uint8_t LED_7 = 35;
 float min_pressure = -25;
+
+uint8_t heartCounter = 0;
+Comms::Packet heart;
+void heartbeat(Comms::Packet p, uint8_t ip){
+  // uint8_t id = Comms::packetGetUint8(&p, 0);
+  // if (id != ip){
+  //   Serial.println("Heartbeat ID mismatch of " + String(ip) + " and " + String(id));
+  //   return;
+  // }
+  // uint8_t recievedCounter = Comms::packetGetUint8(&p, 1);
+  // if (heartCounter != recievedCounter){
+  //   Serial.println(String(recievedCounter-heartCounter) + " packets dropped");
+  // }
+  // Serial.println("Ping from " + String(id) + " with counter " + String(recievedCounter));
+  // heartCounter = recievedCounter;
+
+  //send it back
+  PacketHeartbeat::Builder()
+    .withPacketSpecVersion(PACKET_SPEC_VERSION)
+    .build()
+    .writeRawPacket(&heart);
+  Comms::emitPacketToGS(&heart);
+}
+
 
 uint32_t print_task() { 
   
@@ -93,14 +118,22 @@ void initLEDs(){
   digitalWrite(LED_7, LOW);
 }
 
+uint32_t sendCalibration(){
+  Ducers::sendCal();
+  return 1000 * 1000;
+}
+
 Task taskTable[] = {
   //{task_example, 0, true},
 
   // Ducers
   {Ducers::task_ptSample, 0, true},
+  {Ducers::task_sendAutovent, 0, true},
   {Power::task_readSendPower, 0, true},
+  {Ducers::task_sendChamberP, 0, true},
   {print_task, 0, true},
   {LED_roll, 0, true},
+  {sendCalibration, 0, true}
 };
 
 #define TASK_COUNT (sizeof(taskTable) / sizeof (struct Task))
@@ -112,6 +145,7 @@ void setup() {
   Power::init();
   Ducers::init();
   initLEDs();
+  Comms::registerCallback(PACKET_ID_Heartbeat,heartbeat);
 
   while(1) {
     // main loop here to avoid arduino overhead
@@ -123,7 +157,7 @@ void setup() {
           taskTable[i].enabled = false;
         }
         else {
-        taskTable[i].nexttime = ticks + taskTable[i].taskCall();
+        taskTable[i].nexttime = ticks + nextTime;
         }
       }
     }

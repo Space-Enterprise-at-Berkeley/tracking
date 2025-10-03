@@ -12,7 +12,7 @@ void FDC2214::init(TwoWire *theWire, uint8_t i2c_addr) {
     writeRegister16(FDC2214_SETTLECOUNT_CH0, 0x0010);
     writeRegister16(FDC2214_SETTLECOUNT_CH1, 0x0010);
     writeRegister16(FDC2214_RCOUNT_CH0, 0xA800);
-    writeRegister16(FDC2214_RCOUNT_CH1, 0xA*00);
+    writeRegister16(FDC2214_RCOUNT_CH1, 0xA800);
     writeRegister16(FDC2214_CLOCK_DIVIDERS_CH0, 0x2001);
     writeRegister16(FDC2214_CLOCK_DIVIDERS_CH1, 0x2001);
     writeRegister16(FDC2214_DRIVE_CH0, 0xF800);

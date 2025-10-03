@@ -1,5 +1,16 @@
 #include "Ducers.h"
 #include "EEPROM.h"
+#include "Common.h"
+#include "../proto/include/Packet_PTAutomationData.h"
+#include "../proto/include/Packet_PTValues.h"
+#include "../proto/include/Packet_PTCalibrationSettings.h"
+#include "../proto/include/Packet_FirstPointCalibration.h"
+#include "../proto/include/Packet_SecondPointCalibration.h"
+#include "../proto/include/Packet_RequestCalibrationSettings.h"
+#include "../proto/include/Packet_ResetCalibration.h"
+#include "../proto/include/Packet_PTChamberAutomation.h"
+#include "../proto/include/Packet_SetCalibrationOffset.h"
+#include "../proto/include/Packet_SetCalibrationMultiplier.h"
 
 //TODO - zeroing for PTs
 
@@ -8,20 +19,21 @@ namespace Ducers {
     SPIClass *spi2; 
     
 
-    uint32_t ptUpdatePeriod = 50 * 1000;
-    Comms::Packet ptPacket = {.id = 2};
-    float data[8];
+    uint32_t ptUpdatePeriod = 2.5 * 1000.0; // formerly 50 * 1000 (20 Hz)
+    const int oversample_count = 1;
+
+    Comms::Packet ptPacket;
+    Comms::Packet pressureAutoPacket;
+    Comms::Packet pressureChamberPacket;
+    float data[8][oversample_count+1];
     float offset[8];
-    bool persistentOffset = true;
+    float multiplier[8];
+    bool persistentCalibration = true;
+    uint8_t channelCounter = 0;
+    uint8_t oversampleCounter = 0;
+    uint8_t lastChannel = 0;
 
-
-    // float pressurantPTValue = 0.0;
-    // float loxTankPTValue = 0.0;
-    // float fuelTankPTValue = 0.0;
-    // float loxInjectorPTValue = 0.0;
-    // float fuelInjectorPTValue = 0.0;
-    // float loxDomePTValue = 0.0;
-    // float fuelDomePTValue = 0.0;
+    std::array<float, 8> pt_values;
 
     void handleFastReadPacket(Comms::Packet tmp, uint8_t ip) {
         if(tmp.data[0]) {
@@ -31,10 +43,9 @@ namespace Ducers {
         }
     }
 
-    float interpolate1000(uint16_t rawValue) {
-        // TODO multiply rawValue by 2
-        float tmp = (float) (rawValue - 6406);
-        return tmp / 51.7;
+    float interpolate1000(int32_t rawValue) {
+        float tmp = ( ((float)rawValue) - 6553.6f);
+        return tmp / (52.42f);
     }
 
     float interpolate5000(uint16_t rawValue) {
@@ -42,20 +53,115 @@ namespace Ducers {
         return tmp / 12.97;
     }
 
-    void zeroChannel(uint8_t channel){
-        offset[channel] = -data[channel] + offset[channel];
+    float zeroChannel(uint8_t channel){
+        offset[channel] = -noSamplePT(channel) / multiplier[channel] + offset[channel];
         Serial.println("zeroed channel " + String(channel) + " to " + String(offset[channel]));
-        if (persistentOffset){
-            EEPROM.begin(8*sizeof(float));
+        if (persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
             EEPROM.put(channel*sizeof(float),offset[channel]);
             EEPROM.end();
         }
+        return offset[channel];
     }
 
+    float calChannel(uint8_t channel, float value){
+        multiplier[channel] *= (value) / data[channel][oversample_count];
+        Serial.println("calibrated channel multiplier" + String(channel) + " to " + String(multiplier[channel]));
+        if (persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
+            EEPROM.put((channel+8)*sizeof(float),multiplier[channel]);
+            EEPROM.end();
+        }
+        return multiplier[channel];
+    }
+
+    float directZeroChannel(uint8_t channel, float value){
+        offset[channel] = value;
+        Serial.println("set channel " + String(channel) + " offset to " + String(offset[channel]));
+        if(persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
+            EEPROM.put(channel*sizeof(float),offset[channel]);
+            EEPROM.end();
+        }
+        return offset[channel];
+    }
+
+    float directCalChannel(uint8_t channel, float value){
+        multiplier[channel] = value;
+        Serial.println("set channel " + String(channel) + " multiplier to " + String(multiplier[channel]));
+        if(persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
+            EEPROM.put((channel+8)*sizeof(float),multiplier[channel]);
+            EEPROM.end();
+        }
+        return multiplier[channel];
+    }
+
+    //sets offset (y-int)
     void onZeroCommand(Comms::Packet packet, uint8_t ip){
-        uint8_t channel = Comms::packetGetUint8(&packet, 0);
+        PacketFirstPointCalibration parsed_packet = PacketFirstPointCalibration::fromRawPacket(&packet);
+        uint8_t channel = parsed_packet.m_Channel;
         zeroChannel(channel);
+    }
+
+    //uses current value and given value to add multiplier (slope) to match two points
+    void onCalCommand(Comms::Packet packet, uint8_t ip){
+        PacketSecondPointCalibration parsed_packet = PacketSecondPointCalibration::fromRawPacket(&packet);
+        uint8_t channel = parsed_packet.m_Channel;
+        float value = parsed_packet.m_Value;
+
+        calChannel(channel, value);
+    }
+
+    void onDirectZeroCommand(Comms::Packet packet, uint8_t ip){
+        PacketSetCalibrationOffset parsed_packet = PacketSetCalibrationOffset::fromRawPacket(&packet);
+        uint8_t channel = parsed_packet.m_Channel;
+        float value = parsed_packet.m_Value;
+        directZeroChannel(channel, value);
         return;
+    }
+
+    void onDirectCalCommand(Comms::Packet packet, uint8_t ip){
+        PacketSetCalibrationMultiplier parsed_packet = PacketSetCalibrationMultiplier::fromRawPacket(&packet);
+        uint8_t channel = parsed_packet.m_Channel;
+        float value = parsed_packet.m_Value;
+        directCalChannel(channel, value);
+        return;
+    }
+
+    void sendCal(Comms::Packet packet, uint8_t ip){
+        sendCal();
+    }
+
+    void sendCal(){
+        Comms::Packet response;
+        std::array<float, 8> offsets;
+        std::array<float, 8> multipliers;
+        for (int i = 0; i < 8; i++){
+            offsets[i] = offset[i];
+            multipliers[i] = multiplier[i];
+            Serial.print("Channel " + String(i) + ": offset " + String(offset[i]) + ", multiplier ");
+            Serial.println(multiplier[i], 4);
+        }
+        PacketPTCalibrationSettings::Builder()
+            .withChannelInfoOffset(offsets)
+            .withChannelInfoMultiplier(multipliers)
+            .build()
+            .writeRawPacket(&response);
+        Comms::emitPacketToGS(&response);
+    }
+
+    void resetCal(Comms::Packet packet, uint8_t ip){
+        PacketResetCalibration parsed_packet = PacketResetCalibration::fromRawPacket(&packet);
+        uint8_t channel = parsed_packet.m_Channel;
+        offset[channel] = 0;
+        multiplier[channel] = 1;
+        if (persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
+            EEPROM.put(channel*sizeof(float),offset[channel]);
+            EEPROM.put((channel+8)*sizeof(float),multiplier[channel]);
+            EEPROM.end();
+        }
     }
 
     void init() {
@@ -67,15 +173,26 @@ namespace Ducers {
         adc1.setAllInputsSeparate();
         adc1.enableOTFMode();
 
-        Comms::registerCallback(100, onZeroCommand);
+        Comms::registerCallback(PACKET_ID_FirstPointCalibration, onZeroCommand);
+        Comms::registerCallback(PACKET_ID_SecondPointCalibration, onCalCommand);
+        Comms::registerCallback(PACKET_ID_SetCalibrationOffset, onDirectZeroCommand);
+        Comms::registerCallback(PACKET_ID_SetCalibrationMultiplier, onDirectCalCommand);
+        Comms::registerCallback(PACKET_ID_RequestCalibrationSettings, sendCal);
+        Comms::registerCallback(PACKET_ID_ResetCalibration, resetCal);
 
         //load offset from flash or set to 0
-        if (persistentOffset){
-            EEPROM.begin(8*sizeof(float));
+        if (persistentCalibration){
+            EEPROM.begin(16*sizeof(float));
             for (int i = 0; i < 8; i++){
                 EEPROM.get(i*sizeof(float),offset[i]);
                 if (isnan(offset[i])){
                     offset[i] = 0;
+                }
+            }
+            for (int i = 0; i < 8; i++){
+                EEPROM.get((i+8)*sizeof(float),multiplier[i]);
+                if (isnan(multiplier[i])){
+                    multiplier[i] = 1;
                 }
             }
             EEPROM.end();
@@ -83,57 +200,111 @@ namespace Ducers {
             for (int i = 0; i < 8; i++){
                 offset[i] = 0;
             }
+            for (int i = 0; i < 8; i++){
+                multiplier[i] = 1;
+            }
         }
+
 
     }
 
-
+    // CHANNEL SETS THE NEXT CHANNEL
     float samplePT(uint8_t channel) {
-        adc1.setChannel(channel);
-        data[channel] = interpolate1000(adc1.readChannelOTF(channel)) + offset[channel];
-        return data[channel];
+        float b = multiplier[lastChannel] * (interpolate1000(adc1.readData(channel)) + offset[lastChannel]);
+        data[lastChannel][0] = b;
+        lastChannel = channel;
+        return b;
     }
 
     float noSamplePT(uint8_t channel){
-        return data[channel];
+        return data[channel][oversample_count];
     }
 
     uint32_t task_ptSample() {
         // read from all 8 PTs in sequence
-        
-        adc1.setChannel(0); // switch mux back to channel 0
-        data[0] = interpolate1000(adc1.readChannelOTF(1)) + offset[0];
-        data[1] = interpolate1000(adc1.readChannelOTF(2)) + offset[1];
-        data[2] = interpolate1000(adc1.readChannelOTF(3)) + offset[2];
-        data[3] = interpolate1000(adc1.readChannelOTF(4)) + offset[3];
-        data[4] = interpolate1000(adc1.readChannelOTF(5)) + offset[4];
-        data[5] = interpolate1000(adc1.readChannelOTF(6)) + offset[5]; 
-        data[6] = interpolate1000(adc1.readChannelOTF(7)) + offset[6];
-        data[7] = interpolate1000(adc1.readChannelOTF(0)) + offset[7];
+        if (oversample_count == 1) {
+            if (channelCounter == 0){
+                PacketPTValues::Builder()
+                    .withValues(pt_values)
+                    .build()
+                    .writeRawPacket(&ptPacket);
+                Comms::emitPacketToGS(&ptPacket);
 
-        DEBUG("Read all PTs\n");
-        DEBUG_FLUSH();
+                // right now, sending chamberP at same rate. Worried about overloading the other boards Ethernet, has happened b4
+                //note, totally did overload LC1, moved to separate task
+            }
+            data[channelCounter][oversample_count] = samplePT((channelCounter + 1) % 8);
+            pt_values[channelCounter] = data[channelCounter][oversample_count];
+            // Comms::packetAddFloat(&ptPacket, data[channelCounter][oversample_count]);
+            channelCounter = (channelCounter + 1) % 8;
+            return ptUpdatePeriod/8;
+        } else {
 
-        // emit a packet with data
-        ptPacket.len = 0;
-        for (int i = 0; i < 8; i++){
-            Comms::packetAddFloat(&ptPacket, data[i]);
+        if (channelCounter == 0 && oversampleCounter == 0){
+            PacketPTValues::Builder()
+                .withValues(pt_values)
+                .build()
+                .writeRawPacket(&ptPacket);
+            Comms::emitPacketToGS(&ptPacket);    
+            //Serial.println("pressureAutoPacket");
         }
 
-        Comms::emitPacketToGS(&ptPacket);
-        // Comms::emitPacket(&ptPacket, &RADIO_SERIAL, "\r\n\n", 3);
-        // return the next execution time
-        DEBUG("PT Packet Sent\n");
-        DEBUG_FLUSH();
 
-        return ptUpdatePeriod;
+        if (oversampleCounter == oversample_count) {
+            oversampleCounter = 0;
+            //Serial.printf("Finished sampling %i \n", channelCounter);
+
+            float average = 0;
+            for (int i = 0; i < oversample_count; i++) {
+                average = average + data[channelCounter][i];
+            }
+            average = average / oversample_count;
+
+            data[channelCounter][oversample_count] = average;
+            pt_values[channelCounter] = data[channelCounter][oversample_count];
+            // Comms::packetAddFloat(&ptPacket, data[channelCounter][oversample_count]);
+            channelCounter = (channelCounter + 1) % 8;
+            return ptUpdatePeriod/ (8 * oversample_count);
+        }
+        else {
+            data[channelCounter][oversampleCounter] = multiplier[channelCounter] * (interpolate1000(adc1.readData(channelCounter)) + offset[channelCounter]);
+            //Serial.printf("oversample %i \n", oversampleCounter);
+            oversampleCounter += 1;
+            return ptUpdatePeriod/ (8 * oversample_count);
+        }
+        }
+    }
+
+    uint32_t task_sendAutovent() {
+        if(IS_BOARD_FOR_PT_NOS_TANK){
+            PacketPTAutomationData::Builder()
+                .withNosTank(data[CHANNEL_PT_NOS_TANK][oversample_count])
+                .withIpaTank(data[CHANNEL_PT_IPA_TANK][oversample_count])
+                .build()
+                .writeRawPacket(&pressureAutoPacket);
+            Comms::emitPacketToAll(&pressureAutoPacket);
+            return 100 * 1000;
+        }
+        return 0;
     }
 
     void print_ptSample(){
         for (int i = 0; i < 8; i ++){
-            Serial.print("  PT"+String(i)+": " + String(data[i]));
+            Serial.print("  PT"+String(i)+": " + String(data[i][oversample_count]));
         }
         Serial.println();
+    }
+
+    uint32_t task_sendChamberP() {
+        if (IS_BOARD_FOR_PT_CHAMBER){
+            PacketPTChamberAutomation::Builder()
+                .withChamberP(data[CHANNEL_PT_CHAMBER][oversample_count])
+                .build()
+                .writeRawPacket(&pressureChamberPacket);
+            Comms::emitPacketToAll(&pressureChamberPacket);
+            return 30*1000;
+        }
+        return 0;
     }
 
 };

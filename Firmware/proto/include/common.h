@@ -2,7 +2,7 @@
 #pragma once
 #include <cinttypes>
 #include <array>
-#include <EspComms.h>
+#include <TeensyComms.h>
 #define PACKET_SPEC_VERSION 1
 
 typedef enum SystemMode {

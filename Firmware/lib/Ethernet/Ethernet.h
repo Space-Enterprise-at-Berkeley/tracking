@@ -190,7 +190,6 @@ public:
 	// Start processing the next available incoming packet
 	// Returns the size of the packet in bytes, or 0 if no packets are available
 	virtual int parsePacket();
-	virtual int parsePacket(int s);
 	// Number of bytes remaining in the current packet
 	virtual int available();
 	// Read a single byte from the current packet
@@ -198,11 +197,9 @@ public:
 	// Read up to len bytes from the current packet and place them into buffer
 	// Returns the number of bytes read, or 0 if none are available
 	virtual int read(unsigned char* buffer, size_t len);
-	virtual int read(unsigned char* buffer, size_t len, int s);
 	// Read up to len characters from the current packet and place them into buffer
 	// Returns the number of characters read, or 0 if none are available
 	virtual int read(char* buffer, size_t len) { return read((unsigned char*)buffer, len); };
-	virtual int read(char* buffer, size_t len, int s) { return read((unsigned char*)buffer, len, s); };
 	// Return the next byte from the current packet without moving on to the next byte
 	virtual int peek();
 	virtual void flush(); // Finish reading the current packet

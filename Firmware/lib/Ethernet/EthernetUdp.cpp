@@ -128,7 +128,7 @@ size_t EthernetUDP::write(int s, const uint8_t *buffer, size_t size)
 	return bytes_written;
 }
 
-int EthernetUDP::parsePacket(int s)
+int EthernetUDP::parsePacket()
 {
 	// discard any remaining bytes in the last packet
 	while (_remaining) {
@@ -138,12 +138,12 @@ int EthernetUDP::parsePacket(int s)
 		read((uint8_t *)NULL, _remaining);
 	}
 
-	if (Ethernet.socketRecvAvailable(s) > 0) {
+	if (Ethernet.socketRecvAvailable(1) > 0) {
 		//HACK - hand-parse the UDP packet using TCP recv method
 		uint8_t tmpBuf[8];
 		int ret=0;
 		//read 8 header bytes and get IP and port from it
-		ret = Ethernet.socketRecv(s, tmpBuf, 8);
+		ret = Ethernet.socketRecv(1, tmpBuf, 8);
 		if (ret > 0) {
 			_remoteIP = tmpBuf;
 			_remotePort = tmpBuf[4];
@@ -160,16 +160,11 @@ int EthernetUDP::parsePacket(int s)
 	return 0;
 }
 
-int EthernetUDP::parsePacket()
-{
-	return parsePacket(0);
-}
-
 int EthernetUDP::read()
 {
 	uint8_t byte;
 
-	if ((_remaining > 0) && (Ethernet.socketRecv(0, &byte, 1) > 0)) {
+	if ((_remaining > 0) && (Ethernet.socketRecv(1, &byte, 1) > 0)) {
 		// We read things without any problems
 		_remaining--;
 		return byte;
@@ -181,20 +176,15 @@ int EthernetUDP::read()
 
 int EthernetUDP::read(unsigned char *buffer, size_t len)
 {
-	return read(buffer, len, 0);
-}
-
-int EthernetUDP::read(unsigned char *buffer, size_t len, int s)
-{
 	if (_remaining > 0) {
 		int got;
 		if (_remaining <= len) {
 			// data should fit in the buffer
-			got = Ethernet.socketRecv(s, buffer, _remaining);
+			got = Ethernet.socketRecv(1, buffer, _remaining);
 		} else {
 			// too much data for the buffer,
 			// grab as much as will fit
-			got = Ethernet.socketRecv(s, buffer, len);
+			got = Ethernet.socketRecv(1, buffer, len);
 		}
 		if (got > 0) {
 			_remaining -= got;
@@ -211,7 +201,7 @@ int EthernetUDP::peek()
 	// Unlike recv, peek doesn't check to see if there's any data available, so we must.
 	// If the user hasn't called parsePacket yet then return nothing otherwise they
 	// may get the UDP header
-	return Ethernet.socketPeek(0);
+	return Ethernet.socketPeek(1);
 }
 
 void EthernetUDP::flush()
