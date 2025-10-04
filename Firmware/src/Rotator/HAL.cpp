@@ -59,6 +59,19 @@ namespace HAL {
     }
 
     int getEncoderCount_0() {
+        uint8_t a, b, c;
+        a = digitalRead(encA_0);
+        b = digitalRead(encB_0);
+        c = digitalRead(encC_0);
+
+        uint8_t newState = a | (b << 1) | (c << 2);
+        Serial.print("a: ");
+        Serial.print(a);
+        Serial.print(" b: ");
+        Serial.print(b);
+        Serial.print(" c: ");
+        Serial.print(c);
+        Serial.print("   ");
         return encoderTicks_0;
     }
 
@@ -72,6 +85,7 @@ namespace HAL {
     }
 
     void handleEncoderChange(int encA, int encB, int encC, uint8_t* curEncState, int* encoderTicks) {
+        Serial.println("update");
         bool a, b, c;
         a = digitalRead(encA);
         b = digitalRead(encB);
@@ -141,7 +155,7 @@ namespace HAL {
             if (millis() % 1000 == 0 && revEncMap[curEncState_1] == 100) {
                 Serial.printf("waiting for valid encoders on 1\n");
             }
-        } while (revEncMap[curEncState_1] == 100);
+        } while (revEncMap[curEncState_1] == 100 && false);
         #endif
 
     }

@@ -5,5 +5,5 @@
 #include "Util/PIDController.h"
 
 namespace Rotator {
-    
+    uint32_t printEncoder();
 }

@@ -1,15 +1,44 @@
-#include <Arduino.h>
+/* #include <Arduino.h>
 #include <Common.h>
 //#include <EspComms.h>
 #include <TeensyComms.h>
-#include "Rotator.h"
+#include "TVC.h"
 #include "HAL.h"
 
+
+
 Task taskTable[] = {
-  {Rotator::printEncoder, 0, true},
+  {TVC::zero, 0, false}, 
+  {TVC::moveTVC, 0, true},
+  {TVC::flowSequence, 0, false},
 };
 
 #define TASK_COUNT (sizeof(taskTable) / sizeof (struct Task))
+
+void zeroTVC(Comms::Packet packet, uint8_t ip) { 
+  Serial.printf("zeroing...\n");
+  if (taskTable[0].enabled) return; 
+  taskTable[0].enabled = true;
+  taskTable[0].nexttime = micros();
+}
+
+uint32_t ctr = 0;
+
+void packetcounter(Comms::Packet packet, uint8_t ip) {
+  ctr ++;
+  Serial.printf("ctr: %d\n", ctr);
+}
+
+void startLaunch(Comms::Packet packet, uint8_t ip) {
+  Serial.printf("hihii starting launch\n");
+  taskTable[2].enabled = true;
+  taskTable[2].nexttime = micros();
+}
+
+void stopTVCAll(Comms::Packet packet, uint8_t ip) {
+  taskTable[2].enabled = false;
+  TVC::stopTVC(packet, ip);
+}
 
 void setup() {
   // setup stuff here
@@ -20,7 +49,7 @@ void setup() {
   Serial.printf("setup comms!\n");
   HAL::setupEncoders();
   HAL::resetEncoders();
-  // TVC::init();
+  TVC::init();
   Serial.printf("setup other stuff!\n");  
   // Comms::registerCallback(102, TVC::enableCircle);
   // Comms::registerCallback(102, startLaunch);
@@ -55,3 +84,5 @@ void setup() {
 }
 
 void loop() {} // unused
+
+ */
