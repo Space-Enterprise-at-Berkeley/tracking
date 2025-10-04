@@ -11,16 +11,16 @@ namespace HAL {
 
     //check pinouts!!!!
 
-    const int x_pwm = 39; //sparkmax0 comments
-    const int y_pwm = 15; //sparkmax1
+    const int x_pwm = 28; //sparkmax0 comments
+    const int y_pwm = 37; //sparkmax1
 
-    const int encA_0 = 34; //encoder A blue
-    const int encB_0 = 21; //encoder B red
-    const int encC_0 = 20; //encoder C green
+    const int encA_0 = 7; //encoder A green
+    const int encB_0 = 3; //encoder B red 
+    const int encC_0 = 8; //encoder C blue
 
-    const int encA_1 = 14;
-    const int encB_1 = 17;
-    const int encC_1 = 18;
+    const int encA_1 = 21;
+    const int encB_1 = 18;
+    const int encC_1 = 22;
 
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 

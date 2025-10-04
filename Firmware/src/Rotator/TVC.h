@@ -1,3 +1,5 @@
+// UNUSED, keeping for reference
+
 #pragma once
 
 #include <Arduino.h>
