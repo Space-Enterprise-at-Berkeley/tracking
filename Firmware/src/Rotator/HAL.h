@@ -40,4 +40,7 @@ namespace HAL {
     uint32_t printEncoder_1();
 
     void resetEncoders();
+
+    void sendPower_0(float x);
+    void sendPower_1(float x);
 }
