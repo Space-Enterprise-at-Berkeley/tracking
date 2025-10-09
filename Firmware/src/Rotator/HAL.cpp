@@ -152,4 +152,50 @@ namespace HAL {
         setEncoderCount_1(0);
     }
 
+    void sendPower_0(float power){
+        int neutral = (1500*4096)/5000; // middle of deadband
+        int upper_neutral = (1575*4096)/5000; // top of deadband
+        int lower_neutral = (1425*4096)/5000;
+        int maximum = (2000*4096)/5000;
+        int minimum = (1000*4096)/5000;
+
+        if(power < -1 || power > 1)
+        {
+            Serial.printf("Invalid power input");
+            return;
+        }
+        int pulse = 1229;
+
+        if(power > 0)
+            pulse = upper_neutral + (maximum - upper_neutral) * power;
+        else if(power < 0)
+            pulse = upper_neutral + (upper_neutral - minimum) * power;
+        
+        analogWrite(x_pwm, pulse);
+
+    }
+
+    void sendPower_1(float power){
+        int neutral = (1500*4096)/5000; // middle of deadband
+        int upper_neutral = (1575*4096)/5000; // top of deadband
+        int lower_neutral = (1425*4096)/5000;
+        int maximum = (2000*4096)/5000;
+        int minimum = (1000*4096)/5000;
+
+        if(power < -1 || power > 1)
+        {
+            Serial.printf("Invalid power input");
+            return;
+        }
+        int pulse = 1229;
+
+        if(power > 0)
+            pulse = upper_neutral + (maximum - upper_neutral) * power;
+        else if(power < 0)
+            pulse = upper_neutral + (upper_neutral - minimum) * power;
+        
+        analogWrite(y_pwm, pulse);
+
+    }
+
 }
