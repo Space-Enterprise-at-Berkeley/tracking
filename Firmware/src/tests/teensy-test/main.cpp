@@ -1,6 +1,8 @@
 
 #include <Arduino.h>
 #include <Common.h>
+#include "HAL.h"
+
 #include "EEPROM.h"
 
 
@@ -32,10 +34,8 @@ void setup() {
     Serial.println("Moving around");
     for (int i = 0; i < 100; i ++) {
         Serial.println("fwd");
-        analogWrite(x_pwm, 1229*0.95);
-        delay(500);
-        Serial.println("back");
-        analogWrite(x_pwm, 1229*1.05);
+        //analogWrite(x_pwm, 1229*0.95);
+        HAL::sendPower_0(i/100.0);
         delay(500);
     }
 
