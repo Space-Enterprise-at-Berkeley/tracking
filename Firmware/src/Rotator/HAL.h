@@ -41,6 +41,9 @@ namespace HAL {
 
     void resetEncoders();
 
+    void stop_0();
+    void stop_1();
+
     void sendPower_0(float x);
     void sendPower_1(float x);
 }
