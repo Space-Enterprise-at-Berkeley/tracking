@@ -5,6 +5,8 @@
 #include "SPI.h"
 #include "Common.h"
 #include "TeensyComms.h"
+#include "Util/PIDController.h"
+
 
 
 namespace HAL {

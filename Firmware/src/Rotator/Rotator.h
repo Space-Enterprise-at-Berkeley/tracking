@@ -12,5 +12,7 @@ namespace Rotator {
     void setPoint();
     void stop();
     void setMode(int mode);
+    void setUp();
+    void goToTick_0(int tick,int margin);
 
 }
