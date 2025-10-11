@@ -32,12 +32,10 @@ void setup() {
     delay(5000);
 
     Serial.println("Moving around");
-    for (int i = 0; i < 100; i ++) {
-        Serial.println("fwd");
-        //analogWrite(x_pwm, 1229*0.95);
-        HAL::sendPower_0(i/100.0);
-        delay(500);
-    }
+    Serial.print("fwd");
+    HAL::sendPower_0(0.1);
+    HAL::printEncoder_0();
+    delay(100);
 
     Serial.println("Ending neutral");
     analogWrite(x_pwm, 1229);
