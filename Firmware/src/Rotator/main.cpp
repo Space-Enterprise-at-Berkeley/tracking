@@ -22,6 +22,9 @@ void setup() {
   HAL::resetEncoders();
   // TVC::init();
   Serial.printf("setup other stuff!\n");  
+
+  Rotator::setUp();
+  
   // Comms::registerCallback(102, TVC::enableCircle);
   // Comms::registerCallback(102, startLaunch);
   // Comms::registerCallback(103, zeroTVC);
