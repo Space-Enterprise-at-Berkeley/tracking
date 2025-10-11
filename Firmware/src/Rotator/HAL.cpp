@@ -72,7 +72,6 @@ namespace HAL {
     }
 
     void handleEncoderChange(int encA, int encB, int encC, uint8_t* curEncState, int* encoderTicks) {
-        Serial.println("update");
         bool a, b, c;
         a = digitalRead(encA);
         b = digitalRead(encB);
@@ -152,6 +151,16 @@ namespace HAL {
         setEncoderCount_1(0);
     }
 
+    void stop_0()
+    {
+        analogWrite(x_pwm, 1229);
+    }
+
+    void stop_1()
+    {
+        analogWrite(y_pwm, 1229);
+    }
+
     void sendPower_0(float power){
         int neutral = (1500*4096)/5000; // middle of deadband
         int upper_neutral = (1575*4096)/5000; // top of deadband
@@ -169,7 +178,7 @@ namespace HAL {
         if(power > 0)
             pulse = upper_neutral + (maximum - upper_neutral) * power;
         else if(power < 0)
-            pulse = upper_neutral + (upper_neutral - minimum) * power;
+            pulse = lower_neutral + (lower_neutral - minimum) * power;
         
         analogWrite(x_pwm, pulse);
 

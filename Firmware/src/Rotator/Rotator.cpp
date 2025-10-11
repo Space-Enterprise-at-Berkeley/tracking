@@ -18,16 +18,26 @@ namespace Rotator {
         while(tick - HAL::getEncoderCount_0() > margin)
         {
             Serial.println(HAL::getEncoderCount_0());
-            Serial.print("Wanted tick: ");
-            Serial.println(tick);
+            Serial.print("distance: ");
 
 
             int distance = tick - HAL::getEncoderCount_0();
-            int sign = (distance > 0 ) - (distance < 0);
-            
-            HAL::sendPower_0(sign * 0.01f);
+
+            Serial.println(distance);
+
+
+            if(distance == 0)
+                break;
+            else if(distance > 0)
+                HAL::sendPower_0(-0.01f);
+            else
+                HAL::sendPower_0(0.01f);
+
+            delay(10);
 
         }
+
+        HAL::stop_0();
     }
 
     
