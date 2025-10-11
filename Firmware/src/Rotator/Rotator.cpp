@@ -9,7 +9,8 @@ namespace Rotator {
         return 100 * 1000;
     }
     void setUp(){
-        goToTick_0(300,10);
+        //goToTick_0(300,10);
+        
     }
 
     
