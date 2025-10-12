@@ -9,13 +9,35 @@ namespace HAL {
     volatile uint8_t curEncState_1 = 0;
 
 
+    /* MAGIC! */
     uint8_t revEncMap[] = {100, 5, 3, 4, 1, 0, 2, 100};
+    uint8_t revEncMap_C_Pin_Broken[] = {0, 100, 3, 100, 1, 100, 2, 100};
+    uint8_t revEncMap_B_Pin_Broken[] = {0, 1, 100, 100, 3, 2, 100, 100};
+    uint8_t revEncMap_A_Pin_Broken[] = {0, 3, 1, 2, 100, 100, 100, 100};
 
-
+    volatile int num_broken_pins;
 
     int init() {
+        /* In case a singlular pin is broken, we can gracefully handle it without too much issue */
+        #ifdef ENCODER_A_PIN_BROKEN
+            num_broken_pins += 1;
+            *revEncMap = revEncMap_A_Pin_Broken;
+        #endif
+        #ifdef ENCODER_B_PIN_BROKEN
+            num_broken_pins += 1;
+            *revEncMap = revEncMap_B_Pin_Broken;
+        #endif
+        #ifdef ENCODER_C_PIN_BROKEN
+            num_broken_pins += 1;
+            revEncMap = &revEncMap_C_Pin_Broken;
+        #endif
 
-
+        if (num_broken_pins > 1) {
+            while (1) {
+                Serial.println("At most one encoder pin can be broken");
+                delay(10);
+            }
+        }
         pinMode(x_pwm, OUTPUT); 
         pinMode(y_pwm, OUTPUT);
 
@@ -79,7 +101,7 @@ namespace HAL {
 
         uint8_t newState = a | (b << 1) | (c << 2);
 
-        if (newState == 0 || newState == 7) {
+        if (revEncMap[newState] == 0) {
             // TVC::setMode(0); //state error
             return;
         }
@@ -87,12 +109,13 @@ namespace HAL {
         int prevIndex  = revEncMap[*curEncState];
         int newIndex = revEncMap[newState];
         int delta = newIndex - prevIndex;
-
-        if (delta == 1 || delta == -1 || delta == 5 || delta == -5) {
-            if (delta == 1 || delta == -5) {
-                *encoderTicks -= 1;
-            } else {
-                *encoderTicks += 1;
+        int turnover = num_broken_pins ? 3 : 5;
+        if (delta == 1 || delta == -1 || delta == turnover || delta == -turnover) {
+            if (delta == 1 || delta == -turnover) {
+                *encoderTicks -= (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
+            } 
+            else {
+                *encoderTicks += (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
             }
 
             *curEncState = newState;
@@ -173,7 +196,7 @@ namespace HAL {
             Serial.printf("Invalid power input");
             return;
         }
-        int pulse = 1229;
+        int pulse = neutral;
 
         if(power > 0)
             pulse = upper_neutral + (maximum - upper_neutral) * power;
