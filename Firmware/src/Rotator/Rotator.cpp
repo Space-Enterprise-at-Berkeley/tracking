@@ -5,7 +5,7 @@
 
 namespace Rotator {
     uint32_t printEncoder() {
-        Serial.println(HAL::getEncoderCount_0());
+        // Serial.println(HAL::getEncoderCount_0());
         return 100 * 1000;
     }
     void setUp(){
@@ -21,7 +21,7 @@ namespace Rotator {
             Serial.println(-1.0*i);
             delay(500);
             HAL::printEncoder_0();
-            i += 0.001;
+            i += 0.01;
         }
     }
 

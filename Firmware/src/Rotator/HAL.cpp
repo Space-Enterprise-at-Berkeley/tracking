@@ -11,9 +11,9 @@ namespace HAL {
 
     /* MAGIC! */
     uint8_t revEncMap[] = {100, 5, 3, 4, 1, 0, 2, 100};
-    uint8_t revEncMap_C_Pin_Broken[] = {0, 100, 3, 100, 1, 100, 2, 100};
-    uint8_t revEncMap_B_Pin_Broken[] = {0, 1, 100, 100, 3, 2, 100, 100};
-    uint8_t revEncMap_A_Pin_Broken[] = {0, 3, 1, 2, 100, 100, 100, 100};
+    uint8_t revEncMap_C_Pin_Broken[] = {0, 0, 3, 3, 1, 1, 2, 2};
+    uint8_t revEncMap_B_Pin_Broken[] = {0, 1, 0, 1, 3, 2, 3, 2};
+    uint8_t revEncMap_A_Pin_Broken[] = {0, 3, 1, 2, 0, 3, 1, 2};
 
     volatile int num_broken_pins;
 
@@ -21,15 +21,21 @@ namespace HAL {
         /* In case a singlular pin is broken, we can gracefully handle it without too much issue */
         #ifdef ENCODER_A_PIN_BROKEN
             num_broken_pins += 1;
-            *revEncMap = revEncMap_A_Pin_Broken;
+            for (int i = 0; i < 8; i++) { // Maybe there's a better way to do this idk
+                revEncMap[i] = revEncMap_A_Pin_Broken[i];
+            }
         #endif
         #ifdef ENCODER_B_PIN_BROKEN
             num_broken_pins += 1;
-            *revEncMap = revEncMap_B_Pin_Broken;
+            for (int i = 0; i < 8; i++) {
+                revEncMap[i] = revEncMap_B_Pin_Broken[i];
+            }
         #endif
         #ifdef ENCODER_C_PIN_BROKEN
             num_broken_pins += 1;
-            revEncMap = &revEncMap_C_Pin_Broken;
+            for (int i = 0; i < 8; i++) {
+                revEncMap[i] = revEncMap_C_Pin_Broken[i];
+            }
         #endif
 
         if (num_broken_pins > 1) {
@@ -101,7 +107,7 @@ namespace HAL {
 
         uint8_t newState = a | (b << 1) | (c << 2);
 
-        if (revEncMap[newState] == 0) {
+        if (revEncMap[newState] == 100) {
             // TVC::setMode(0); //state error
             return;
         }
@@ -122,6 +128,8 @@ namespace HAL {
         } else {
             // TVC::setMode(0);
         }
+        
+        // Serial.printf("a: %d, b: %d, c: %d, delta: %d, ticks: %d\n", a, b, c, delta, encoderTicks_0);
     }
 
     void handleEncoderChange_0() {
