@@ -10,7 +10,19 @@ namespace Rotator {
     }
     void setUp(){
         //goToTick_0(300,10);
-        
+        float i = 0.0;
+        Serial.print("about to start");
+        delay(5000);
+        while(1){
+            HAL::sendPower_0(0);
+            delay(500);
+            HAL::sendPower_0(-1.0*i);
+            Serial.print("current power:");
+            Serial.println(-1.0*i);
+            delay(500);
+            HAL::printEncoder_0();
+            i += 0.001;
+        }
     }
 
     

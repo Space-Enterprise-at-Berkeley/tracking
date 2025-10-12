@@ -17,19 +17,6 @@ void setup() {
   HAL::init();
   Serial.printf("hii!!\n");
   //Comms::init()
-  float i = 0.0;
-  Serial.print("about to start");
-  delay(5000);
-  while(1){
-    HAL::sendPower_0(0);
-    delay(500);
-    HAL::sendPower_0(-1.0*i);
-    Serial.print("current power:");
-    Serial.println(-1.0*i);
-    delay(500);
-    HAL::printEncoder_0();
-    i += 0.01;
-  }
   Serial.printf("setup comms!\n");
   HAL::setupEncoders();
   HAL::resetEncoders();
