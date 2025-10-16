@@ -6,7 +6,7 @@
 #include "HAL.h"
 
 Task taskTable[] = {
-  {Rotator::printEncoder, 0, true},
+  {HAL::printEncoder_0, 0, true},
 };
 
 #define TASK_COUNT (sizeof(taskTable) / sizeof (struct Task))
@@ -23,7 +23,7 @@ void setup() {
   // TVC::init();
   Serial.printf("setup other stuff!\n");  
 
-  // Rotator::setUp();
+  Rotator::setUp();
   
   // Comms::registerCallback(102, TVC::enableCircle);
   // Comms::registerCallback(102, startLaunch);

@@ -5,23 +5,22 @@
 
 namespace Rotator {
     uint32_t printEncoder() {
-        // Serial.println(HAL::getEncoderCount_0());
+        Serial.println(HAL::getEncoderCount_0());
         return 100 * 1000;
     }
     void setUp(){
         //goToTick_0(300,10);
         float i = 0.0;
-        Serial.print("about to start");
+        Serial.println("about to start");
+        HAL::stop_0();
         delay(5000);
         while(1){
-            HAL::sendPower_0(0);
-            delay(500);
-            HAL::sendPower_0(-1.0*i);
-            Serial.print("current power:");
-            Serial.println(-1.0*i);
+            HAL::sendPower_0(1.0*i);
+            Serial.print("current power: ");
+            Serial.println(1.0*i);
             delay(500);
             HAL::printEncoder_0();
-            i += 0.01;
+            i += 0.005;
         }
     }
 

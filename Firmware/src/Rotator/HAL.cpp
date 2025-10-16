@@ -18,7 +18,7 @@ namespace HAL {
     volatile int num_broken_pins;
 
     int init() {
-        /* In case a singlular pin is broken, we can gracefully handle it without too much issue */
+        /* In case a singular pin is broken, we can gracefully handle it without too much issue */
         #ifdef ENCODER_A_PIN_BROKEN
             num_broken_pins += 1;
             for (int i = 0; i < 8; i++) { // Maybe there's a better way to do this idk
@@ -40,7 +40,7 @@ namespace HAL {
 
         if (num_broken_pins > 1) {
             while (1) {
-                Serial.println("At most one encoder pin can be broken");
+                Serial.println("ERROR: At most one encoder pin can be broken");
                 delay(10);
             }
         }
@@ -118,10 +118,10 @@ namespace HAL {
         int turnover = num_broken_pins ? 3 : 5;
         if (delta == 1 || delta == -1 || delta == turnover || delta == -turnover) {
             if (delta == 1 || delta == -turnover) {
-                *encoderTicks -= (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
+                *encoderTicks += (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
             } 
             else {
-                *encoderTicks += (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
+                *encoderTicks -= (num_broken_pins && (prevIndex == 0 || newIndex == 0)) ?  2 : 1;
             }
 
             *curEncState = newState;
@@ -182,20 +182,11 @@ namespace HAL {
         setEncoderCount_1(0);
     }
 
-    void stop_0()
-    {
-        analogWrite(x_pwm, 1229);
-    }
-
-    void stop_1()
-    {
-        analogWrite(y_pwm, 1229);
-    }
-
-    void sendPower_0(float power){
+    void sendPwm(int pin, float power){
+        float deadband = 0.01;
         int neutral = (1500*4096)/5000; // middle of deadband
-        int upper_neutral = (1575*4096)/5000; // top of deadband
-        int lower_neutral = (1425*4096)/5000;
+        int upper_neutral = (1500*(1+deadband)*4096)/5000; // top of deadband
+        int lower_neutral = (1500*(1-deadband)*4096)/5000;
         int maximum = (2000*4096)/5000;
         int minimum = (1000*4096)/5000;
 
@@ -204,6 +195,7 @@ namespace HAL {
             Serial.printf("Invalid power input");
             return;
         }
+
         int pulse = neutral;
 
         if(power > 0)
@@ -211,31 +203,23 @@ namespace HAL {
         else if(power < 0)
             pulse = lower_neutral + (lower_neutral - minimum) * power;
         
-        analogWrite(x_pwm, pulse);
+        analogWrite(pin, pulse);
 
+    }
+
+    void sendPower_0(float power){
+        sendPwm(x_pwm, power);
     }
 
     void sendPower_1(float power){
-        int neutral = (1500*4096)/5000; // middle of deadband
-        int upper_neutral = (1575*4096)/5000; // top of deadband
-        int lower_neutral = (1425*4096)/5000;
-        int maximum = (2000*4096)/5000;
-        int minimum = (1000*4096)/5000;
-
-        if(power < -1 || power > 1)
-        {
-            Serial.printf("Invalid power input");
-            return;
-        }
-        int pulse = 1229;
-
-        if(power > 0)
-            pulse = upper_neutral + (maximum - upper_neutral) * power;
-        else if(power < 0)
-            pulse = upper_neutral + (upper_neutral - minimum) * power;
-        
-        analogWrite(y_pwm, pulse);
-
+        sendPwm(y_pwm, power);
     }
 
+    void stop_0() {
+        sendPower_0(0);
+    }
+
+    void stop_1() {
+        sendPower_1(0);
+    }
 }
