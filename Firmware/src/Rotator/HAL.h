@@ -25,6 +25,10 @@ namespace HAL {
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 
 
+    const int minTicks_0 = 0;
+    const int maxTicks_0 = 1500;
+    const int minTicks_1 = 0;
+    const int maxTicks_1 = 1500;
 
     int init();
 

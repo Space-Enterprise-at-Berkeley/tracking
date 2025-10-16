@@ -183,6 +183,8 @@ namespace HAL {
     }
 
     void sendPwm(int pin, float power){
+        // Serial.println(power);
+
         float deadband = 0.01;
         int neutral = (1500*4096)/5000; // middle of deadband
         int upper_neutral = (1500*(1+deadband)*4096)/5000; // top of deadband
@@ -208,7 +210,13 @@ namespace HAL {
     }
 
     void sendPower_0(float power){
-        sendPwm(x_pwm, power);
+        if ((power > 0 && encoderTicks_0 > maxTicks_0) || (power < 0 && encoderTicks_0 < minTicks_0)) {
+            sendPwm(x_pwm, 0);
+        } else if ((power > 0 && encoderTicks_0 > maxTicks_0 - 200) || (power < 0 && encoderTicks_0 < minTicks_0 + 200)) {
+            sendPwm(x_pwm, max(min(power, 0.025), -0.025));
+        } else {
+            sendPwm(x_pwm, power);
+        }
     }
 
     void sendPower_1(float power){

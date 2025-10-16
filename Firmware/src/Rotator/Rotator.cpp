@@ -10,17 +10,25 @@ namespace Rotator {
     }
     void setUp(){
         //goToTick_0(300,10);
-        float i = 0.0;
+        float power = 0.0;
+        int ticks = 0;
+        int setpoints[] = {550, 1100, 400};
+        int index = 0;
+        int i = 0;
         Serial.println("about to start");
         HAL::stop_0();
         delay(5000);
         while(1){
-            HAL::sendPower_0(1.0*i);
-            Serial.print("current power: ");
-            Serial.println(1.0*i);
-            delay(500);
-            HAL::printEncoder_0();
-            i += 0.005;
+            ticks = HAL::getEncoderCount_0();
+            power = 0.0004 * (setpoints[index] - ticks);
+            Serial.println(ticks);
+            HAL::sendPower_0(power);
+            if (i % 400 == 0) {
+                if (index == 2) index = 0;
+                else index++;
+            }
+            i++;
+            delay(5);
         }
     }
 
