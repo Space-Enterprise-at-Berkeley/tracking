@@ -12,7 +12,7 @@ vel(:,1:2) = vel(:,1) .* [cos(diffvel(:,3)), sin(diffvel(:,3))];
 % Generate GPS packets
 FARcoords = [35.3472294, -117.8108024, 628];
 delay = 1;
-stdev = 15;
+stdev = 25;
 gps = gpsSensor('ReferenceFrame', 'ENU', 'ReferenceLocation',FARcoords,'HorizontalPositionAccuracy',stdev,'VerticalPositionAccuracy',stdev,'VelocityAccuracy',stdev,'DecayFactor',0.95,'SampleRate',1/delay);
 
 % imuSensor('ReferenceFrame','ENU','Accelerometer',)
@@ -57,8 +57,8 @@ for i = 2:samples
         GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
     end
     if i < 300 && mod(i,3) == 1
-        % accelerometer/a priori thrust estimate
-        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)])
+        % not needed hopefully
+        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
     end
     %disp(tracker.Time);
     states(:, i) = extrapolate(tracker, time(i));
@@ -75,7 +75,7 @@ angerror = acosd(sind(trueangle(:,3)) .* sind(filterangle(:,3)) + cosd(trueangle
 
 figure
 % plot(time, angerror)
-plot(time(1:300), angerror(1:300))
+plot(time(1:300), angerror(1:300), time(1:300), filterangle(1:300,3), time(1:300), trueangle(1:300,3))
 xlabel("Time (s)")
 ylabel("Angular error (deg)")
 
