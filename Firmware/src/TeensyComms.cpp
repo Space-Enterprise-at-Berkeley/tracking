@@ -120,6 +120,7 @@ namespace Comms {
 
   void processWaitingPackets()
   {
+    /* commented out for now, this part doesnt work
     if (true) { //Ethernet.detectRead()) { this should be okay, the next line checks for waiting packets - Zahed
       if (Udp.parsePacket()) {
         // if(Udp.remotePort() != port) return;
@@ -128,8 +129,8 @@ namespace Comms {
         
         evokeCallbackFunction(packet, Udp.remoteIP()[3]);
       }
-    }
-
+    }*/
+    //Serial.println("Checking availability");
     if (Serial.available())
       {
         //That was for reading full formed packets from the USB serial port
@@ -154,7 +155,9 @@ namespace Comms {
         uint8_t id = (uint8_t)Serial.parseInt();
         Serial.print("id" + String(id));
         if (id == -1) return;
+        //create new packet
         Packet packet = {.id = id, .len = 0};
+        //add data to packet 
         while(Serial.available()){
           if (Serial.peek() == ' ') Serial.read();
           if (Serial.peek() == '\n') {Serial.read(); break;}
