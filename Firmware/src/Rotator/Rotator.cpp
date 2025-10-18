@@ -19,6 +19,7 @@ namespace Rotator {
     int target_setpoint = 0;
     void setTargetSetpoint(int sp){
         target_setpoint = sp;
+        Serial.println(sp);
     }
     float speed = 0.0004f; // How fast the motor approaches the target
     float max_speed = 0.3f;
