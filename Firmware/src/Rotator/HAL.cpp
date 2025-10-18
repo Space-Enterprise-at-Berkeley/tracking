@@ -19,17 +19,9 @@ namespace HAL {
 
     volatile int num_broken_pins;
 
-    //helper function to allow registercallback to work
-
-    void mMovement(uint8_t state){
-        if(state==1) allowMotorMovement = true;
-        else if (state==0) allowMotorMovement = false;
-        else Serial.println("motor movement packet value error");
-
-    }
-    
     void motorMovement(Comms::Packet packet, uint8_t ip){
-        mMovement(Comms::packetGetUint8(&packet, 0));
+        PacketEnableRotation parsed_packet = PacketEnableRotation::fromRawPacket(&packet);
+        allowMotorMovement = parsed_packet.m_Action;
     }
 
     

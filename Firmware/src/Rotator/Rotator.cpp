@@ -33,7 +33,14 @@ namespace Rotator {
 
     }
 
-    
+    void motorMovement(uint8_t state){
+        if(state==1);
+        //stop all motors and set to idle
+        else if(state==0);
+        //allow motor movement
+        else Serial.println("motor movement packet value error");
+
+    }
 
     void switchModes(uint8_t state){
         if (state==1) flightmode = true;
