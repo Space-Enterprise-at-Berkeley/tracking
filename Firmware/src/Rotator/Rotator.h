@@ -15,8 +15,7 @@ namespace Rotator {
     void setUp();
     void goToTick_0(int tick,int margin);
     void setTargetSetpoint(int sp);
-    void setSpeed(float s);
-    void setMaxSpeed(float ms);
-    void setTolerance(int t);
+    void setAzimuthSetpoint(int sp);
+    void switchModes(uint8_t state);
 
 }

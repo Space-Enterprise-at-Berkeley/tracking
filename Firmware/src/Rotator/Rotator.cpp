@@ -4,22 +4,52 @@
 #include <FlexCAN_T4.h>
 
 namespace Rotator {
+    //fale = ground control mode, true = flight mode
+    bool flightmode = false;
     uint32_t printEncoder() {
         Serial.println(HAL::getEncoderCount_0());
         return 100 * 1000;
     }
-
-    void setUp(){
-        //goToTick_0(300,10);
-        Serial.println("about to start");
-        HAL::stop_0();
-        delay(5000);
+    
+    void setTargetSetpoint(Comms::Packet packet, uint8_t ip){
+        Rotator::setTargetSetpoint(Comms::packetGetUint32(&packet, 0));
     }
 
+    void setAzimuthSetpoint(Comms::Packet packet, uint8_t ip){
+        Rotator::setAzimuthSetpoint(Comms::packetGetUint32(&packet, 0));
+    }
+
+    void runDiagnostic(Comms::Packet packet, uint8_t ip){
+        //preprogramed diagnostic movement
+    }
+
+    void init(){
+        //set elevation 
+        Comms::registerCallback(102, setTargetSetpoint);
+        //set azimuth
+        Comms::registerCallback(103, setAzimuthSetpoint);
+        //runs preprogramed diagnostic
+        Comms::registerCallback(104, runDiagnostic);
+
+    }
+
+    
+
+    void switchModes(uint8_t state){
+        if (state==1) flightmode = true;
+        else if (state==0) flightmode = false;
+        else Serial.println("switch mode packet value error");
+    }
+
+    //elevation tracking
     int target_setpoint = 0;
     void setTargetSetpoint(int sp){
         target_setpoint = sp;
         Serial.println(sp);
+    }
+    //azimuthal setpoint
+    void setAzimuthSetpoint(int sp){
+        //set azimuth setpoint
     }
     float speed = 0.0004f; // How fast the motor approaches the target
     float max_speed = 0.3f;

@@ -17,10 +17,12 @@ void func(Comms::Packet packet, uint8_t ip){
   Serial.print(Comms::packetGetFloat(&packet,4));
 }
 
-//helper function to call setTargetSetpoint(<value from packet>)
-void callSetTargetSetpoint(Comms::Packet packet, uint8_t ip){
-    Rotator::setTargetSetpoint(Comms::packetGetUint32(&packet, 0));
-  }
+
+void switchModes(Comms::Packet packet, uint8_t ip){
+  Rotator::switchModes(Comms::packetGetUint8(&packet, 0));
+}
+
+
 
 
 
@@ -35,7 +37,9 @@ void setup() {
   //HAL::resetEncoders();
   // TVC::init();
   Serial.printf("setup other stuff!\n");  
-  Rotator::setUp();
+  Rotator::init();
+  HAL::init();
+
 
   //if number detected, do function
   
@@ -52,11 +56,13 @@ void setup() {
   // Comms::registerCallback(2, TVC::printEncoders);
 
   //for testing purposes
-  Comms::registerCallback(100, func);
+  Comms::registerCallback(999, func);
 
-  
+  //takes 0 or 1
+  Comms::registerCallback(101, switchModes);
 
-  Comms::registerCallback(101, callSetTargetSetpoint);
+
+
 
   Serial.printf("Setup complete\n");
 

@@ -7,8 +7,10 @@
 #ifndef BOARD_TC
 #ifndef BOARD_LC
 #ifndef BOARD_AC
+#ifndef BOARD_FC
 #ifndef BOARD_GD
 #error
+#endif
 #endif
 #endif
 #endif

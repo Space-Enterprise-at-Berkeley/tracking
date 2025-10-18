@@ -4,8 +4,10 @@
 #include "common.h"
 
 #ifndef BOARD_AC
+#ifndef BOARD_SE
 #ifndef BOARD_GD
 #error
+#endif
 #endif
 #endif
 

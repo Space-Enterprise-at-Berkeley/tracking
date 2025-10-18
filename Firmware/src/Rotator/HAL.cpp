@@ -8,6 +8,8 @@ namespace HAL {
     volatile uint8_t curEncState_0 = 0;
     volatile uint8_t curEncState_1 = 0;
 
+    bool allowMotorMovement = false;
+
 
     /* MAGIC! */
     uint8_t revEncMap[] = {100, 5, 3, 4, 1, 0, 2, 100};
@@ -16,6 +18,22 @@ namespace HAL {
     uint8_t revEncMap_A_Pin_Broken[] = {0, 3, 1, 2, 0, 3, 1, 2};
 
     volatile int num_broken_pins;
+
+    //helper function to allow registercallback to work
+
+    void mMovement(uint8_t state){
+        if(state==1) allowMotorMovement = true;
+        else if (state==0) allowMotorMovement = false;
+        else Serial.println("motor movement packet value error");
+
+    }
+    
+    void motorMovement(Comms::Packet packet, uint8_t ip){
+        mMovement(Comms::packetGetUint8(&packet, 0));
+    }
+
+    
+
 
     int init() {
         /* In case a singular pin is broken, we can gracefully handle it without too much issue */
@@ -67,6 +85,8 @@ namespace HAL {
         setupEncoders();
         setEncoderCount_0(0);
         setEncoderCount_1(0);
+
+        Comms::registerCallback(100, motorMovement);
 
         return 0;
     }
