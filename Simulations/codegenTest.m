@@ -81,4 +81,4 @@ ylabel("Angular error (deg)")
 
 
 angvel = (acosd(sind(trueangle(2:end,3)) .* sind(trueangle(1:end-1,3)) + cosd(trueangle(2:end,3)) .* cosd(trueangle(1:end-1,3)) .* cosd(trueangle(2:end,2)-trueangle(1:end-1,2))))./(time(2:end)-time(1:end-1));
-angvel
+plot(time, trueangle(:, 2))
