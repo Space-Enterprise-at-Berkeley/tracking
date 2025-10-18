@@ -5,7 +5,7 @@ classdef CombinedTracker < handle
         Filter = trackingKF("MotionModel","3D Constant Acceleration")
 
         GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0]
-        GPSNoise = [10 0 0; 0 10 0; 0 0 10]
+        GPSNoise = [5 0 0; 0 5 0; 0 0 5]
 
         AccelModel = [0 0 1 0 0 0 0 0 0; 0 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 0 1]
         AccelNoise = [1 0 0; 0 1 0; 0 0 1]

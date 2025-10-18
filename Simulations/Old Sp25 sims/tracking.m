@@ -1,4 +1,4 @@
-sim_data = readmatrix("Clean Prospect sim.csv");
+sim_data = readmatrix("Clean sim 2.csv");
 samples = length(sim_data);
 time = sim_data(:,1);
 pos = sim_data(:,[7,8,2]);
@@ -57,8 +57,7 @@ for i = 2:samples
         GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
     end
     if i < 300 && mod(i,3) == 1
-        % accelerometer/a priori thrust estimate
-        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)])
+        accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
     end
     %disp(tracker.Time);
     states(:, i) = extrapolate(tracker, time(i));
