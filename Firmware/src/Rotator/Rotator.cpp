@@ -4,7 +4,7 @@
 #include <FlexCAN_T4.h>
 
 namespace Rotator {
-    //fale = ground control mode, true = flight mode
+    //false = ground control mode, true = flight mode
     bool flightmode = false;
     uint32_t printEncoder() {
         Serial.println(HAL::getEncoderCount_0());
