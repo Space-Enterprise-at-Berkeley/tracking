@@ -5,7 +5,8 @@
 #include "SPI.h"
 #include "Common.h"
 #include "TeensyComms.h"
-#include "TVC.h"
+#include "../proto/include/common.h"
+#include "../proto/include/Packet_EnableRotation.h"
 
 namespace HAL {
 

@@ -5,6 +5,7 @@
 #include "Rotator.h"
 #include "HAL.h"
 
+
 Task taskTable[] = {
   {HAL::printEncoder_0, 0, true},
 };
