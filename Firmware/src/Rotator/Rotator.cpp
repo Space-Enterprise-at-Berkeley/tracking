@@ -34,17 +34,25 @@ namespace Rotator {
         tracking = false;
         diagnostic = false;
         // TODO: Unwrap an RTSetElevation packet and update the elvRefPos variable
+        PacketRTSetElevation parsed_packet = PacketRTSetElevation::fromRawPacket(&packet);
+        elvRefPos = parsed_packet.m_Degrees;
     }
 
     void setAziSetpoint(Comms::Packet packet, uint8_t ip){
         tracking = false;
         diagnostic = false;
         // TODO: Unwrap an RTSetAzimuth packet and update the aziRefPos variable
+        PacketRTSetAzimuth parsed_packet = PacketRTSetAzimuth::fromRawPacket(&packet);
+        aziRefPos = parsed_packet.m_Degrees;
+
     }
 
     void runDiagnostic(Comms::Packet packet, uint8_t ip){
         tracking = false;
         diagnostic = true;
+        //run the actual diagnostic
+        diagnosticUpdate();
+
     }
 
 
@@ -52,21 +60,55 @@ namespace Rotator {
         // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
         // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
         // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
+
     }
 
     void diagnosticUpdate(){
         // TODO: preprogramed diagnostic movement, this will require some timing and probably an extra array or two
     }
 
-    void sendTrackingState(){} // TODO: emit elvPos, elvRefPos, elvVel, elvRefVel, and their azimuth equivalents as an RTRotatorState packet
+    void sendTrackingState(){
+        //PacketRTRotatorState newpacket = PacketRTRotatorState::writeRawPacket();
+        //make packet
+        PacketRTRotatorState state = PacketRTRotatorState::Builder()
+            .withElvPos(elvPos)
+            .withElvRefPos(elvRefPos)
+            .withElvVel(elvVel)
+            .withElvRefVel(elvRefVel)
+            .withAziPos(aziPos)
+            .withAziRefPos(aziRefPos)
+            .withAziVel(aziVel)
+            .withAziRefVel(aziRefVel)
+            .build();
+        Comms::Packet newpacket;
+        state.writeRawPacket(&newpacket);
+        //emit packet 
+        Comms::emitPacketToGS(&newpacket);
+    } // TODO: emit elvPos, elvRefPos, elvVel, elvRefVel, and their azimuth equivalents as an RTRotatorState packet
 
-    void sendRotatorState(){} // TODO: emit trackingState[] as an RTTrackingState packet
+    void sendRotatorState(){
+        PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
+            .withXPos(trackingState[0])
+            .withXVel(trackingState[1])
+            .withXAccel(trackingState[2])
+            .withYPos(trackingState[3])
+            .withYVel(trackingState[4])
+            .withYAccel(trackingState[5])
+            .withZPos(trackingState[6])
+            .withZVel(trackingState[7])
+            .withZAccel(trackingState[8])
+            .build();
+        Comms::Packet newpacket;
+        state.writeRawPacket(&newpacket);
+        //emit packet 
+        Comms::emitPacketToGS(&newpacket);
+    } // TODO: emit trackingState[] as an RTTrackingState packet
 
     void init(){
         // TODO: make these packet spec'd
-        Comms::registerCallback(102, setElvSetpoint);
-        Comms::registerCallback(103, setAziSetpoint);
-        Comms::registerCallback(104, runDiagnostic);
+        Comms::registerCallback(PACKET_ID_RTSetElevation, setElvSetpoint);
+        Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
+        Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
 
     }
 

@@ -78,7 +78,7 @@ namespace HAL {
         setEncoderCount_0(0);
         setEncoderCount_1(0);
 
-        Comms::registerCallback(100, motorMovement);
+        Comms::registerCallback(PACKET_ID_RTEnableRotation, motorMovement);
 
         return 0;
     }
