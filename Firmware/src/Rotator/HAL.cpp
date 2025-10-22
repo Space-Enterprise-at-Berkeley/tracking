@@ -20,7 +20,7 @@ namespace HAL {
     volatile int num_broken_pins;
 
     void motorMovement(Comms::Packet packet, uint8_t ip){
-        PacketEnableRotation parsed_packet = PacketEnableRotation::fromRawPacket(&packet);
+        PacketRTEnableRotation parsed_packet = PacketRTEnableRotation::fromRawPacket(&packet);
         allowMotorMovement = parsed_packet.m_Action;
     }
 

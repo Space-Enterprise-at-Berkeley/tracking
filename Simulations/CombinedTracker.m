@@ -17,15 +17,16 @@ classdef CombinedTracker < handle
         function state = extrapolate(obj, time)
             dt = time - obj.Time;
             dt2 = dt^2/2;
-            state = [1 dt dt2 0 0  0   0 0  0  ;
-                     0 1  dt  0 0  0   0 0  0  ;
-                     0 0  1   0 0  0   0 0  0  ;
-                     0 0  0   1 dt dt2 0 0  0  ;
-                     0 0  0   0 1  dt  0 0  0  ;
-                     0 0  0   0 0  1   0 0  0  ;
-                     0 0  0   0 0  0   1 dt dt2;
-                     0 0  0   0 0  0   0 1  dt ;
-                     0 0  0   0 0  0   0 0  1  ] * obj.State;
+            transition = [1 dt dt2 0 0  0   0 0  0;
+                          0 1  dt  0 0  0   0 0  0  ;
+                          0 0  1   0 0  0   0 0  0  ;
+                          0 0  0   1 dt dt2 0 0  0  ;
+                          0 0  0   0 1  dt  0 0  0  ;
+                          0 0  0   0 0  1   0 0  0  ;
+                          0 0  0   0 0  0   1 dt dt2;
+                          0 0  0   0 0  0   0 1  dt ;
+                          0 0  0   0 0  0   0 0  1  ];
+            state = transition * obj.State;
         end
         function obj = GPSUpdate(obj, time, value)
             obj.Filter.MeasurementModel = obj.GPSModel;

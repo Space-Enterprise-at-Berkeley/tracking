@@ -4,64 +4,102 @@
 #include <FlexCAN_T4.h>
 
 namespace Rotator {
-    //false = ground control mode, true = flight mode
-    bool flightmode = false;
-    uint32_t printEncoder() {
-        Serial.println(HAL::getEncoderCount_0());
-        return 100 * 1000;
-    }
+    // State flags
+    bool tracking = false;
+    bool diagnostic = false;
+
+    // Motor state
+    float elvPos, elvVel, elvPower, aziPos, aziVel, aziPower;
     
-    void setTargetSetpoint(Comms::Packet packet, uint8_t ip){
-        Rotator::setTargetSetpoint(Comms::packetGetUint32(&packet, 0));
+    // Reference setpoints
+    float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
+
+    // Dynamics constants
+    float elvKp = 0.0004;
+    float elvKd = 0;
+    float elvMaxPower = 0.2;
+    float aziKp = 0.0004;
+    float aziKd = 0;
+    float aziMaxPower = 0.2;
+
+    // Tracking stuff
+    float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+    float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
+
+    // Timing for derivatives and tracking updates
+    uint32_t lastTrackingUpdate, lastMotorTime;
+    float elvLastPos, aziLastPos, motorDt;
+    
+    void setElvSetpoint(Comms::Packet packet, uint8_t ip){
+        tracking = false;
+        diagnostic = false;
+        // TODO: Unwrap an RTSetElevation packet and update the elvRefPos variable
     }
 
-    void setAzimuthSetpoint(Comms::Packet packet, uint8_t ip){
-        Rotator::setAzimuthSetpoint(Comms::packetGetUint32(&packet, 0));
+    void setAziSetpoint(Comms::Packet packet, uint8_t ip){
+        tracking = false;
+        diagnostic = false;
+        // TODO: Unwrap an RTSetAzimuth packet and update the aziRefPos variable
     }
 
     void runDiagnostic(Comms::Packet packet, uint8_t ip){
-        //preprogramed diagnostic movement
+        tracking = false;
+        diagnostic = true;
     }
 
+
+    void trackingUpdate(){
+        // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
+        // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
+        // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
+    }
+
+    void diagnosticUpdate(){
+        // TODO: preprogramed diagnostic movement, this will require some timing and probably an extra array or two
+    }
+
+    void sendTrackingState(){} // TODO: emit elvPos, elvRefPos, elvVel, elvRefVel, and their azimuth equivalents as an RTRotatorState packet
+
+    void sendRotatorState(){} // TODO: emit trackingState[] as an RTTrackingState packet
+
     void init(){
-        //set elevation 
-        Comms::registerCallback(102, setTargetSetpoint);
-        //set azimuth
-        Comms::registerCallback(103, setAzimuthSetpoint);
-        //runs preprogramed diagnostic
+        // TODO: make these packet spec'd
+        Comms::registerCallback(102, setElvSetpoint);
+        Comms::registerCallback(103, setAziSetpoint);
         Comms::registerCallback(104, runDiagnostic);
 
     }
 
-    void motorMovement(uint8_t state){
-        if(state==1);
-        //stop all motors and set to idle
-        else if(state==0);
-        //allow motor movement
-        else Serial.println("motor movement packet value error");
+    uint32_t updateAndMove(){
+        if (tracking) trackingUpdate();
+        else {
+            elvRefVel = 0;
+            aziRefVel = 0;
+            if (diagnostic) diagnosticUpdate();
+        }
 
+        motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
+
+        elvPos = HAL::getEncoderDegrees_0();
+        elvVel = (elvPos - elvLastPos) / motorDt; // Elevation angular velocity, degrees per second
+        float elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel); // PD control
+        HAL::sendPower_0(min(max(elvPower, -elvMaxPower), elvMaxPower)); // Clamp power to +-maxPower
+
+        float aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
+        float aziVel = (aziPos - aziLastPos) / motorDt;
+        float aziPower = aziKp * (aziRefPos - aziPos) + aziKd * (aziRefVel - aziVel);
+        HAL::sendPower_1(min(max(aziPower, -aziMaxPower), aziMaxPower));
+
+        lastMotorTime = micros();
+        elvLastPos = elvPos;
+        aziLastPos = aziPos;
+
+        sendRotatorState();
+
+        return 5 * 1000;
     }
 
-    void switchModes(uint8_t state){
-        if (state==1) flightmode = true;
-        else if (state==0) flightmode = false;
-        else Serial.println("switch mode packet value error");
-    }
-
-    //elevation tracking
-    int target_setpoint = 0;
-    void setTargetSetpoint(int sp){
-        target_setpoint = sp;
-        Serial.println(sp);
-    }
-    //azimuthal setpoint
-    void setAzimuthSetpoint(int sp){
-        //set azimuth setpoint
-    }
-    float speed = 0.0004f; // How fast the motor approaches the target
-    float max_speed = 0.3f;
-    float min_speed = speed * 10;
-    int tolerance = 5; // How close it needs to be to target before stopping
+    /*int tolerance = 5; // How close it needs to be to target before stopping
     void setSpeed(float s){
         speed = s;
     }
@@ -71,7 +109,7 @@ namespace Rotator {
     void setTolerance(int t){
         tolerance = t;
     }   
-    /* Aux func to print important info to the serial terminal */
+    // Aux func to print important info to the serial terminal
     void printInfoToSerial(int ticks, int dist, float power){
         Serial.print("ticks: ");
         Serial.print(ticks);
@@ -82,16 +120,16 @@ namespace Rotator {
         Serial.print("| power: ");
         Serial.println(power);
     }
-    /* Updates the motor's power based on the relative distance from target Setpoint */
-    /* int tolerance: how close ticks needs to be at the target */
+    // Updates the motor's power based on the relative distance from target Setpoint
+    // int tolerance: how close ticks needs to be at the target
     void moveToSetpoint(int tolerance){
-        /* Break early if within tolerance*/
+        // Break early if within tolerance
         if (abs(HAL::getEncoderCount_0() - target_setpoint) <= tolerance){
             HAL::stop_0();
             return;
         }
         int ticks = HAL::getEncoderCount_0();
-        /* This code ansymptotically approches the target */
+        // This code ansymptotically approches the target
         int dist = target_setpoint - ticks;
         float power = speed * (float) dist;
         // Clamp power to max speed and min speed
@@ -104,11 +142,11 @@ namespace Rotator {
         delay(5);
     }
     void update(){
-        /* call every step. 
-        You can do other stuff by adding other functions above*/
+        // call every step. 
+        // You can do other stuff by adding other functions above
         moveToSetpoint(tolerance);
     }
-    /* Uses a constnant magnitude power to approach target within a margin */
+    // Uses a constnant magnitude power to approach target within a margin
     void goToTick_0(int tick,int margin)
     {
         while(tick - HAL::getEncoderCount_0() > margin)
@@ -130,7 +168,7 @@ namespace Rotator {
         }
 
         HAL::stop_0();
-    }
+    }*/
 
     
 

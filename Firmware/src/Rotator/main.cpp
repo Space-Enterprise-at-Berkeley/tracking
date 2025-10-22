@@ -19,9 +19,9 @@ void func(Comms::Packet packet, uint8_t ip){
 }
 
 
-void switchModes(Comms::Packet packet, uint8_t ip){
+/*void switchModes(Comms::Packet packet, uint8_t ip){
   Rotator::switchModes(Comms::packetGetUint8(&packet, 0));
-}
+}*/
 
 
 
@@ -57,10 +57,10 @@ void setup() {
   // Comms::registerCallback(2, TVC::printEncoders);
 
   //for testing purposes
-  Comms::registerCallback(999, func);
+  // Comms::registerCallback(999, func);
 
   //takes 0 or 1
-  Comms::registerCallback(101, switchModes);
+  // Comms::registerCallback(101, switchModes);
 
 
 

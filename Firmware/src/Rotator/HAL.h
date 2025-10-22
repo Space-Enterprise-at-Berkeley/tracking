@@ -6,7 +6,7 @@
 #include "Common.h"
 #include "TeensyComms.h"
 #include "../proto/include/common.h"
-#include "../proto/include/Packet_EnableRotation.h"
+#include "../proto/include/Packet_RTEnableRotation.h"
 
 namespace HAL {
 
@@ -42,9 +42,11 @@ namespace HAL {
 
     void setEncoderCount_0(int i);
     int getEncoderCount_0();
+    float getEncoderDegrees_0();
 
     void setEncoderCount_1(int i);
     int getEncoderCount_1();
+    float getEncoderDegrees_1();
 
     uint32_t printEncoder_0();
     uint32_t printEncoder_1();

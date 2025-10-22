@@ -1,4 +1,4 @@
-sim_data = readmatrix("Clean sim 2.csv");
+sim_data = readmatrix("Clean Prospect sim.csv");
 samples = length(sim_data);
 time = sim_data(:,1);
 pos = sim_data(:,[7,8,2]);
@@ -12,7 +12,7 @@ vel(:,1:2) = vel(:,1) .* [cos(diffvel(:,3)), sin(diffvel(:,3))];
 % Generate GPS packets
 FARcoords = [35.3472294, -117.8108024, 628];
 delay = 1;
-stdev = 5;
+stdev = 15;
 gps = gpsSensor('ReferenceFrame', 'ENU', 'ReferenceLocation',FARcoords,'HorizontalPositionAccuracy',stdev,'VerticalPositionAccuracy',stdev,'VelocityAccuracy',stdev,'DecayFactor',0.95,'SampleRate',1/delay);
 
 % imuSensor('ReferenceFrame','ENU','Accelerometer',)
@@ -56,10 +56,10 @@ for i = 2:samples
         % correct(filter, lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
         GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
     end
-    if i < 100
-        %accelUpdate(tracker, time(i), [0;0;250]);
+    if i < 300 && mod(i,3) == 1
+        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
     end
-    disp(tracker.Time);
+    %disp(tracker.Time);
     states(:, i) = extrapolate(tracker, time(i));
 end
 
@@ -73,6 +73,10 @@ filterangle = angle(states([1,4,7], :)' - GSpos);
 angerror = acosd(sind(trueangle(:,3)) .* sind(filterangle(:,3)) + cosd(trueangle(:,3)) .* cosd(filterangle(:,3)) .* cosd(trueangle(:,2)-filterangle(:,2)));
 
 figure
-plot(time(1:300), angerror(1:300))
+% plot(time, angerror)
+plot(time(1:300), angerror(1:300), angvel)
+xlabel("Time (s)")
+ylabel("Angular error (deg)")
+
 
 angvel = (acosd(sind(trueangle(2:end,3)) .* sind(trueangle(1:end-1,3)) + cosd(trueangle(2:end,3)) .* cosd(trueangle(1:end-1,3)) .* cosd(trueangle(2:end,2)-trueangle(1:end-1,2))))./(time(2:end)-time(1:end-1));
