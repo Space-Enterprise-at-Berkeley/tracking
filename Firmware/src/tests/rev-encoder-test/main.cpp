@@ -1,9 +1,4 @@
 #include <Arduino.h>
-/* Encoder Library - Basic Example
- * http://www.pjrc.com/teensy/td_libs_Encoder.html
- *
- * This example code is in the public domain.
- */
 
 uint8_t pwm_0 = 11;
 uint8_t pwm_1 = 14;
@@ -32,8 +27,13 @@ void setup() {
   }
 }
 
-void loop () {
-}
+void loop () {}
+
+/* Encoder Library - Basic Example
+ * http://www.pjrc.com/teensy/td_libs_Encoder.html
+ *
+ * This example code is in the public domain.
+ */
 /*#include <Encoder.h>
 #define ENC_PIN1 5
 #define ENC_PIN2 6
