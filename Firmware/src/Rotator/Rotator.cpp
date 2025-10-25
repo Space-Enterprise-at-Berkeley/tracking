@@ -63,7 +63,20 @@ namespace Rotator {
     }
 
     void diagnosticUpdate(){
-        // TODO: preprogramed diagnostic movement, this will require some timing and probably an extra array or two
+        // Check if enough time has passed to move to the next diagnostic position
+        if ((micros() - lastDiagnosticTime) >= diagnosticDelay) {
+            // Move to next diagnostic step
+            if (diagnosticStep < sizeof(elvSequence)/sizeof(float)) {
+                elvRefPos = elvSequence[diagnosticStep];
+                aziRefPos = aziSequence[diagnosticStep];
+                diagnosticStep++;
+            } else {
+                // End of sequence, stop diagnostic mode
+                stopDiagnostic();
+                return;
+            }
+            lastDiagnosticTime = micros();
+        }
     }
 
     void setElvSetpoint(Comms::Packet packet, uint8_t ip){
