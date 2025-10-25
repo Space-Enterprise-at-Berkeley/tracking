@@ -147,11 +147,13 @@ namespace Rotator {
     }
 
     uint32_t updateAndMove(){
-        if (tracking) trackingUpdate();
-        else {
+        if (tracking) { // tracking mode
+            trackingUpdate()
+        } else if (diagnostic) { // diagnostic mode
+            diagnosticUpdate();
+        } else { // idle mode
             elvRefVel = 0;
             aziRefVel = 0;
-            if (diagnostic) diagnosticUpdate();
         }
 
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
