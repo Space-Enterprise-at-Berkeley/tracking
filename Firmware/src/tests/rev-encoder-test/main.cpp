@@ -1,11 +1,40 @@
-
+#include <Arduino.h>
 /* Encoder Library - Basic Example
  * http://www.pjrc.com/teensy/td_libs_Encoder.html
  *
  * This example code is in the public domain.
  */
 
-#include <Encoder.h>
+uint8_t pwm_0 = 11;
+uint8_t pwm_1 = 14;
+
+int lastPulse_0;
+long pulseStart_0;
+
+void monitor_0() {
+  if (digitalRead(pwm_0)) {
+    pulseStart_0 = micros();
+  } else {
+    lastPulse_0 = micros() - pulseStart_0;
+  }
+}
+
+void setup() {
+  //lastPulse_0 = 0;
+  pulseStart_0 = micros();
+
+  attachInterrupt(pwm_0, monitor_0, CHANGE);
+  //lastPulse_0 = analogRead(pwm_0);
+  while (1) {
+    Serial.println(lastPulse_0);
+  //lastPulse_0 = 0;
+    delayMicroseconds(10000);
+  }
+}
+
+void loop () {
+}
+/*#include <Encoder.h>
 #define ENC_PIN1 5
 #define ENC_PIN2 6
 
@@ -30,4 +59,4 @@ void loop() {
     oldPosition = newPosition;
     Serial.println(newPosition);
   }
-}
+}*/
