@@ -242,6 +242,7 @@ namespace HAL {
     }
 
     float readDegrees(uint8_t pin) {
+        return 0;
         // TODO: use interrupts to read the pulse width coming from the TBE pin and convert to a degree measurement
         // Look in tests/rev-encoder-test for an example of how to do this, you will need to define a new function
         // 1 microsecond = 0 degrees, 1024 microseconds = 360 degrees
