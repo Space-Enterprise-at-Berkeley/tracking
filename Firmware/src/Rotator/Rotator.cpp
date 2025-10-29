@@ -176,18 +176,13 @@ namespace Rotator {
     }
 
     uint32_t updateAndMove(){
-        Serial.println(diagnostic);
-        if (tracking) {
-            Serial.println("tracking");
-            trackingUpdate();
-        }
-        else {
+        if (tracking) { // tracking mode
+            trackingUpdate()
+        } else if (diagnostic) { // diagnostic mode
+            diagnosticUpdate();
+        } else { // idle mode
             elvRefVel = 0;
             aziRefVel = 0;
-            if (diagnostic) {
-                Serial.println("diagnostic");
-                diagnosticUpdate();
-            }
         }
         Serial.println("done with updates");
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
