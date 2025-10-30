@@ -87,9 +87,6 @@ namespace Rotator {
     }
 
     void setElvSetpoint(Comms::Packet packet, uint8_t ip){
-        Serial.println("Elevation packet");
-        //Serial.println(ip);
-        Serial.println("Sus");
         stopTracking();
         stopDiagnostic();
         // TODO: Unwrap an RTSetElevation packet and update the elvRefPos variable
@@ -100,9 +97,6 @@ namespace Rotator {
     }
 
     void setAziSetpoint(Comms::Packet packet, uint8_t ip){
-        Serial.println("Azimuth packet");
-        Serial.println(ip);
-        Serial.println("Sus");
         stopTracking();
         stopDiagnostic();
         // TODO: Unwrap an RTSetAzimuth packet and update the aziRefPos variable
@@ -113,10 +107,7 @@ namespace Rotator {
     }
 
     void runDiagnostic(Comms::Packet packet, uint8_t ip){
-        //Serial.println(ip);
-        Serial.println("Run diagnostic packet");
-        Serial.println(ip);
-        Serial.println("Sus");
+        Serial.println("Beginning diagnostic");
         stopTracking();
         startDiagnostic();
     }
@@ -177,14 +168,18 @@ namespace Rotator {
 
     uint32_t updateAndMove(){
         if (tracking) { // tracking mode
-            trackingUpdate()
+            trackingUpdate();
         } else if (diagnostic) { // diagnostic mode
             diagnosticUpdate();
         } else { // idle mode
             elvRefVel = 0;
             aziRefVel = 0;
         }
-        Serial.println("done with updates");
+        // Serial.println("done with updates");
+        Serial.print("Elevation: ");
+        Serial.print(elvRefPos);
+        Serial.print(" Azimuth: ");
+        Serial.println(aziRefPos);
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
 
         elvPos = HAL::getEncoderDegrees_0();
@@ -203,7 +198,7 @@ namespace Rotator {
 
         //sendRotatorState();
 
-        return 1000 * 1000;
+        return 100 * 1000;
     }
 
 }

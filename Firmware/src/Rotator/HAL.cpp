@@ -22,6 +22,7 @@ namespace HAL {
     void motorMovement(Comms::Packet packet, uint8_t ip){
         PacketRTEnableRotation parsed_packet = PacketRTEnableRotation::fromRawPacket(&packet);
         allowMotorMovement = parsed_packet.m_Action;
+        Serial.println("Motor enable set to: " + allowMotorMovement);
     }
 
     
