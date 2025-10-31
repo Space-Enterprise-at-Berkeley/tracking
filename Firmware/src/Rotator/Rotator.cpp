@@ -47,13 +47,7 @@ namespace Rotator {
 
     }
 
-    void runDiagnostic(Comms::Packet packet, uint8_t ip){
-        tracking = false;
-        diagnostic = true;
-        //run the actual diagnostic
-        diagnosticUpdate();
 
-    }
 
 
     void trackingUpdate(){
@@ -65,6 +59,14 @@ namespace Rotator {
 
     void diagnosticUpdate(){
         // TODO: preprogramed diagnostic movement, this will require some timing and probably an extra array or two
+    }
+
+    void runDiagnostic(Comms::Packet packet, uint8_t ip){
+        tracking = false;
+        diagnostic = true;
+        //run the actual diagnostic
+        diagnosticUpdate();
+
     }
 
     void sendTrackingState(){
@@ -109,7 +111,6 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTSetElevation, setElvSetpoint);
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
-
     }
 
     uint32_t updateAndMove(){
