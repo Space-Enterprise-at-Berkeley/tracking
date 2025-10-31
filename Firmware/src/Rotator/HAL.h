@@ -19,6 +19,7 @@ namespace HAL {
     const uint8_t encC_0 = 8; //encoder C blue
 
     const uint8_t tbe_0 = 11; //Through Bore Encoder PWM Input pin Elevation
+    const uint8_t tbe_1 = 14; //Through Bore Encoder PWM Input pin Azimuth
 
     const uint8_t pwm_1 = 37; //sparkmax1 Azimuth
 
@@ -26,7 +27,8 @@ namespace HAL {
     const uint8_t encB_1 = 17; //encoder B red 
     const uint8_t encC_1 = 22; //encoder C blue
 
-    const uint8_t tbe_1 = 14; //Through Bore Encoder PWM Input pin Azimuth
+    
+
 
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 
@@ -58,4 +60,12 @@ namespace HAL {
 
     void stop_0();
     void stop_1();
+
+    void monitor_TBE_0();
+    void monitor_TBE_1();
+
+    float readDegrees(long raw_pulse);
+    float getEncoderDegrees_0();
+    float getEncoderDegrees_1();
+
 }

@@ -8,6 +8,12 @@ namespace HAL {
     volatile uint8_t curEncState_0 = 0;
     volatile uint8_t curEncState_1 = 0;
 
+    volatile long pulseStart_0 = 0; //Through Bore Encoder Elevation Pulse Start
+    volatile long pulseWidth_0 = 0; //Through Bore Encoder Elevation Pulse Width
+
+    volatile long pulseStart_1 = 0; //Through Bore Encoder Azimuth Pulse Start
+    volatile long pulseWidth_1 = 0; //Through Bore Encoder Azimuth Pulse Width
+
     bool allowMotorMovement = false;
 
 
@@ -163,6 +169,9 @@ namespace HAL {
         pinMode(encB_1, INPUT);
         pinMode(encC_1, INPUT);
 
+        pinMode(tbe_0, INPUT);
+        pinMode(tbe_1, INPUT);
+
         attachInterrupt(encA_0, handleEncoderChange_0, CHANGE);
         attachInterrupt(encB_0, handleEncoderChange_0, CHANGE);
         attachInterrupt(encC_0, handleEncoderChange_0, CHANGE);
@@ -170,6 +179,11 @@ namespace HAL {
         attachInterrupt(encA_1, handleEncoderChange_1, CHANGE);
         attachInterrupt(encB_1, handleEncoderChange_1, CHANGE);
         attachInterrupt(encC_1, handleEncoderChange_1, CHANGE);
+
+        attachInterrupt(tbe_0, monitor_TBE_0, CHANGE);
+        attachInterrupt(tbe_1, monitor_TBE_1, CHANGE);
+
+
 
         #ifndef DISABLE_RELATIVE_ENCODER_CHECK
         do {
@@ -241,19 +255,43 @@ namespace HAL {
     void stop_1() {
         sendPower_1(0);
     }
+    const float PULSE_MAX = 1024;
+    const float PULSE_MIN = 1;
 
-    float readDegrees(uint8_t pin) {
-        return 0;
+    void monitor_TBE_0(){
+        if(digitalRead(HAL::tbe_0) == HIGH){
+            pulseStart_0 = micros();
+        }
+        else{
+            pulseWidth_0 = micros() - pulseStart_0;
+        }
+    }
+
+    void monitor_TBE_1(){
+        if(digitalRead(HAL::tbe_1) == HIGH){
+            pulseStart_1 = micros();
+        }
+        else{
+            pulseWidth_1 = micros() - pulseStart_1;
+        }
+    }
+
+    float readDegrees(long raw_pulse) {
+        long relative_pulse = raw_pulse - PULSE_MIN;
+        if(relative_pulse < 0) relative_pulse = 0;
+        if(relative_pulse > 1023) relative_pulse = 1023;
+        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
         // TODO: use interrupts to read the pulse width coming from the TBE pin and convert to a degree measurement
         // Look in tests/rev-encoder-test for an example of how to do this, you will need to define a new function
         // 1 microsecond = 0 degrees, 1024 microseconds = 360 degrees
     }
 
     float getEncoderDegrees_0() {
-        return readDegrees(tbe_0);
+        return readDegrees(pulseWidth_0);
     }
     
     float getEncoderDegrees_1() {
-        return readDegrees(tbe_1);
+        return readDegrees(pulseWidth_1);
     }
+
 }
