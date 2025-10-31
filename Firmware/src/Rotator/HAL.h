@@ -12,21 +12,21 @@ namespace HAL {
 
     //check pinouts!!!!
 
-    const int x_pwm = 28; //sparkmax0 Azimuth
+    const uint8_t pwm_0 = 28; //sparkmax0 Elevation
 
-    const int encA_0 = 7; //encoder A green
-    const int encB_0 = 3; //encoder B red 
-    const int encC_0 = 8; //encoder C blue
+    const uint8_t encA_0 = 7; //encoder A green
+    const uint8_t encB_0 = 3; //encoder B red 
+    const uint8_t encC_0 = 8; //encoder C blue
 
-    const int TBE_0 = 14; //Through Bore Encoder PWM Input pin Azimuth
+    const uint8_t tbe_0 = 11; //Through Bore Encoder PWM Input pin Elevation
 
-    const int y_pwm = 37; //sparkmax1 Elevation
+    const uint8_t pwm_1 = 37; //sparkmax1 Azimuth
 
-    const int encA_1 = 21; //encoder A green
-    const int encB_1 = 17; //encoder B red 
-    const int encC_1 = 22; //encoder C blue
+    const uint8_t encA_1 = 21; //encoder A green
+    const uint8_t encB_1 = 17; //encoder B red 
+    const uint8_t encC_1 = 22; //encoder C blue
 
-    const int TBE_1 = 11; //Through Bore Encoder PWM Input pin Elevation
+    const uint8_t tbe_1 = 14; //Through Bore Encoder PWM Input pin Azimuth
 
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 

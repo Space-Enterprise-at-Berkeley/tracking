@@ -28,6 +28,8 @@ namespace Comms {
   void init(int cs)
   {
     Serial.begin(921600);
+    callbackMap.clear();
+    /*
     Ethernet.init(cs);
     Ethernet.begin((uint8_t *)mac, ip);
 
@@ -41,7 +43,7 @@ namespace Comms {
 
     Udp.beginMulticast(mcast, mcast_port);
     Udp.begin(bcast_port);
-    Udp.beginPacket(bcast, bcast_port);
+    Udp.beginPacket(bcast, bcast_port);*/
     
     // if (multicast) {
     //   Udp.beginMulticast(multiGround, port);
@@ -78,16 +80,18 @@ namespace Comms {
   void registerCallback(uint8_t id, commFunction function)
   {
     callbackMap.insert(std::pair<int, commFunction>(id, function));
+    Serial.println(callbackMap.size());
   }
 
   /**
    * @brief Checks checksum of packet and tries to call the associated callback function.
    *
-   * @param packet Packet to be processed.
+   * @param packet Packet o be processed.
    * @param ip End byte in IP address of sender (255 if usb packet)
    */
   void evokeCallbackFunction(Packet *packet, uint8_t ip)
   {
+    Serial.println("Evoking function");
     uint16_t checksum = *(uint16_t *)&packet->checksum;
     if (checksum == computePacketChecksum(packet))
     {
@@ -100,6 +104,7 @@ namespace Comms {
       // try to access function, checking for out of range exception
       if (callbackMap.count(packet->id))
       {
+        Serial.println("Calling");
         callbackMap.at(packet->id)(*packet, ip);
       }
       else
@@ -130,9 +135,9 @@ namespace Comms {
         evokeCallbackFunction(packet, Udp.remoteIP()[3]);
       }
     }*/
-    //Serial.println("Checking availability");
     if (Serial.available())
       {
+        Serial.println("Serial available");
         //That was for reading full formed packets from the USB serial port
         /*
         int cnt = 0;

@@ -22,6 +22,7 @@ namespace HAL {
     void motorMovement(Comms::Packet packet, uint8_t ip){
         PacketRTEnableRotation parsed_packet = PacketRTEnableRotation::fromRawPacket(&packet);
         allowMotorMovement = parsed_packet.m_Action;
+        Serial.println("Motor enable set to: " + allowMotorMovement);
     }
 
     
@@ -54,24 +55,24 @@ namespace HAL {
                 delay(10);
             }
         }
-        pinMode(x_pwm, OUTPUT); 
-        pinMode(y_pwm, OUTPUT);
+        pinMode(pwm_0, OUTPUT); 
+        pinMode(pwm_1, OUTPUT);
 
         //ledcSetup(0, 200, 12);
-        //ledcAttachPin(x_pwm, 0);
+        //ledcAttachPin(pwm_0, 0);
         //ledcWrite(0, 1229);
 
         analogWriteResolution(12);
-        analogWriteFrequency(x_pwm, 200);
-        analogWrite(x_pwm, 1229);
+        analogWriteFrequency(pwm_0, 200);
+        analogWrite(pwm_0, 1229);
 
         //ledcSetup(1, 200, 12);
-        //ledcAttachPin(y_pwm, 1);
+        //ledcAttachPin(pwm_1, 1);
         //ledcWrite(1, 1229);
         //analogWriteResolution(12);
 
-        analogWriteFrequency(y_pwm, 200);
-        analogWrite(y_pwm, 1229);
+        analogWriteFrequency(pwm_1, 200);
+        analogWrite(pwm_1, 1229);
 
 
         setupEncoders();
@@ -170,7 +171,7 @@ namespace HAL {
         attachInterrupt(encB_1, handleEncoderChange_1, CHANGE);
         attachInterrupt(encC_1, handleEncoderChange_1, CHANGE);
 
-        #ifndef DISABLE_ENCODER_CHECK
+        #ifndef DISABLE_RELATIVE_ENCODER_CHECK
         do {
             curEncState_0 = digitalRead(encA_0) | (digitalRead(encB_0) << 1) | (digitalRead(encC_0) << 2);
 
@@ -194,7 +195,7 @@ namespace HAL {
         setEncoderCount_1(0);
     }
 
-    void sendPwm(int pin, float power){
+    void sendPwm(uint8_t pin, float power){
         // Serial.println(power);
 
         float deadband = 0.01;
@@ -204,17 +205,15 @@ namespace HAL {
         int maximum = (2000*4096)/5000;
         int minimum = (1000*4096)/5000;
 
-        if(power < -1 || power > 1)
-        {
-            Serial.printf("Invalid power input");
-            return;
-        }
+        if (power < -1) power = -1;
+        if (power > 1) power = 1;
+        if (!allowMotorMovement) power = 0;
 
         int pulse = neutral;
 
-        if(power > 0)
+        if (power > 0)
             pulse = upper_neutral + (maximum - upper_neutral) * power;
-        else if(power < 0)
+        else if (power < 0)
             pulse = lower_neutral + (lower_neutral - minimum) * power;
         
         analogWrite(pin, pulse);
@@ -223,16 +222,16 @@ namespace HAL {
 
     void sendPower_0(float power){
         if ((power > 0 && encoderTicks_0 > maxTicks_0) || (power < 0 && encoderTicks_0 < minTicks_0)) {
-            sendPwm(x_pwm, 0);
+            sendPwm(pwm_0, 0);
         } else if ((power > 0 && encoderTicks_0 > maxTicks_0 - 200) || (power < 0 && encoderTicks_0 < minTicks_0 + 200)) {
-            sendPwm(x_pwm, max(min(power, 0.025), -0.025));
+            sendPwm(pwm_0, max(min(power, 0.025), -0.025));
         } else {
-            sendPwm(x_pwm, power);
+            sendPwm(pwm_0, power);
         }
     }
 
     void sendPower_1(float power){
-        sendPwm(y_pwm, power);
+        sendPwm(pwm_1, power);
     }
 
     void stop_0() {
@@ -241,5 +240,20 @@ namespace HAL {
 
     void stop_1() {
         sendPower_1(0);
+    }
+
+    float readDegrees(uint8_t pin) {
+        return 0;
+        // TODO: use interrupts to read the pulse width coming from the TBE pin and convert to a degree measurement
+        // Look in tests/rev-encoder-test for an example of how to do this, you will need to define a new function
+        // 1 microsecond = 0 degrees, 1024 microseconds = 360 degrees
+    }
+
+    float getEncoderDegrees_0() {
+        return readDegrees(tbe_0);
+    }
+    
+    float getEncoderDegrees_1() {
+        return readDegrees(tbe_1);
     }
 }

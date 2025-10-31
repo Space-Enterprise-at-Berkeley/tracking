@@ -17,9 +17,6 @@
 
 namespace Rotator {
     void init();
-    void deinit();
-    void goToTick_0(int tick,int margin);
-    void setTargetSetpoint(int sp);
-    void setAzimuthSetpoint(int sp);
+    uint32_t updateAndMove();
 
 }
