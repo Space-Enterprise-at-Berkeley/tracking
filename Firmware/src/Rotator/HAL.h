@@ -64,8 +64,8 @@ namespace HAL {
     void monitor_TBE_0();
     void monitor_TBE_1();
 
-    float readDegrees(long raw_pulse);
-    float getEncoderDegrees_0();
-    float getEncoderDegrees_1();
+    float readDegrees(long raw_pulse,float offset_degrees);
+    float getEncoderDegrees_0(float offset_degrees);
+    float getEncoderDegrees_1(float offset_degrees);
 
 }
