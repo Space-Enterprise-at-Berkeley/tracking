@@ -7,7 +7,7 @@
 
 
 Task taskTable[] = {
-  {HAL::printEncoder_0, 0, true},
+  {Rotator::updateAndMove, 0, true},
 };
 
 #define TASK_COUNT (sizeof(taskTable) / sizeof (struct Task))
@@ -32,7 +32,7 @@ void setup() {
   Serial.begin(115200);
   //HAL::init();
   Serial.printf("hii!!\n");
-  //Comms::init()
+  Comms::init();
   Serial.printf("setup comms!\n");
   //HAL::setupEncoders();
   //HAL::resetEncoders();

@@ -54,10 +54,10 @@ for i = 2:samples
     % predict(filter, time(i)-time(i-1));
     if ismember(i, packet_times)
         % correct(filter, lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
-        GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
+        GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "ellipsoid"));
     end
-    if i < 300 && mod(i,3) == 1
-        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
+    if i > 10 && mod(i,3) == 1
+        %accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
     end
     %disp(tracker.Time);
     states(:, i) = extrapolate(tracker, time(i));

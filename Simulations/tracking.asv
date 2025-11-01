@@ -56,8 +56,8 @@ for i = 2:samples
         % correct(filter, lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
         GPSUpdate(tracker, time(i), lla2enu(gps(pos(i, :), vel(i, :)), FARcoords, "flat"));
     end
-    if i < 300 && mod(i,3) == 1
-        % accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
+    if i >  && mod(i,3) == 1
+        accelUpdate(tracker, time(i), [0;0;sim_data(i,4)*(1+randn/5)]);
     end
     %disp(tracker.Time);
     states(:, i) = extrapolate(tracker, time(i));
@@ -74,7 +74,7 @@ angerror = acosd(sind(trueangle(:,3)) .* sind(filterangle(:,3)) + cosd(trueangle
 
 figure
 % plot(time, angerror)
-plot(time(1:300), angerror(1:300), angvel)
+plot(time(1:300), angerror(1:300), time(1:300), trueangle(1:300, 3), time(1:300), filterangle(1:300, 3))
 xlabel("Time (s)")
 ylabel("Angular error (deg)")
 

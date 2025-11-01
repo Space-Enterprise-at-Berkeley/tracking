@@ -8,7 +8,7 @@ classdef CombinedTracker < handle
         GPSNoise = [5 0 0; 0 5 0; 0 0 5]
 
         AccelModel = [0 0 1 0 0 0 0 0 0; 0 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 0 1]
-        AccelNoise = [1 0 0; 0 1 0; 0 0 1]
+        AccelNoise = [5 0 0; 0 5 0; 0 0 5]
     end
     methods
         % function obj = CombinedTracker()

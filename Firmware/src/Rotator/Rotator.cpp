@@ -35,7 +35,7 @@ namespace Rotator {
     float elvSequence[] = {30, 60, 90, 120, 150, 30, 30,  30,  30,   30, 30, 90, 150, 30};
     float aziSequence[] = {0,   0,  0,   0,   0,  0, 90, 180, -90, -180,  0, 90, -90,  0};
     uint32_t lastDiagnosticTime;
-    int diagnosticDelay = 1000 * 1000;
+    uint32_t diagnosticDelay = 1000 * 1000;
 
     void startTracking(){
         tracking = true;
@@ -53,16 +53,23 @@ namespace Rotator {
     }
 
     void startDiagnostic(){
+        Serial.println("Starting diagnostic");
         diagnostic = true;
         diagnosticStep = 0;
         lastDiagnosticTime = micros();
     }
 
     void stopDiagnostic(){
+        Serial.println("Stopping diagnostic");
         diagnostic = false;
     }
 
     void diagnosticUpdate(){
+        Serial.println("Updating diagnostic");
+        // Serial.print("Diagnostic times: " + micros());
+        // Serial.print(" " + lastDiagnosticTime);
+        // Serial.print(" " + micros() - lastDiagnosticTime);
+        // Serial.println(" " + diagnosticDelay);
         // Check if enough time has passed to move to the next diagnostic position
         if ((micros() - lastDiagnosticTime) >= diagnosticDelay) {
             // Move to next diagnostic step
@@ -85,6 +92,8 @@ namespace Rotator {
         // TODO: Unwrap an RTSetElevation packet and update the elvRefPos variable
         PacketRTSetElevation parsed_packet = PacketRTSetElevation::fromRawPacket(&packet);
         elvRefPos = parsed_packet.m_Degrees;
+        Serial.print("Set elevation setpoint to ");
+        Serial.println(elvRefPos);
     }
 
     void setAziSetpoint(Comms::Packet packet, uint8_t ip){
@@ -93,15 +102,17 @@ namespace Rotator {
         // TODO: Unwrap an RTSetAzimuth packet and update the aziRefPos variable
         PacketRTSetAzimuth parsed_packet = PacketRTSetAzimuth::fromRawPacket(&packet);
         aziRefPos = parsed_packet.m_Degrees;
-
+        Serial.print("Set azimuth setpoint to ");
+        Serial.println(aziRefPos);
     }
 
     void runDiagnostic(Comms::Packet packet, uint8_t ip){
+        Serial.println("Beginning diagnostic");
         stopTracking();
         startDiagnostic();
     }
 
-    void sendTrackingState(){
+    void sendRotatorState(){
         //PacketRTRotatorState newpacket = PacketRTRotatorState::writeRawPacket();
         //make packet
         PacketRTRotatorState state = PacketRTRotatorState::Builder()
@@ -118,9 +129,15 @@ namespace Rotator {
         state.writeRawPacket(&newpacket);
         //emit packet 
         Comms::emitPacketToGS(&newpacket);
+        float rotatorState[] = {elvRefPos, aziRefPos};
+        for (int i = 0; i < 2; i++) {
+            Serial.print(rotatorState[i]);
+            Serial.print(" ");
+        }
+        Serial.println();
     } // TODO: emit elvPos, elvRefPos, elvVel, elvRefVel, and their azimuth equivalents as an RTRotatorState packet
 
-    void sendRotatorState(){
+    void sendTrackingState(){
         PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
             .withXPos(trackingState[0])
             .withXVel(trackingState[1])
@@ -135,10 +152,13 @@ namespace Rotator {
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
         //emit packet 
-        Comms::emitPacketToGS(&newpacket);
+        //Comms::emitPacketToGS(&newpacket);
     } // TODO: emit trackingState[] as an RTTrackingState packet
 
     void init(){
+        tracking = false;
+        diagnostic = false;
+
         // TODO: make these packet spec'd
         Comms::registerCallback(PACKET_ID_RTSetElevation, setElvSetpoint);
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
@@ -148,14 +168,18 @@ namespace Rotator {
 
     uint32_t updateAndMove(){
         if (tracking) { // tracking mode
-            trackingUpdate()
+            trackingUpdate();
         } else if (diagnostic) { // diagnostic mode
             diagnosticUpdate();
         } else { // idle mode
             elvRefVel = 0;
             aziRefVel = 0;
         }
-
+        // Serial.println("done with updates");
+        Serial.print("Elevation: ");
+        Serial.print(elvRefPos);
+        Serial.print(" Azimuth: ");
+        Serial.println(aziRefPos);
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
 
         elvPos = HAL::getEncoderDegrees_0();
@@ -173,7 +197,7 @@ namespace Rotator {
 
         sendRotatorState();
 
-        return 5 * 1000;
+        return 100 * 1000;
     }
 
 
