@@ -17,7 +17,18 @@ namespace Comms {
   IPAddress bcast(10, 0, 0, 255);
   uint16_t bcast_port = 42099;
 
-  byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, ID};
+  // byte mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, ID};
+  // https://github.com/Space-Enterprise-at-Berkeley/E2-Firmware/blob/main/src/TeensyComms.h
+  const uint32_t __m1 = HW_OCOTP_MAC1;
+  const uint32_t __m2 = HW_OCOTP_MAC0;
+  const byte mac[] = {
+      (uint8_t)(__m1 >> 8),
+      (uint8_t)(__m1 >> 0),
+      (uint8_t)(__m2 >> 24),
+      (uint8_t)(__m2 >> 16),
+      (uint8_t)(__m2 >> 8),
+      (uint8_t)(__m2 >> 0),
+  };
   
   // IPAddress groundStations[groundStationCount] = {IPAddress(10, 0, 0, GROUND1)};
   // int ports[groundStationCount] = {42069};
@@ -29,7 +40,7 @@ namespace Comms {
   {
     Serial.begin(921600);
     callbackMap.clear();
-    /*
+    
     Ethernet.init(cs);
     Ethernet.begin((uint8_t *)mac, ip);
 
@@ -43,7 +54,7 @@ namespace Comms {
 
     Udp.beginMulticast(mcast, mcast_port);
     Udp.begin(bcast_port);
-    Udp.beginPacket(bcast, bcast_port);*/
+    Udp.beginPacket(bcast, bcast_port);
     
     // if (multicast) {
     //   Udp.beginMulticast(multiGround, port);
@@ -91,7 +102,6 @@ namespace Comms {
    */
   void evokeCallbackFunction(Packet *packet, uint8_t ip)
   {
-    Serial.println("Evoking function");
     uint16_t checksum = *(uint16_t *)&packet->checksum;
     if (checksum == computePacketChecksum(packet))
     {
@@ -104,7 +114,6 @@ namespace Comms {
       // try to access function, checking for out of range exception
       if (callbackMap.count(packet->id))
       {
-        Serial.println("Calling");
         callbackMap.at(packet->id)(*packet, ip);
       }
       else
@@ -305,7 +314,7 @@ namespace Comms {
 
     // Send over UDP
     // Udp.resetSendOffset();
-    Udp.beginPacket(mcast, bcast_port);
+    Udp.beginPacket(mcast, mcast_port);
     Udp.write(packet->id);
     Udp.write(packet->len);
     Udp.write(packet->timestamp, 4);

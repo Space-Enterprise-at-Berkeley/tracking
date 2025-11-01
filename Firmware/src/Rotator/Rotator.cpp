@@ -128,7 +128,7 @@ namespace Rotator {
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
         //emit packet 
-        //Comms::emitPacketToGS(&newpacket);
+        Comms::emitPacketToGS(&newpacket);
         float rotatorState[] = {elvRefPos, aziRefPos};
         for (int i = 0; i < 2; i++) {
             Serial.print(rotatorState[i]);
@@ -196,7 +196,7 @@ namespace Rotator {
         elvLastPos = elvPos;
         aziLastPos = aziPos;
 
-        //sendRotatorState();
+        sendRotatorState();
 
         return 100 * 1000;
     }
