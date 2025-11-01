@@ -184,6 +184,7 @@ namespace Rotator {
 
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = (elvPos - elvLastPos) / motorDt; // Elevation bbelvVel); // PD control
+        float elvPower = elvKp * check_wraparound(elvRefPos, elvPos) + elvKd * (elvRefVel - elvVel)
         HAL::sendPower_0(min(max(elvPower, -elvMaxPower), elvMaxPower)); // Clamp power to +-maxPower
 
         float aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
