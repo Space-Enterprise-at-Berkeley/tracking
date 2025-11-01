@@ -184,12 +184,12 @@ namespace Rotator {
 
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = (elvPos - elvLastPos) / motorDt; // Elevation bbelvVel); // PD control
-        float elvPower = elvKp * check_wraparound(elvRefPos, elvPos) + elvKd * (elvRefVel - elvVel)
+        float elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel)
         HAL::sendPower_0(min(max(elvPower, -elvMaxPower), elvMaxPower)); // Clamp power to +-maxPower
 
         float aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
         float aziVel = (aziPos - aziLastPos) / motorDt;
-        float aziPower = aziKp * (aziRefPos - aziPos) + aziKd * (aziRefVel - aziVel);
+        float aziPower = aziKp * check_wraparound(aziRefPos, aziPos) + aziKd * (aziRefVel - aziVel);
         HAL::sendPower_1(min(max(aziPower, -aziMaxPower), aziMaxPower));
 
         lastMotorTime = micros();
