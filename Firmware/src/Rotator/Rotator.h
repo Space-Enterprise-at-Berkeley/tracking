@@ -10,10 +10,7 @@
 #include "../proto/include/Packet_RTSetAzimuth.h"
 #include "../proto/include/Packet_RTFlightTracking.h"
 #include "../proto/include/Packet_RTRunDiagnostic.h"
-
-
-
-
+#include "../proto/include/Packet_RTEnableFlightTracking.h"
 
 namespace Rotator {
     void init();

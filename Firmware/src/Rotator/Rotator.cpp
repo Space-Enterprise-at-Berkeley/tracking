@@ -112,6 +112,18 @@ namespace Rotator {
         startDiagnostic();
     }
 
+    void switchTracking(Comms::Packet packet, uint8_t ip){
+        stopDiagnostic();
+        PacketRTEnableFlightTracking parsed_packet = PacketRTEnableFlightTracking::fromRawPacket(&packet);
+        if (parsed_packet.m_Action) {
+            startTracking();
+            Serial.println("Starting tracking");
+        } else {
+            stopTracking();
+            Serial.println("Stopping tracking");
+        }
+    }
+
     void sendRotatorState(){
         //PacketRTRotatorState newpacket = PacketRTRotatorState::writeRawPacket();
         //make packet
@@ -159,11 +171,10 @@ namespace Rotator {
         tracking = false;
         diagnostic = false;
 
-        // TODO: make these packet spec'd
         Comms::registerCallback(PACKET_ID_RTSetElevation, setElvSetpoint);
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
-
+        Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
     }
 
     uint32_t updateAndMove(){
