@@ -194,13 +194,13 @@ namespace Rotator {
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
 
         elvPos = HAL::getEncoderDegrees_0();
-        elvVel = (elvPos - elvLastPos) / motorDt; // Elevation angular velocity, degrees per second
-        float elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel); // PD control
+        elvVel = (elvPos - elvLastPos) / motorDt; // Elevation bbelvVel); // PD control
+        float elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel)
         HAL::sendPower_0(min(max(elvPower, -elvMaxPower), elvMaxPower)); // Clamp power to +-maxPower
 
         float aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
         float aziVel = (aziPos - aziLastPos) / motorDt;
-        float aziPower = aziKp * (aziRefPos - aziPos) + aziKd * (aziRefVel - aziVel);
+        float aziPower = aziKp * check_wraparound(aziRefPos, aziPos) + aziKd * (aziRefVel - aziVel);
         HAL::sendPower_1(min(max(aziPower, -aziMaxPower), aziMaxPower));
 
         lastMotorTime = micros();
@@ -210,6 +210,20 @@ namespace Rotator {
         sendRotatorState();
 
         return 100 * 1000;
+    }
+
+
+    // if we are at 330, and we want to go to 0, there are two options: go forward 30 degrees, or backward 330 degrees
+    // this function checks which option is shorter, and returns the target angle adjusted for wraparound
+    float check_wraparound(float target_angle, float current_angle) {
+        error1 = target_angle - current_angle; // forward error
+        error2 = (target_angle - 360) - current_angle; // backward error
+
+        if (abs(error1) < abs(error2)) {
+            return erorr1; // forward is shorter
+        } else {
+            return error2; // backward is shorter
+        }
     }
 
 }

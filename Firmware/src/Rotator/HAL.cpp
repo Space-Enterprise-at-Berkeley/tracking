@@ -276,22 +276,24 @@ namespace HAL {
         }
     }
 
-    float readDegrees(long raw_pulse) {
+    float readDegrees(long raw_pulse, float offset_degrees) {
         long relative_pulse = raw_pulse - PULSE_MIN;
         if(relative_pulse < 0) relative_pulse = 0;
         if(relative_pulse > 1023) relative_pulse = 1023;
-        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
+        float angle = (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN) + offset_degrees;
+        angle = fmod(angle + 360.0F, 360.0F);
+        return angle;
         // TODO: use interrupts to read the pulse width coming from the TBE pin and convert to a degree measurement
         // Look in tests/rev-encoder-test for an example of how to do this, you will need to define a new function
         // 1 microsecond = 0 degrees, 1024 microseconds = 360 degrees
     }
 
-    float getEncoderDegrees_0() {
-        return readDegrees(pulseWidth_0);
+    float getEncoderDegrees_0(float offset_degrees = 0.0F) {
+        return readDegrees(pulseWidth_0, offset_degrees);
     }
     
-    float getEncoderDegrees_1() {
-        return readDegrees(pulseWidth_1);
+    float getEncoderDegrees_1(float offset_degrees = 0.0F) {
+        return readDegrees(pulseWidth_1, offset_degrees);
     }
 
 }
