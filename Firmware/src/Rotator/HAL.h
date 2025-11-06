@@ -33,10 +33,10 @@ namespace HAL {
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 
 
-    const int minTicks_0 = 0;
-    const int maxTicks_0 = 1500;
-    const int minTicks_1 = 0;
-    const int maxTicks_1 = 1500;
+    const float minDegrees_0 = 25.9;
+    const float maxDegrees_0 = 154.1;
+    const float minDegrees_1 = 0;
+    const float maxDegrees_1 = 1500;
 
     int init();
 
@@ -68,4 +68,5 @@ namespace HAL {
     float getEncoderDegrees_0(float offset_degrees);
     float getEncoderDegrees_1(float offset_degrees);
 
+    bool *getStateFlags();
 }

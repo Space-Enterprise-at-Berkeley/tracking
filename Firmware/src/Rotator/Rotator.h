@@ -15,5 +15,5 @@
 namespace Rotator {
     void init();
     uint32_t updateAndMove();
-
+    bool *getStateFlags();
 }

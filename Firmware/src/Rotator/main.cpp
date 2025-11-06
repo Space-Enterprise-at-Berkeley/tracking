@@ -8,24 +8,18 @@
 
 Task taskTable[] = {
   {Rotator::updateAndMove, 0, true},
+  //{sendStateFlags, 0, true}
 };
 
 #define TASK_COUNT (sizeof(taskTable) / sizeof (struct Task))
 
-//test to see if packet reading works
-void func(Comms::Packet packet, uint8_t ip){
-  Serial.print(Comms::packetGetFloat(&packet,0));
-  Serial.print(Comms::packetGetFloat(&packet,4));
-}
-
+uint32_t sendStateFlags(){
+  return 10 * 1000 * 1000;
+};
 
 /*void switchModes(Comms::Packet packet, uint8_t ip){
   Rotator::switchModes(Comms::packetGetUint8(&packet, 0));
 }*/
-
-
-
-
 
 void setup() {
   // setup stuff here
@@ -41,31 +35,8 @@ void setup() {
   Rotator::init();
   HAL::init();
 
-
-  //if number detected, do function
-  
-  // Comms::registerCallback(102, TVC::enableCircle);
-  // Comms::registerCallback(102, startLaunch);
-  // Comms::registerCallback(103, zeroTVC);
-  // Comms::registerCallback(104, stopTVCAll);
-  // Comms::registerCallback(105, TVC::setRadius);
-  // Comms::registerCallback(106, TVC::setAngle);
-  // Comms::registerCallback(200, packetcounter);
-  // Comms::registerCallback(150, startLaunch);
-  // Comms::registerCallback(5, TVC::setTVCMode);
-  // Comms::registerCallback(101, joystickCommand);
-  // Comms::registerCallback(2, TVC::printEncoders);
-
-  //for testing purposes
-  // Comms::registerCallback(999, func);
-
-  //takes 0 or 1
-  // Comms::registerCallback(101, switchModes);
-
-
-
-
   Serial.printf("Setup complete\n");
+  digitalWrite(LED_BUILTIN, HIGH);
 
   while(1) {
     // main loop here to avoid arduino overhead

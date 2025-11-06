@@ -134,7 +134,7 @@ namespace Comms {
 
   void processWaitingPackets()
   {
-    /* commented out for now, this part doesnt work
+    // commented out for now, this part doesnt work
     if (true) { //Ethernet.detectRead()) { this should be okay, the next line checks for waiting packets - Zahed
       if (Udp.parsePacket()) {
         // if(Udp.remotePort() != port) return;
@@ -143,7 +143,7 @@ namespace Comms {
         
         evokeCallbackFunction(packet, Udp.remoteIP()[3]);
       }
-    }*/
+    }
     if (Serial.available())
       {
         Serial.println("Serial available");

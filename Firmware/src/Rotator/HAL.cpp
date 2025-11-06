@@ -1,12 +1,13 @@
 #include "HAL.h"
 
 namespace HAL {
-
+    #ifdef RELATIVE_ENCODERS
     volatile int encoderTicks_0 = 0;
     volatile int encoderTicks_1 = 0;
 
     volatile uint8_t curEncState_0 = 0;
     volatile uint8_t curEncState_1 = 0;
+    #endif
 
     volatile long pulseStart_0 = 0; //Through Bore Encoder Elevation Pulse Start
     volatile long pulseWidth_0 = 0; //Through Bore Encoder Elevation Pulse Width
@@ -15,7 +16,8 @@ namespace HAL {
     volatile long pulseWidth_1 = 0; //Through Bore Encoder Azimuth Pulse Width
 
     bool allowMotorMovement = false;
-
+    bool encoderFault_0 = false;
+    bool encoderFault_1 = false;
 
     /* MAGIC! */
     uint8_t revEncMap[] = {100, 5, 3, 4, 1, 0, 2, 100};
@@ -28,13 +30,11 @@ namespace HAL {
     void motorMovement(Comms::Packet packet, uint8_t ip){
         PacketRTEnableRotation parsed_packet = PacketRTEnableRotation::fromRawPacket(&packet);
         allowMotorMovement = parsed_packet.m_Action;
-        Serial.println("Motor enable set to: " + allowMotorMovement);
+        Serial.println("Motor enable set to: " + (uint8_t) allowMotorMovement);
     }
 
-    
-
-
     int init() {
+        #ifdef RELATIVE_ENCODERS
         /* In case a singular pin is broken, we can gracefully handle it without too much issue */
         #ifdef ENCODER_A_PIN_BROKEN
             num_broken_pins += 1;
@@ -61,6 +61,8 @@ namespace HAL {
                 delay(10);
             }
         }
+        #endif
+
         pinMode(pwm_0, OUTPUT); 
         pinMode(pwm_1, OUTPUT);
 
@@ -82,14 +84,15 @@ namespace HAL {
 
 
         setupEncoders();
-        setEncoderCount_0(0);
-        setEncoderCount_1(0);
+        //setEncoderCount_0(0);
+        //setEncoderCount_1(0);
 
         Comms::registerCallback(PACKET_ID_RTEnableRotation, motorMovement);
 
         return 0;
     }
 
+    #ifdef RELATIVE_ENCODERS
     uint32_t printEncoder_0() {        
         Serial.println(getEncoderCount_0());
         return 50 * 1000;
@@ -100,7 +103,6 @@ namespace HAL {
         return 50 * 1000;
     }
 
-
     void setEncoderCount_0(int i) {
         encoderTicks_0 = (int) i;
     }
@@ -108,7 +110,6 @@ namespace HAL {
     int getEncoderCount_0() {
         return encoderTicks_0;
     }
-
     
     void setEncoderCount_1(int i) {
         encoderTicks_1 = (int) i;
@@ -157,10 +158,19 @@ namespace HAL {
     void handleEncoderChange_1() {
         handleEncoderChange(encA_1, encB_1, encC_1, (uint8_t*)&curEncState_1, (int*)&encoderTicks_1);
     }
+    #endif
 
+    void setupEncoders() {   
+        pinMode(tbe_0, INPUT);
+        pinMode(tbe_1, INPUT);
 
+        attachInterrupt(tbe_0, monitor_TBE_0, CHANGE);
+        attachInterrupt(tbe_1, monitor_TBE_1, CHANGE);
 
-    void setupEncoders() {
+        pulseStart_0 = micros();
+        pulseStart_1 = micros();
+        
+        #ifdef RELATIVE_ENCODERS
         pinMode(encA_0, INPUT);
         pinMode(encB_0, INPUT);
         pinMode(encC_0, INPUT);
@@ -168,10 +178,7 @@ namespace HAL {
         pinMode(encA_1, INPUT);
         pinMode(encB_1, INPUT);
         pinMode(encC_1, INPUT);
-
-        pinMode(tbe_0, INPUT);
-        pinMode(tbe_1, INPUT);
-
+        
         attachInterrupt(encA_0, handleEncoderChange_0, CHANGE);
         attachInterrupt(encB_0, handleEncoderChange_0, CHANGE);
         attachInterrupt(encC_0, handleEncoderChange_0, CHANGE);
@@ -179,11 +186,6 @@ namespace HAL {
         attachInterrupt(encA_1, handleEncoderChange_1, CHANGE);
         attachInterrupt(encB_1, handleEncoderChange_1, CHANGE);
         attachInterrupt(encC_1, handleEncoderChange_1, CHANGE);
-
-        attachInterrupt(tbe_0, monitor_TBE_0, CHANGE);
-        attachInterrupt(tbe_1, monitor_TBE_1, CHANGE);
-
-
 
         #ifndef DISABLE_RELATIVE_ENCODER_CHECK
         do {
@@ -201,12 +203,13 @@ namespace HAL {
             }
         } while (revEncMap[curEncState_1] == 100 && false); // change this when there's a second encoder
         #endif
+        #endif
 
     }
 
     void resetEncoders() { 
-        setEncoderCount_0(0);
-        setEncoderCount_1(0);
+        // setEncoderCount_0(0);
+        // setEncoderCount_1(0);
     }
 
     void sendPwm(uint8_t pin, float power){
@@ -234,17 +237,19 @@ namespace HAL {
 
     }
 
-    void sendPower_0(float power){
-        if ((power > 0 && encoderTicks_0 > maxTicks_0) || (power < 0 && encoderTicks_0 < minTicks_0)) {
-            sendPwm(pwm_0, 0);
-        } else if ((power > 0 && encoderTicks_0 > maxTicks_0 - 200) || (power < 0 && encoderTicks_0 < minTicks_0 + 200)) {
-            sendPwm(pwm_0, max(min(power, 0.025), -0.025));
-        } else {
-            sendPwm(pwm_0, power);
+    void sendPower_0(float power){  
+        float degrees = getEncoderDegrees_0();    
+        if ((power > 0 && degrees > maxDegrees_0) || (power < 0 && degrees < minDegrees_0)) {
+            power = 0;
+        } else if ((power > 0 && degrees > maxDegrees_0 - 5) || (power < 0 && degrees < minDegrees_0 + 5)) {
+            power = max(min(power, 0.025), -0.025);
         }
+        if (encoderFault_0) power = 0;
+        sendPwm(pwm_0, power);
     }
 
     void sendPower_1(float power){
+        if (encoderFault_1) power = 0;
         sendPwm(pwm_1, power);
     }
 
@@ -276,24 +281,30 @@ namespace HAL {
         }
     }
 
-    float readDegrees(long raw_pulse, float offset_degrees) {
+    float readDegrees(long raw_pulse) {
         long relative_pulse = raw_pulse - PULSE_MIN;
-        if(relative_pulse < 0) relative_pulse = 0;
-        if(relative_pulse > 1023) relative_pulse = 1023;
-        float angle = (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN) + offset_degrees;
-        angle = fmod(angle + 360.0F, 360.0F);
-        return angle;
-        // TODO: use interrupts to read the pulse width coming from the TBE pin and convert to a degree measurement
-        // Look in tests/rev-encoder-test for an example of how to do this, you will need to define a new function
-        // 1 microsecond = 0 degrees, 1024 microseconds = 360 degrees
+        if (relative_pulse < 0) relative_pulse = 0;
+        if (relative_pulse > 1023) relative_pulse = 1023;
+        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
     }
 
-    float getEncoderDegrees_0(float offset_degrees = 0.0F) {
-        return readDegrees(pulseWidth_0, offset_degrees);
+    float getEncoderDegrees_0() {
+        if (micros() - pulseStart_0 > 50 * 1000) encoderFault_0 = true;
+        else encoderFault_0 = false;
+        if (encoderFault_0) Serial.println("Fault 0");
+        return fmod(-readDegrees(pulseWidth_0) + 289.8, 360.0);
     }
     
-    float getEncoderDegrees_1(float offset_degrees = 0.0F) {
-        return readDegrees(pulseWidth_1, offset_degrees);
+    float getEncoderDegrees_1() {
+        if (micros() - pulseStart_1 > 50 * 1000) encoderFault_1 = true;
+        else encoderFault_1 = false;
+        if (encoderFault_1) Serial.println("Fault 1");
+        return readDegrees(pulseWidth_1);
     }
 
+    /*bool *getStateFlags() {
+        bool flags[] = {allowMotorMovement, encoderFault_0, encoderFault_1};
+        return flags;
+        // return ((uint8_t) allowMotorMovement) << 2 + ((uint8_t) encoderFault_0) << 1 + ((uint8_t) encoderFault_1);
+    }*/
 }
