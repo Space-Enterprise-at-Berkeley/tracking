@@ -223,12 +223,12 @@ namespace HAL {
     void sendPwm(uint8_t pin, float power){
         // Serial.println(power);
 
-        float deadband = 0.01;
-        int neutral = (1500*4096)/5000; // middle of deadband
-        int upper_neutral = (1500*(1+deadband)*4096)/5000; // top of deadband
-        int lower_neutral = (1500*(1-deadband)*4096)/5000;
-        int maximum = (2000*4096)/5000;
-        int minimum = (1000*4096)/5000;
+        // float deadband = 0.01;
+        int neutral = 1229; // (1500*4096)/5000; // middle of deadband
+        int upper_neutral = 1236; // (1500*(1+deadband)*4096)/5000; // top of deadband
+        int lower_neutral = 1222; // (1500*(1-deadband)*4096)/5000;
+        int maximum = 1638; // (2000*4096)/5000;
+        int minimum = 819; // (1000*4096)/5000;
 
         if (power < -1) power = -1;
         if (power > 1) power = 1;
@@ -273,9 +273,8 @@ namespace HAL {
     const float PULSE_MIN = 1;
     
     float readDegrees(long raw_pulse) {
+        raw_pulse = raw_pulse % 1025;
         long relative_pulse = raw_pulse - PULSE_MIN;
-        if (relative_pulse < 0) relative_pulse = 0;
-        if (relative_pulse > 1023) relative_pulse = 1023;
         return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
     }
 

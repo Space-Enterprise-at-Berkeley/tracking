@@ -24,14 +24,21 @@ void setup() {
 
     Serial.println("Beginning neutral");
     analogWrite(x_pwm, 1229);
-    delay(5000);
+    delay(1000);
 
     Serial.println("Moving around");
-    for (int i = 0; i < 100; i ++) {
-        Serial.println("fwd");
-        //analogWrite(x_pwm, 1229*0.95);
-        HAL::sendPower_0(i/100.0);
-        delay(500);
+    for (int i = 1229; i < 1240; i ++) {
+        Serial.println(i);
+        analogWrite(x_pwm, i);
+        //HAL::sendPower_0(i/100.0);
+        delay(1000);
+    }
+
+    for (int i = 1229; i > 1218; i --) {
+        Serial.println(i);
+        analogWrite(x_pwm, i);
+        //HAL::sendPower_0(i/100.0);
+        delay(1000);
     }
 
     Serial.println("Ending neutral");

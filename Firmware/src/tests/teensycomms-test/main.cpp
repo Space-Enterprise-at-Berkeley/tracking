@@ -21,7 +21,7 @@
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
-IPAddress ip(10, 0, 0, 91);
+IPAddress ip(10, 0, 0, ID);
 
 unsigned int localPort = 42099;      // local port to listen on*/
 
@@ -68,6 +68,10 @@ void setup() {
 }
 
 void loop() {
+  // Send something
+  Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+  Udp.write("hiii");
+  Udp.endPacket();
   // if there's data available, read a packet
   int packetSize = Udp.parsePacket();
   if (packetSize) {
@@ -94,6 +98,6 @@ void loop() {
     Udp.write(ReplyBuffer);
     Udp.endPacket();
   }
-  delay(10);
+  delay(1000);
 }
 

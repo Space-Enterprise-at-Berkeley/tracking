@@ -11,7 +11,7 @@ namespace Rotator {
     bool diagnostic = false;
 
     // Motor state
-    float elvPos, elvVel, elvError, elvPower, elvSmallIntegral, aziPos, aziVel, aziError, aziPower, aziSmallIntegral;
+    float elvPos, elvVel, elvError, elvPower, aziPos, aziVel, aziError, aziPower;
     
     // Reference setpoints
     float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
@@ -20,14 +20,10 @@ namespace Rotator {
     uint32_t updatePeriod = 5 * 1000; // microseconds
     float elvKp = 0.005;
     float elvKd = 0;
-    float elvSmallKp = 0.00002;
-    float elvSmallKi = 0.0005;
     float elvMaxPower = 0.15;
     // float elvMaxBacklash = 3.2;
     float aziKp = 0.001;
     float aziKd = 0;
-    float aziSmallKp = 0.00002;
-    float aziSmallKi = 0.0005;
     float aziMaxPower = 0.1;
 
     // Tracking stuff
@@ -263,13 +259,8 @@ namespace Rotator {
         elvError = elvRefPos - elvPos;
         elvPower = elvKp * elvError + elvKd * (elvRefVel - elvVel); // PD control
 
-        if (abs(elvError) < 0.25) {
+        if (abs(elvError) < 1) {
             elvPower = 0;
-        } else if (abs(elvError) < 1 && HAL::getMotorEnable() && !HAL::getFault_0()) {
-            elvSmallIntegral += elvError * ((float) updatePeriod / 1000000.0);
-            elvPower = elvSmallKp * elvError + elvSmallKi * elvSmallIntegral;
-        } else {
-            elvSmallIntegral = 0;
         }
 
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower); // Clamp power to +-maxPower
@@ -280,13 +271,8 @@ namespace Rotator {
         aziError = check_wraparound(aziRefPos, aziPos);
         aziPower = aziKp * aziError + aziKd * (aziRefVel - aziVel);
 
-        if (abs(aziError) < 0.25) {
+        if (abs(aziError) < 1) {
             aziPower = 0;
-        } else if (abs(aziError) < 1 && HAL::getMotorEnable() && !HAL::getFault_1()) {
-            aziSmallIntegral += aziError * ((float) updatePeriod / 1000000.0);
-            aziPower = aziSmallKp * aziError + aziSmallKi * aziSmallIntegral;
-        } else {
-            aziSmallIntegral = 0;
         }
 
         aziPower = min(max(aziPower, -aziMaxPower), aziMaxPower);
