@@ -1,10 +1,21 @@
 #include "data_buff.h"
 #include <Arduino.h>
 
+Buffer::Buffer(int buf_size, int window_size){
+    buf = (double *)malloc(sizeof(double) * buf_size);
+    t_buf = (double *)malloc(sizeof(double) * buf_size);
+    n = buf_size;
+    m = window_size;
+    taps = (double *)malloc(sizeof(double) * window_size);
+    calculate_taps();
+    clear();
+}
+
 Buffer::Buffer(int buf_size){
     buf = (double *)malloc(sizeof(double) * buf_size);
     t_buf = (double *)malloc(sizeof(double) * buf_size);
     n = buf_size;
+    m = buf_size;
     taps = (double *)malloc(sizeof(double) * buf_size);
     calculate_taps();
     clear();
@@ -73,21 +84,23 @@ double Buffer::getFiltered() {
         return 0;
     } else {
         double filtered = 0;
-        for (int i = curr_i; i<curr_i+n; i++) {
-            filtered += buf[i % n] * taps[i - curr_i];
+        for (int i = 0; i<m; i++) {
+            int index = curr_i - 1 - i; // curr_i is actually next i so the -1 compensates
+            if (index < 0) index = n + index; // Modulo with negative numbers is apparently implementation defined
+            filtered += buf[index] * taps[i];
         }
         return filtered;
     }
 }
 
 void Buffer::calculate_taps() {
-    double stdev = (float)n / 2.35; //fwhm of ~0.5
+    double stdev = (float)m / 2.35; //fwhm of ~0.5
     double sum = 0;
-    for (int i = 0; i<n; i++) {
-        taps[i] = exp(-0.5 * pow((i - (n/2))/stdev, 2));
+    for (int i = 0; i<m; i++) {
+        taps[i] = exp(-0.5 * pow((i - (m/2))/stdev, 2));
         sum += taps[i];
     }
-    for (int i = 0; i<n; i++) {
+    for (int i = 0; i<m; i++) {
         taps[i] /= sum;
     }
 }

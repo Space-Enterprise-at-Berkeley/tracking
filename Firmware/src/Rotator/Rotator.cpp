@@ -9,18 +9,20 @@ namespace Rotator {
     bool diagnostic = false;
 
     // Motor state
-    float elvPos, elvVel, elvPower, aziPos, aziVel, aziPower;
+    float elvPos, elvVel, elvPower, elvBacklash, aziPos, aziVel, aziPower, aziBacklash;
     
     // Reference setpoints
     float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
 
     // Dynamics constants
-    float elvKp = 0.0004;
-    float elvKd = 0;
-    float elvMaxPower = 0.2;
-    float aziKp = 0.0004;
+    float elvKp = 0.002;
+    float elvKd = 0.001;
+    float elvMaxPower = 0.1;
+    float elvMaxBacklash = 3.2;
+    float aziKp = 0.001;
     float aziKd = 0;
-    float aziMaxPower = 0.2;
+    float aziMaxPower = 0.1;
+    float aziMaxBacklash;
 
     // Tracking stuff
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
@@ -65,11 +67,6 @@ namespace Rotator {
     }
 
     void diagnosticUpdate(){
-        Serial.println("Updating diagnostic");
-        // Serial.print("Diagnostic times: " + micros());
-        // Serial.print(" " + lastDiagnosticTime);
-        // Serial.print(" " + micros() - lastDiagnosticTime);
-        // Serial.println(" " + diagnosticDelay);
         // Check if enough time has passed to move to the next diagnostic position
         if ((micros() - lastDiagnosticTime) >= diagnosticDelay) {
             // Move to next diagnostic step
@@ -141,13 +138,13 @@ namespace Rotator {
         state.writeRawPacket(&newpacket);
         //emit packet 
         Comms::emitPacketToGS(&newpacket);
-        float rotatorState[] = {elvRefPos, aziRefPos};
+        /*float rotatorState[] = {elvRefPos, aziRefPos};
         for (int i = 0; i < 2; i++) {
             Serial.print(rotatorState[i]);
             Serial.print(" ");
         }
-        Serial.println();
-    } // TODO: emit elvPos, elvRefPos, elvVel, elvRefVel, and their azimuth equivalents as an RTRotatorState packet
+        Serial.println();*/
+    }
 
     void sendTrackingState(){
         PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
@@ -200,19 +197,34 @@ namespace Rotator {
             elvRefVel = 0;
             aziRefVel = 0;
         }
+
+        elvRefPos = fmod(elvRefPos, 360.0);
+        elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);
+        //aziRefPos = fmod(aziRefPos, 360.0);
         // Serial.println("done with updates");
         
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
 
         elvPos = HAL::getEncoderDegrees_0();
-        elvVel = (elvPos - elvLastPos) / motorDt; // Elevation bbelvVel); // PD control
-        elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel);
-        HAL::sendPower_0(min(max(elvPower, -elvMaxPower), elvMaxPower)); // Clamp power to +-maxPower
+        elvVel = HAL::getSlope_0() * 1000 * 1000;
+        elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel); // PD control
+        elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower); // Clamp power to +-maxPower
+        HAL::sendPower_0(elvPower); 
 
         aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
-        aziVel = (aziPos - aziLastPos) / motorDt;
+        aziVel = HAL::getSlope_1() * 1000 * 1000;
         aziPower = aziKp * check_wraparound(aziRefPos, aziPos) + aziKd * (aziRefVel - aziVel);
-        HAL::sendPower_1(min(max(aziPower, -aziMaxPower), aziMaxPower));
+        aziPower = min(max(aziPower, -aziMaxPower), aziMaxPower);
+        HAL::sendPower_1(aziPower);
+
+        Serial.print("Elv power: ");
+        Serial.print(elvPower, 5);
+        Serial.print(" Azi power: ");
+        Serial.println(aziPower, 5);
+
+        // BAD!!! MAKE SURE TO REMOVE THIS AFTER TESTING
+        aziRefPos = elvPower;
+        aziPos = elvPower;
 
         lastMotorTime = micros();
         elvLastPos = elvPos;

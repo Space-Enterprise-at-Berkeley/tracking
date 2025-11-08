@@ -11,9 +11,11 @@ namespace HAL {
 
     volatile long pulseStart_0 = 0; //Through Bore Encoder Elevation Pulse Start
     volatile long pulseWidth_0 = 0; //Through Bore Encoder Elevation Pulse Width
+    Buffer* degreeBuff_0;
 
     volatile long pulseStart_1 = 0; //Through Bore Encoder Azimuth Pulse Start
     volatile long pulseWidth_1 = 0; //Through Bore Encoder Azimuth Pulse Width
+    Buffer* degreeBuff_1;
 
     bool allowMotorMovement = false;
     bool encoderFault_0 = false;
@@ -164,12 +166,18 @@ namespace HAL {
         pinMode(tbe_0, INPUT);
         pinMode(tbe_1, INPUT);
 
-        attachInterrupt(tbe_0, monitor_TBE_0, CHANGE);
-        attachInterrupt(tbe_1, monitor_TBE_1, CHANGE);
+        degreeBuff_0 = new Buffer(301, 31);
+        degreeBuff_1 = new Buffer(301, 31);
+
+        degreeBuff_0->clear();
+        degreeBuff_1->clear();
 
         pulseStart_0 = micros();
         pulseStart_1 = micros();
-        
+
+        attachInterrupt(tbe_0, monitor_TBE_0, CHANGE);
+        attachInterrupt(tbe_1, monitor_TBE_1, CHANGE);
+      
         #ifdef RELATIVE_ENCODERS
         pinMode(encA_0, INPUT);
         pinMode(encB_0, INPUT);
@@ -260,8 +268,16 @@ namespace HAL {
     void stop_1() {
         sendPower_1(0);
     }
+
     const float PULSE_MAX = 1024;
     const float PULSE_MIN = 1;
+    
+    float readDegrees(long raw_pulse) {
+        long relative_pulse = raw_pulse - PULSE_MIN;
+        if (relative_pulse < 0) relative_pulse = 0;
+        if (relative_pulse > 1023) relative_pulse = 1023;
+        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
+    }
 
     void monitor_TBE_0(){
         if(digitalRead(HAL::tbe_0) == HIGH){
@@ -269,6 +285,7 @@ namespace HAL {
         }
         else{
             pulseWidth_0 = micros() - pulseStart_0;
+            degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 287.9, 360.0));
         }
     }
 
@@ -278,28 +295,30 @@ namespace HAL {
         }
         else{
             pulseWidth_1 = micros() - pulseStart_1;
+            degreeBuff_1->insert(micros(), readDegrees(pulseWidth_1));
         }
-    }
-
-    float readDegrees(long raw_pulse) {
-        long relative_pulse = raw_pulse - PULSE_MIN;
-        if (relative_pulse < 0) relative_pulse = 0;
-        if (relative_pulse > 1023) relative_pulse = 1023;
-        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
     }
 
     float getEncoderDegrees_0() {
         if (micros() - pulseStart_0 > 50 * 1000) encoderFault_0 = true;
         else encoderFault_0 = false;
         if (encoderFault_0) Serial.println("Fault 0");
-        return fmod(-readDegrees(pulseWidth_0) + 289.8, 360.0);
+        return degreeBuff_0->getFiltered();
+    }
+
+    float getSlope_0() {
+        return degreeBuff_0->getSlope();
     }
     
     float getEncoderDegrees_1() {
         if (micros() - pulseStart_1 > 50 * 1000) encoderFault_1 = true;
         else encoderFault_1 = false;
         if (encoderFault_1) Serial.println("Fault 1");
-        return readDegrees(pulseWidth_1);
+        return degreeBuff_1->getFiltered();
+    }
+
+    float getSlope_1() {
+        return degreeBuff_1->getSlope();
     }
 
     /*bool *getStateFlags() {

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "SPI.h"
 #include "Common.h"
+#include "Util/data_buff.h"
 #include "TeensyComms.h"
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_RTEnableRotation.h"
@@ -42,16 +43,18 @@ namespace HAL {
 
     void setupEncoders();
 
-    void setEncoderCount_0(int i);
-    int getEncoderCount_0();
+    //void setEncoderCount_0(int i);
+    //int getEncoderCount_0();
     float getEncoderDegrees_0();
+    float getSlope_0();
 
-    void setEncoderCount_1(int i);
-    int getEncoderCount_1();
+    //void setEncoderCount_1(int i);
+    //int getEncoderCount_1();
     float getEncoderDegrees_1();
+    float getSlope_1();
 
-    uint32_t printEncoder_0();
-    uint32_t printEncoder_1();
+    //uint32_t printEncoder_0();
+    //uint32_t printEncoder_1();
 
     void resetEncoders();
 

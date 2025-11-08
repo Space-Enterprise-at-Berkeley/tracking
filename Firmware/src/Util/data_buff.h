@@ -8,6 +8,7 @@ class Buffer{
     double * buf;
     double * t_buf; // time in seconds
     int n;
+    int m;
     bool is_full = false;
     int curr_i = 0;
 
@@ -25,6 +26,7 @@ class Buffer{
     double slope;
 
     public:
+    Buffer(int buf_size, int window_size);
     Buffer(int buf_size);
 
     void insert(double t, double y);
