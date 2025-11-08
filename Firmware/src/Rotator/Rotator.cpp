@@ -296,4 +296,46 @@ namespace Rotator {
         bool flags[] = {tracking, diagnostic};
         return flags;
     }*/
+
+    void gpsToECEF(float lat, float lon, float alt, float &x, float &y, float &z) {
+        const float a = 6378137.0f;           // WGS84 semi-major axis
+        const float e2 = 6.69437999014e-3f;   // first eccentricity squared
+        const float deg2rad = M_PI / 180.0f;
+
+        float latRad = lat * deg2rad;
+        float lonRad = lon * deg2rad;
+
+        float N = a / sqrtf(1.0f - e2 * sinf(latRad) * sinf(latRad));
+
+        x = (N + alt) * cosf(latRad) * cosf(lonRad);
+        y = (N + alt) * cosf(latRad) * sinf(lonRad);
+        z = (N * (1.0f - e2) + alt) * sinf(latRad);
+    } // from chatgpt
+
+    // Compute local ENU separation between two GPS coordinates
+    // gps1 = reference point (lat, lon, alt)
+    // gps2 = target point (lat, lon, alt)
+    // enu[3] = output {East, North, Up} in meters
+    void gpsSeparationENU(const float gps1[3], const float gps2[3], float enu[3]) {
+        float x1, y1, z1, x2, y2, z2;
+        gpsToECEF(gps1[0], gps1[1], gps1[2], x1, y1, z1);
+        gpsToECEF(gps2[0], gps2[1], gps2[2], x2, y2, z2);
+
+        float dx = x2 - x1;
+        float dy = y2 - y1;
+        float dz = z2 - z1;
+
+        // Convert ECEF delta to ENU relative to gps1
+        const float deg2rad = M_PI / 180.0f;
+        float lat0 = gps1[0] * deg2rad;
+        float lon0 = gps1[1] * deg2rad;
+
+        float sinLat = sinf(lat0), cosLat = cosf(lat0);
+        float sinLon = sinf(lon0), cosLon = cosf(lon0);
+
+        enu[0] = -sinLon * dx + cosLon * dy;                      // East
+        enu[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
+        enu[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
+    } // from chatgpt
+
 }
