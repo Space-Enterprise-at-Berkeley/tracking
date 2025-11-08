@@ -87,7 +87,7 @@ namespace Rotator {
      void setTrackingPoint(Comms::Packet packet, uint8_t ip){
         //PacketRocketXPOS parsed_packet = PacketRocketXPOS::fromRawPacket(&packet);
         
-     }   
+     //}    < why is this here????
         // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
         // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
         Serial.println("Updating tracking");
@@ -180,6 +180,8 @@ namespace Rotator {
             .withAziRefPos(aziRefPos)
             .withAziVel(aziVel)
             .withAziRefVel(aziRefVel)
+            .withElvPower(elvPower)
+            .withAziPower(aziPower)
             .build();
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
