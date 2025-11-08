@@ -321,6 +321,10 @@ namespace HAL {
         return degreeBuff_1->getSlope();
     }
 
+    bool getMotorEnable() {return allowMotorMovement;}
+    bool getFault_0() {return encoderFault_0;}
+    bool getFault_1() {return encoderFault_1;}
+
     /*bool *getStateFlags() {
         bool flags[] = {allowMotorMovement, encoderFault_0, encoderFault_1};
         return flags;

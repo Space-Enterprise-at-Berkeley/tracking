@@ -11,20 +11,24 @@ namespace Rotator {
     bool diagnostic = false;
 
     // Motor state
-    float elvPos, elvVel, elvPower, elvBacklash, aziPos, aziVel, aziPower, aziBacklash;
+    float elvPos, elvVel, elvError, elvPower, elvSmallIntegral, aziPos, aziVel, aziError, aziPower, aziSmallIntegral;
     
     // Reference setpoints
     float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
 
     // Dynamics constants
-    float elvKp = 0.002;
-    float elvKd = 0.001;
-    float elvMaxPower = 0.1;
-    float elvMaxBacklash = 3.2;
+    uint32_t updatePeriod = 5 * 1000; // microseconds
+    float elvKp = 0.005;
+    float elvKd = 0;
+    float elvSmallKp = 0.00002;
+    float elvSmallKi = 0.0005;
+    float elvMaxPower = 0.15;
+    // float elvMaxBacklash = 3.2;
     float aziKp = 0.001;
     float aziKd = 0;
+    float aziSmallKp = 0.00002;
+    float aziSmallKi = 0.0005;
     float aziMaxPower = 0.1;
-    float aziMaxBacklash;
 
     // Tracking stuff
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
@@ -176,12 +180,12 @@ namespace Rotator {
             .withElvRefPos(elvRefPos)
             .withElvVel(elvVel)
             .withElvRefVel(elvRefVel)
+            .withElvPower(elvPower*100)
             .withAziPos(aziPos)
             .withAziRefPos(aziRefPos)
             .withAziVel(aziVel)
             .withAziRefVel(aziRefVel)
-            .withElvPower(elvPower)
-            .withAziPower(aziPower)
+            .withAziPower(aziPower*100)
             .build();
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
@@ -256,13 +260,35 @@ namespace Rotator {
 
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = HAL::getSlope_0() * 1000 * 1000;
-        elvPower = elvKp * (elvRefPos - elvPos) + elvKd * (elvRefVel - elvVel); // PD control
+        elvError = elvRefPos - elvPos;
+        elvPower = elvKp * elvError + elvKd * (elvRefVel - elvVel); // PD control
+
+        if (abs(elvError) < 0.25) {
+            elvPower = 0;
+        } else if (abs(elvError) < 1 && HAL::getMotorEnable() && !HAL::getFault_0()) {
+            elvSmallIntegral += elvError * ((float) updatePeriod / 1000000.0);
+            elvPower = elvSmallKp * elvError + elvSmallKi * elvSmallIntegral;
+        } else {
+            elvSmallIntegral = 0;
+        }
+
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower); // Clamp power to +-maxPower
         HAL::sendPower_0(elvPower); 
 
         aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
         aziVel = HAL::getSlope_1() * 1000 * 1000;
-        aziPower = aziKp * check_wraparound(aziRefPos, aziPos) + aziKd * (aziRefVel - aziVel);
+        aziError = check_wraparound(aziRefPos, aziPos);
+        aziPower = aziKp * aziError + aziKd * (aziRefVel - aziVel);
+
+        if (abs(aziError) < 0.25) {
+            aziPower = 0;
+        } else if (abs(aziError) < 1 && HAL::getMotorEnable() && !HAL::getFault_1()) {
+            aziSmallIntegral += aziError * ((float) updatePeriod / 1000000.0);
+            aziPower = aziSmallKp * aziError + aziSmallKi * aziSmallIntegral;
+        } else {
+            aziSmallIntegral = 0;
+        }
+
         aziPower = min(max(aziPower, -aziMaxPower), aziMaxPower);
         HAL::sendPower_1(aziPower);
 
@@ -271,17 +297,13 @@ namespace Rotator {
         Serial.print(" Azi power: ");
         Serial.println(aziPower, 5);
 
-        // BAD!!! MAKE SURE TO REMOVE THIS AFTER TESTING
-        aziRefPos = elvPower;
-        aziPos = elvPower;
-
         lastMotorTime = micros();
         elvLastPos = elvPos;
         aziLastPos = aziPos;
 
         sendRotatorState();
 
-        return 5 * 1000;
+        return updatePeriod;
     }
 
     /*bool *getStateFlags(){
