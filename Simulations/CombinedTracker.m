@@ -1,8 +1,8 @@
 classdef CombinedTracker < handle
     properties
-        Time = 0
-        State = [0;0;0;0;0;0;0;0;0]
-        Filter = trackingKF("MotionModel","3D Constant Acceleration")
+        Time
+        State
+        Filter
 
         GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0]
         GPSNoise = [5 0 0; 0 5 0; 0 0 5]
@@ -11,9 +11,11 @@ classdef CombinedTracker < handle
         AccelNoise = [5 0 0; 0 5 0; 0 0 5]
     end
     methods
-        % function obj = CombinedTracker()
-        %     obj.Filter.initialize(obj.Filter, zeros(9,1), zeros(9))
-        % end
+        function obj = CombinedTracker()
+            obj.Time = 0;
+            obj.State = [0;0;0;0;0;0;0;0;0];
+            obj.Filter = trackingKF("MotionModel","3D Constant Acceleration");
+        end
         function state = extrapolate(obj, time)
             dt = time - obj.Time;
             dt2 = dt^2/2;

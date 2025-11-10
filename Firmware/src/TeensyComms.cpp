@@ -146,7 +146,6 @@ namespace Comms {
     }
     if (Serial.available())
       {
-        Serial.println("Serial available");
         //That was for reading full formed packets from the USB serial port
         /*
         int cnt = 0;

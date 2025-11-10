@@ -6,7 +6,7 @@
 #include "EEPROM.h"
 
 
-const int x_pwm = 28; //sparkmax0
+const int x_pwm = 37; //sparkmax0
 
 void setup() {
     Serial.begin(115200);

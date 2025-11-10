@@ -1,13 +1,6 @@
-function rel = codegenTest(coords, FARcoords)
-    rel = lla2enu(coords, FARcoords, "ellipsoid");
-    % dt2 = dt^2/2;
-    % next = [1 dt dt2 0 0  0   0 0  0  ;
-    %         0 1  dt  0 0  0   0 0  0  ;
-    %         0 0  1   0 0  0   0 0  0  ;
-    %         0 0  0   1 dt dt2 0 0  0  ;
-    %         0 0  0   0 1  dt  0 0  0  ;
-    %         0 0  0   0 0  1   0 0  0  ;
-    %         0 0  0   0 0  0   1 dt dt2;
-    %         0 0  0   0 0  0   0 1  dt ;
-    %         0 0  0   0 0  0   0 0  1  ] * state;
+function state = codegenTest(testGPS, testGPStime, testAccel, testAcceltime, testExtrapolate)
+    testTracker = CombinedTracker();
+    GPSUpdate(testTracker, testGPStime, testGPS);
+    accelUpdate(testTracker, testAcceltime, testAccel);
+    state = extrapolate(testTracker, testExtrapolate);
 end
