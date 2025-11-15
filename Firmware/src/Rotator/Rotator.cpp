@@ -48,6 +48,15 @@ namespace Rotator {
     void stopTracking(){
         tracking = false;
     }
+    float getTrackingState_X(){
+        return [trackingState[0],trackingState[1],trackingState[2]];
+    }
+    float getTrackingState_Y(){
+        return [trackingState[3],trackingState[4],trackingState[5]];
+    }
+    float getTrackingState_Z(){
+        return [trackingState[6],trackingState[7],trackingState[8]];
+    }
 
     void trackingUpdate(){
         // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
@@ -62,6 +71,7 @@ namespace Rotator {
         float y_rotator = rotatorPosition[1];
         float z_rotator = rotatorPosition[2];
         float distance_from_rocket = sqrt(pow(x_position-x_rotator,2.0)+pow(y_position-y_rotator,2.0));
+        float total_distance_from_rocket = sqrt(pow(x_position-x_rotator,2.0)+pow(y_position-y_rotator,2.0) + pow(z_position-z_rotator,2.0));
 
         float delta_x = x_position-x_rotator;
         float delta_y = y_position-y_rotator;
@@ -72,12 +82,14 @@ namespace Rotator {
             aziRefVel = 0.0;
             elvRefVel = 0.0;
         }
-        else {
+        else { 
             aziRefPos = 180/M_PI * atan2((delta_y),(delta_x));
             elvRefPos = 180/M_PI * asin((delta_z)/sqrt(pow(distance_from_rocket,2.0)+pow(delta_z,2.0)));
 
-            aziRefVel = (y_velocity - x_velocity * tan(aziRefPos * M_PI/180)) * pow(cos(aziRefPos * M_PI/180),2.0);
-            elvRefVel = z_velocity/(cos(M_PI * elvRefPos/180) * distance_from_rocket) - ((delta_x) * x_velocity + (delta_y) * y_velocity) * tan(elvRefPos * M_PI/180)/pow(distance_from_rocket,2.0);
+            aziRefPos = fmod(aziRefPos + 360.0, 360.0); //convert from -180 to 180 to 0 to 360
+            elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
+            aziRefVel = (y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
+            elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
 
             aziRefVel *= 180/M_PI;
             elvRefVel *= 180/M_PI;
@@ -85,9 +97,6 @@ namespace Rotator {
     }
         
      void setTrackingPoint(Comms::Packet packet, uint8_t ip){
-        //PacketRocketXPOS parsed_packet = PacketRocketXPOS::fromRawPacket(&packet);
-        
-     //}    < why is this here????
         // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
         // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
         Serial.println("Updating tracking");
