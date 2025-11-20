@@ -273,8 +273,11 @@ namespace HAL {
     const float PULSE_MIN = 1;
     
     float readDegrees(long raw_pulse) {
+        Serial.print(raw_pulse);
+        Serial.print(" ");
         raw_pulse = raw_pulse % 1025;
         long relative_pulse = raw_pulse - PULSE_MIN;
+        Serial.println(relative_pulse);
         return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
     }
 
@@ -283,8 +286,7 @@ namespace HAL {
             pulseStart_0 = micros();
         }
         else{
-            pulseWidth_0 = micros() - pulseStart_0;
-            degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 287.9, 360.0));
+            pulseWidth_0 = micros() - pulseStart_0;      
         }
     }
 
@@ -294,8 +296,13 @@ namespace HAL {
         }
         else{
             pulseWidth_1 = micros() - pulseStart_1;
-            degreeBuff_1->insert(micros(), readDegrees(pulseWidth_1));
         }
+    }
+
+    uint32_t pushToBuffers(){
+        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 287.9, 360.0));
+        degreeBuff_1->insert(micros(), readDegrees(pulseWidth_1));
+        return 1025;
     }
 
     float getEncoderDegrees_0() {

@@ -66,6 +66,7 @@ namespace HAL {
 
     void monitor_TBE_0();
     void monitor_TBE_1();
+    uint32_t pushToBuffers();
 
     bool getMotorEnable();
     bool getFault_0();
