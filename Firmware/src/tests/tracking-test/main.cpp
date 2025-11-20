@@ -5,6 +5,7 @@
 uint32_t lastMessage;
 uint32_t startTime;
 CombinedTracker tracker;
+uint32_t update;
 
 void setup() {
     tracker.init();
@@ -24,18 +25,24 @@ void loop() {
         gps[2] = Serial.parseFloat();
         Serial.clear();
         Serial.println("Starting update");
+        update = micros();
         tracker.GPSUpdate((double) (micros() - startTime)/1000000.0, gps);
+        update = micros() - update;
+        Serial.println(update);
         Serial.println("End update");
     }
 
     if (micros() - lastMessage > 1000 * 1000) {
         double state[9];
+        update = micros();
         tracker.extrapolate((double) (micros() - startTime)/1000000.0, state);
+        update = micros() - update;
+        Serial.println(update);
         Serial.print(state[0]);
         Serial.print(" ");
         Serial.print(state[3]);
         Serial.print(" ");
         Serial.println(state[6]);
-        lastMessage= micros();
+        lastMessage = micros();
     }
 }
