@@ -22,9 +22,9 @@ namespace Rotator {
     float elvKd = 0;
     float elvMaxPower = 0.15;
     // float elvMaxBacklash = 3.2;
-    float aziKp = 0.001;
+    float aziKp = 0.005;
     float aziKd = 0;
-    float aziMaxPower = 0.1;
+    float aziMaxPower = 0.2;
 
     // Tracking stuff
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
@@ -36,8 +36,8 @@ namespace Rotator {
 
     // Diagnostic stuff
     uint8_t diagnosticStep = 0;
-    float elvSequence[] = {30, 60, 90, 120, 150, 30, 30,  30,  30,   30, 30, 90, 150, 30};
-    float aziSequence[] = {0,   0,  0,   0,   0,  0, 90, 180, -90, -180,  0, 90, -90,  0};
+    float elvSequence[] = {30, 60, 90, 120, 150, 30, 30,  30, 30,  30,   30, 30, 90, 150, 30};
+    float aziSequence[] = {0,   0,  0,   0,   0,  0, 90, 180, 45, -90, -150,  0, 80, -80,  0};
     uint32_t lastDiagnosticTime;
     uint32_t diagnosticDelay = 1000 * 1000;
 
@@ -48,7 +48,8 @@ namespace Rotator {
     void stopTracking(){
         tracking = false;
     }
-    float getTrackingState_X(){
+
+    /*float getTrackingState_X(){
         return [trackingState[0],trackingState[1],trackingState[2]];
     }
     float getTrackingState_Y(){
@@ -56,7 +57,7 @@ namespace Rotator {
     }
     float getTrackingState_Z(){
         return [trackingState[6],trackingState[7],trackingState[8]];
-    }
+    }*/
 
     void trackingUpdate(){
         // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
@@ -226,13 +227,14 @@ namespace Rotator {
     // if we are at 330, and we want to go to 0, there are two options: go forward 30 degrees, or backward 330 degrees
     // this function checks which option is shorter, and returns the target angle adjusted for wraparound
     float check_wraparound(float target_angle, float current_angle) {
-        float error1 = target_angle - current_angle; // forward error
-        float error2 = (target_angle - 360) - current_angle; // backward error
-
-        if (abs(error1) < abs(error2)) {
-            return error1; // forward is shorter
+        float error = target_angle - current_angle; // forward error
+        
+        if (error > 180) {
+            return error - 360;
+        } else if (error < -180) {
+            return error + 360;
         } else {
-            return error2; // backward is shorter
+            return error;
         }
     }
 
@@ -258,7 +260,7 @@ namespace Rotator {
 
         elvRefPos = fmod(elvRefPos, 360.0);
         elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);
-        //aziRefPos = fmod(aziRefPos, 360.0);
+        aziRefPos = fmod(aziRefPos, 360.0);
         // Serial.println("done with updates");
         
         motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
@@ -287,10 +289,10 @@ namespace Rotator {
         aziPower = min(max(aziPower, -aziMaxPower), aziMaxPower);
         HAL::sendPower_1(aziPower);
 
-        Serial.print("Elv power: ");
+        /*Serial.print("Elv power: ");
         Serial.print(elvPower, 5);
         Serial.print(" Azi power: ");
-        Serial.println(aziPower, 5);
+        Serial.println(aziPower, 5);*/
 
         lastMotorTime = micros();
         elvLastPos = elvPos;

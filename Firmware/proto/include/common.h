@@ -63,18 +63,18 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_BREAKWIRE false
 #endif
 
-#define CHANNEL_AC_NOS_MAIN 2
+#define CHANNEL_AC_IPA_POPPET 2
 #ifdef BOARD_AC_1
-#define IS_BOARD_FOR_AC_NOS_MAIN true
+#define IS_BOARD_FOR_AC_IPA_POPPET true
 #else
-#define IS_BOARD_FOR_AC_NOS_MAIN false
+#define IS_BOARD_FOR_AC_IPA_POPPET false
 #endif
 
-#define CHANNEL_AC_IPA_MAIN 3
+#define CHANNEL_AC_NOS_POPPET 3
 #ifdef BOARD_AC_1
-#define IS_BOARD_FOR_AC_IPA_MAIN true
+#define IS_BOARD_FOR_AC_NOS_POPPET true
 #else
-#define IS_BOARD_FOR_AC_IPA_MAIN false
+#define IS_BOARD_FOR_AC_NOS_POPPET false
 #endif
 
 #define CHANNEL_AC_IGNITER 4
@@ -91,25 +91,46 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_NOS_EMERGENCY_VENT false
 #endif
 
+#define CHANNEL_AC_NOS_RQD 6
+#ifdef BOARD_AC_1
+#define IS_BOARD_FOR_AC_NOS_RQD true
+#else
+#define IS_BOARD_FOR_AC_NOS_RQD false
+#endif
+
+#define CHANNEL_AC_IPA_STATIC_PRESS 7
+#ifdef BOARD_AC_1
+#define IS_BOARD_FOR_AC_IPA_STATIC_PRESS true
+#else
+#define IS_BOARD_FOR_AC_IPA_STATIC_PRESS false
+#endif
+
 #define CHANNEL_AC_NOS_GEMS 0
-#ifdef BOARD_AC_3
+#ifdef BOARD_AC_2
 #define IS_BOARD_FOR_AC_NOS_GEMS true
 #else
 #define IS_BOARD_FOR_AC_NOS_GEMS false
 #endif
 
-#define CHANNEL_AC_NOS_FILL 1
-#ifdef BOARD_AC_3
+#define CHANNEL_AC_NOS_FILL 3
+#ifdef BOARD_AC_2
 #define IS_BOARD_FOR_AC_NOS_FILL true
 #else
 #define IS_BOARD_FOR_AC_NOS_FILL false
 #endif
 
-#define CHANNEL_AC_NOS_LINE_VENT 2
-#ifdef BOARD_AC_3
+#define CHANNEL_AC_NOS_LINE_VENT 5
+#ifdef BOARD_AC_2
 #define IS_BOARD_FOR_AC_NOS_LINE_VENT true
 #else
 #define IS_BOARD_FOR_AC_NOS_LINE_VENT false
+#endif
+
+#define CHANNEL_AC_NOS_DRAIN 7
+#ifdef BOARD_AC_2
+#define IS_BOARD_FOR_AC_NOS_DRAIN true
+#else
+#define IS_BOARD_FOR_AC_NOS_DRAIN false
 #endif
 
 #define CHANNEL_PT_NOS_POPPET 0
