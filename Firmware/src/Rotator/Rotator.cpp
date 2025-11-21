@@ -238,6 +238,15 @@ namespace Rotator {
         }
     }
 
+    void accelUpdate(Comms::Packet packet, uint8_t ip) {
+
+    }
+
+    void GPSUpdate(Comms::Packet packet, uint8_t ip) {
+        PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
+        Serial.print(parsed_packet.m_Latitude);
+    }
+
     void init(){
         tracking = false;
         diagnostic = false;
@@ -246,6 +255,8 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
         Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
+        Comms::registerCallback(PACKET_ID_LowIMUValues, accelUpdate);
+        Comms::registerCallback(PACKET_ID_GPSValues, GPSUpdate);
     }
 
     uint32_t updateAndMove(){
