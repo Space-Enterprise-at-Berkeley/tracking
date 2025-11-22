@@ -4,6 +4,7 @@
 #include <FlexCAN_T4.h>
 #include <cmath>
 #include <math.h>
+#include <array>
 
 namespace Rotator {
     // State flags
@@ -29,6 +30,9 @@ namespace Rotator {
     // Tracking stuff
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
+
+    //Rocket stuff
+    float launchPosition[] = {0,0,0}; // in terms of longitude, latitude, and altitude
 
     // Timing for derivatives and tracking updates
     uint32_t lastTrackingUpdate, lastMotorTime;
@@ -58,7 +62,47 @@ namespace Rotator {
     float getTrackingState_Z(){
         return [trackingState[6],trackingState[7],trackingState[8]];
     }*/
+    std::array<float, 3> gpsToECEF(float lat, float lon, float alt) {
+        const float a = 6378137.0f;           // WGS84 semi-major axis
+        const float e2 = 6.69437999014e-3f;   // first eccentricity squared
+        const float deg2rad = M_PI / 180.0f;
 
+        float latRad = lat * deg2rad;
+        float lonRad = lon * deg2rad;
+
+        float N = a / sqrtf(1.0f - e2 * sinf(latRad) * sinf(latRad));
+        float x = (N + alt) * cosf(latRad) * cosf(lonRad);
+        float y = (N + alt) * cosf(latRad) * sinf(lonRad);
+        float z = (N * (1.0f - e2) + alt) * sinf(latRad);
+        return {x,y,z} ;
+    } // from chatgpt, I sort of fixed it
+
+    // Compute local ENU separation between two GPS coordinates
+    // gps1 = reference point (lat, lon, alt)
+    // gps2 = target point (lat, lon, alt)
+    // enu[3] = output {East, North, Up} in meters
+    std::array<float, 3> gpsSeparationENU(float gps1[], float gps2[]) {
+        std::array<float,3> rocketpos = gpsToECEF(gps1[0], gps1[1], gps1[2]);
+        std::array<float,3> launchpos = gpsToECEF(gps2[0], gps2[1], gps2[2]);
+
+        float dx = rocketpos[0] - launchpos[0];
+        float dy = rocketpos[1] - launchpos[1];
+        float dz = rocketpos[2] - launchpos[2];
+
+        // Convert ECEF delta to ENU relative to gps1
+        const float deg2rad = M_PI / 180.0f;
+        float lat0 = gps1[0] * deg2rad;
+        float lon0 = gps1[1] * deg2rad;
+
+        float sinLat = sinf(lat0), cosLat = cosf(lat0);
+        float sinLon = sinf(lon0), cosLon = cosf(lon0);
+
+        float relx = -sinLon * dx + cosLon * dy;                      // East
+        float rely = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
+        float relz =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
+        return {relx, rely, relz};
+    }
+    
     void trackingUpdate(){
         // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
         float x_position = trackingState[0];
@@ -100,6 +144,18 @@ namespace Rotator {
      void setTrackingPoint(Comms::Packet packet, uint8_t ip){
         // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
         // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
+        PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
+        float lat = parsed_packet.m_Latitude;
+        float lon = parsed_packet.m_Longitude;
+        float att = parsed_packet.m_Altitude;
+
+        float rocketPosition[] = {lat,lon,att};
+        trackingState[0] = gpsSeparationENU(rocketPosition, launchPosition)[0];
+        trackingState[3] = gpsSeparationENU(rocketPosition, launchPosition)[1];
+        trackingState[6] = gpsSeparationENU(rocketPosition, launchPosition)[2];
+
+        trackingUpdate();
+
         Serial.println("Updating tracking");
         Serial.println("Update azimuth reference position to ");
         Serial.println(aziRefPos);
@@ -246,6 +302,7 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
         Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
+        Comms::registerCallback(PACKET_ID_GPSValues, setTrackingPoint);
     }
 
     uint32_t updateAndMove(){
@@ -307,46 +364,6 @@ namespace Rotator {
         bool flags[] = {tracking, diagnostic};
         return flags;
     }*/
-
-    void gpsToECEF(float lat, float lon, float alt, float &x, float &y, float &z) {
-        const float a = 6378137.0f;           // WGS84 semi-major axis
-        const float e2 = 6.69437999014e-3f;   // first eccentricity squared
-        const float deg2rad = M_PI / 180.0f;
-
-        float latRad = lat * deg2rad;
-        float lonRad = lon * deg2rad;
-
-        float N = a / sqrtf(1.0f - e2 * sinf(latRad) * sinf(latRad));
-
-        x = (N + alt) * cosf(latRad) * cosf(lonRad);
-        y = (N + alt) * cosf(latRad) * sinf(lonRad);
-        z = (N * (1.0f - e2) + alt) * sinf(latRad);
-    } // from chatgpt
-
-    // Compute local ENU separation between two GPS coordinates
-    // gps1 = reference point (lat, lon, alt)
-    // gps2 = target point (lat, lon, alt)
-    // enu[3] = output {East, North, Up} in meters
-    void gpsSeparationENU(const float gps1[3], const float gps2[3], float enu[3]) {
-        float x1, y1, z1, x2, y2, z2;
-        gpsToECEF(gps1[0], gps1[1], gps1[2], x1, y1, z1);
-        gpsToECEF(gps2[0], gps2[1], gps2[2], x2, y2, z2);
-
-        float dx = x2 - x1;
-        float dy = y2 - y1;
-        float dz = z2 - z1;
-
-        // Convert ECEF delta to ENU relative to gps1
-        const float deg2rad = M_PI / 180.0f;
-        float lat0 = gps1[0] * deg2rad;
-        float lon0 = gps1[1] * deg2rad;
-
-        float sinLat = sinf(lat0), cosLat = cosf(lat0);
-        float sinLon = sinf(lon0), cosLon = cosf(lon0);
-
-        enu[0] = -sinLon * dx + cosLon * dy;                      // East
-        enu[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
-        enu[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
-    } // from chatgpt
+     // from chatgpt, I sort of fixed it
 
 }
