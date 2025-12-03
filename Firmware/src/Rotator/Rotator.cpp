@@ -34,7 +34,7 @@ namespace Rotator {
     float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
 
     //Rocket stuff
-    float launchPosition[] = {0,0,0}; // in terms of longitude, latitude, and altitude
+    float launchPosition[] = {35.3472294, -117.8108024, 628}; // in terms of longitude, latitude, and altitude
 
     // Timing for derivatives and tracking updates
     /*uint32_t lastTrackingUpdate, lastMotorTime;
@@ -66,28 +66,30 @@ namespace Rotator {
     float getTrackingState_Z(){
         return [trackingState[6],trackingState[7],trackingState[8]];
     }*/
-    std::array<float, 3> gpsToECEF(float lat, float lon, float alt) {
+    void gpsToECEF(float gps[], float ecef[]) {
         const float a = 6378137.0f;           // WGS84 semi-major axis
         const float e2 = 6.69437999014e-3f;   // first eccentricity squared
         const float deg2rad = M_PI / 180.0f;
 
-        float latRad = lat * deg2rad;
-        float lonRad = lon * deg2rad;
+        float latRad = gps[0] * deg2rad;
+        float lonRad = gps[1] * deg2rad;
+        float alt = gps[2];
 
         float N = a / sqrtf(1.0f - e2 * sinf(latRad) * sinf(latRad));
-        float x = (N + alt) * cosf(latRad) * cosf(lonRad);
-        float y = (N + alt) * cosf(latRad) * sinf(lonRad);
-        float z = (N * (1.0f - e2) + alt) * sinf(latRad);
-        return {x,y,z} ;
-    } // from chatgpt, I sort of fixed it
+        ecef[0] = (N + alt) * cosf(latRad) * cosf(lonRad);
+        ecef[1] = (N + alt) * cosf(latRad) * sinf(lonRad);
+        ecef[2] = (N * (1.0f - e2) + alt) * sinf(latRad);
+    }
 
     // Compute local ENU separation between two GPS coordinates
     // gps1 = reference point (lat, lon, alt)
     // gps2 = target point (lat, lon, alt)
     // enu[3] = output {East, North, Up} in meters
-    std::array<float, 3> gpsSeparationENU(float gps1[], float gps2[]) {
-        std::array<float,3> rocketpos = gpsToECEF(gps1[0], gps1[1], gps1[2]);
-        std::array<float,3> launchpos = gpsToECEF(gps2[0], gps2[1], gps2[2]);
+    void gpsSeparationENU(float gps1[], float gps2[], float out[]) {
+        float rocketpos[3];
+        gpsToECEF(gps1, rocketpos);
+        float launchpos[3];
+        gpsToECEF(gps2, launchpos);
 
         float dx = rocketpos[0] - launchpos[0];
         float dy = rocketpos[1] - launchpos[1];
@@ -101,10 +103,9 @@ namespace Rotator {
         float sinLat = sinf(lat0), cosLat = cosf(lat0);
         float sinLon = sinf(lon0), cosLon = cosf(lon0);
 
-        float relx = -sinLon * dx + cosLon * dy;                      // East
-        float rely = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
-        float relz =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
-        return {relx, rely, relz};
+        out[0] = -sinLon * dx + cosLon * dy;                      // East
+        out[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
+        out[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
     }
     
     void trackingUpdate(){
@@ -142,29 +143,22 @@ namespace Rotator {
         aziRefVel *= 180/M_PI;
         elvRefVel *= 180/M_PI;
     }
+
+    void accelUpdate(Comms::Packet packet, uint8_t ip) {}
         
-     void setTrackingPoint(Comms::Packet packet, uint8_t ip){
-        // Given the rotatorPosition, turn this into azimuth and elevation commands (position and velocity)
-        // Make sure to update elvRefPos, aziRevPos, as well as elvRefVel and aziRefVel
+    void GPSUpdate(Comms::Packet packet, uint8_t ip){
+        if (!tracking) return;
+
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
         float lat = parsed_packet.m_Latitude;
         float lon = parsed_packet.m_Longitude;
-        float att = parsed_packet.m_Altitude;
+        float alt = parsed_packet.m_Altitude;
 
-        float rocketPosition[] = {lat,lon,att};
-        trackingState[0] = gpsSeparationENU(rocketPosition, launchPosition)[0];
-        trackingState[3] = gpsSeparationENU(rocketPosition, launchPosition)[1];
-        trackingState[6] = gpsSeparationENU(rocketPosition, launchPosition)[2];
+        float rocketPosition[] = {lat,lon,alt};
+        float enu[3];
+        gpsSeparationENU(rocketPosition, launchPosition, enu);
 
-        Serial.println("Updating tracking");
-        Serial.println("Update azimuth reference position to ");
-        Serial.println(aziRefPos);
-        Serial.println("Update elevation reference position to ");
-        Serial.println(elvRefPos);
-        Serial.println("Update azimuth reference velocity to ");
-        Serial.println(aziRefVel);
-        Serial.println("Update elevation reference velocity to ");
-        Serial.println(elvRefVel);
+        tracker.GPSUpdate((float) (micros() - trackingStartTime)/1000000.0, enu);
     }
 
     void startDiagnostic(){
@@ -292,15 +286,6 @@ namespace Rotator {
         }
     }
 
-    void accelUpdate(Comms::Packet packet, uint8_t ip) {
-
-    }
-
-    void GPSUpdate(Comms::Packet packet, uint8_t ip) {
-        PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
-        Serial.print(parsed_packet.m_Latitude);
-    }
-
     void init(){
         tracking = false;
         diagnostic = false;
@@ -373,6 +358,4 @@ namespace Rotator {
         bool flags[] = {tracking, diagnostic};
         return flags;
     }*/
-     // from chatgpt, I sort of fixed it
-
 }
