@@ -98,13 +98,6 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_NOS_RQD false
 #endif
 
-#define CHANNEL_AC_IPA_STATIC_PRESS 7
-#ifdef BOARD_AC_1
-#define IS_BOARD_FOR_AC_IPA_STATIC_PRESS true
-#else
-#define IS_BOARD_FOR_AC_IPA_STATIC_PRESS false
-#endif
-
 #define CHANNEL_AC_NOS_GEMS 0
 #ifdef BOARD_AC_2
 #define IS_BOARD_FOR_AC_NOS_GEMS true
@@ -124,6 +117,13 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_NOS_LINE_VENT true
 #else
 #define IS_BOARD_FOR_AC_NOS_LINE_VENT false
+#endif
+
+#define CHANNEL_AC_IPA_PRESS_FLOW 6
+#ifdef BOARD_AC_2
+#define IS_BOARD_FOR_AC_IPA_PRESS_FLOW true
+#else
+#define IS_BOARD_FOR_AC_IPA_PRESS_FLOW false
 #endif
 
 #define CHANNEL_AC_NOS_DRAIN 7
@@ -175,18 +175,11 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_PT_NOS_INJECTOR false
 #endif
 
-#define CHANNEL_PT_NOS_TANK 4
+#define CHANNEL_PT_NOS_TANK 5
 #ifdef BOARD_PT_2
 #define IS_BOARD_FOR_PT_NOS_TANK true
 #else
 #define IS_BOARD_FOR_PT_NOS_TANK false
-#endif
-
-#define CHANNEL_PT_IPA_TANK 5
-#ifdef BOARD_PT_2
-#define IS_BOARD_FOR_PT_IPA_TANK true
-#else
-#define IS_BOARD_FOR_PT_IPA_TANK false
 #endif
 
 #define CHANNEL_PT_CHAMBER 7

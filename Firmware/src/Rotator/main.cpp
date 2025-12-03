@@ -38,10 +38,10 @@ void setup() {
 
   Serial.printf("Setup complete\n");
   digitalWrite(LED_BUILTIN, HIGH);
+}
 
-  while(1) {
-    // main loop here to avoid arduino overhead
-    for(uint32_t i = 0; i < TASK_COUNT; i++) { // for each task, execute if next time >= current time
+void loop() {
+  for(uint32_t i = 0; i < TASK_COUNT; i++) { // for each task, execute if next time >= current time
       uint32_t ticks = micros(); // current time in microseconds
       if (taskTable[i].nexttime - ticks > UINT32_MAX / 2 && taskTable[i].enabled) {
         uint32_t delayoftask = taskTable[i].taskCall();
@@ -54,7 +54,4 @@ void setup() {
     }
     // delayMicroseconds(10);
     Comms::processWaitingPackets();
-  }
-}
-
-void loop() {} // unused
+} // arduino overhead is fake, having to upload twice is real

@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <TeensyComms.h>
 #include "Util/PIDController.h"
+#include "Util/codegen_KF/CombinedTracker.h"
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_RTRotatorState.h"
 #include "../proto/include/Packet_RTSetElevation.h"
@@ -10,13 +11,8 @@
 #include "../proto/include/Packet_RTFlightTracking.h"
 #include "../proto/include/Packet_RTRunDiagnostic.h"
 #include "../proto/include/Packet_RTEnableFlightTracking.h"
-<<<<<<< HEAD
-#include "../proto/include/Packet_GPSValues.h"
-
-=======
 #include "../proto/include/Packet_LowIMUValues.h"
 #include "../proto/include/Packet_GPSValues.h"
->>>>>>> fe0fb2b6fff59e6452970b185d0d2b6882546e62
 
 namespace Rotator {
     void init();

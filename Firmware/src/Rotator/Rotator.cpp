@@ -28,6 +28,8 @@ namespace Rotator {
     float aziMaxPower = 0.2;
 
     // Tracking stuff
+    CombinedTracker tracker;
+    uint32_t trackingStartTime;
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
 
@@ -35,8 +37,8 @@ namespace Rotator {
     float launchPosition[] = {0,0,0}; // in terms of longitude, latitude, and altitude
 
     // Timing for derivatives and tracking updates
-    uint32_t lastTrackingUpdate, lastMotorTime;
-    float elvLastPos, aziLastPos, motorDt;
+    /*uint32_t lastTrackingUpdate, lastMotorTime;
+    float elvLastPos, aziLastPos, motorDt;*/
 
     // Diagnostic stuff
     uint8_t diagnosticStep = 0;
@@ -47,6 +49,8 @@ namespace Rotator {
 
     void startTracking(){
         tracking = true;
+        trackingStartTime = micros();
+        tracker.init();
     }
 
     void stopTracking(){
@@ -104,7 +108,8 @@ namespace Rotator {
     }
     
     void trackingUpdate(){
-        // TODO: Assume the trackingState array is updated with the X, Y, Z positions and accelerations (all X first, then all Y, then all Z)
+        tracker.extrapolate((float) (micros() - trackingStartTime)/1000000.0, trackingState);
+
         float x_position = trackingState[0];
         float x_velocity = trackingState[1];
         float y_position = trackingState[3];
@@ -115,30 +120,27 @@ namespace Rotator {
         float x_rotator = rotatorPosition[0];
         float y_rotator = rotatorPosition[1];
         float z_rotator = rotatorPosition[2];
-        float distance_from_rocket = sqrt(pow(x_position-x_rotator,2.0)+pow(y_position-y_rotator,2.0));
-        float total_distance_from_rocket = sqrt(pow(x_position-x_rotator,2.0)+pow(y_position-y_rotator,2.0) + pow(z_position-z_rotator,2.0));
-
+        
         float delta_x = x_position-x_rotator;
         float delta_y = y_position-y_rotator;
         float delta_z = z_position-z_rotator;
 
+        float distance_from_rocket = sqrt(pow(delta_x,2.0)+pow(delta_y,2.0));
+        float total_distance_from_rocket = sqrt(pow(distance_from_rocket,2.0) + pow(delta_z,2.0));
+
         const float MIN_DISTANCE_THRESHOLD = 0.01;
-        if (distance_from_rocket < MIN_DISTANCE_THRESHOLD) {
-            aziRefVel = 0.0;
-            elvRefVel = 0.0;
-        }
-        else { 
-            aziRefPos = 180/M_PI * atan2((delta_y),(delta_x));
-            elvRefPos = 180/M_PI * asin((delta_z)/sqrt(pow(distance_from_rocket,2.0)+pow(delta_z,2.0)));
+        if (total_distance_from_rocket < MIN_DISTANCE_THRESHOLD) return;
+        
+        aziRefPos = 180/M_PI * atan2(delta_y,delta_x);
+        elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket);
 
-            aziRefPos = fmod(aziRefPos + 360.0, 360.0); //convert from -180 to 180 to 0 to 360
-            elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
-            aziRefVel = (y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
-            elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
+        aziRefPos = fmod(aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
+        // elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
+        aziRefVel = (y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
+        elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
 
-            aziRefVel *= 180/M_PI;
-            elvRefVel *= 180/M_PI;
-        }
+        aziRefVel *= 180/M_PI;
+        elvRefVel *= 180/M_PI;
     }
         
      void setTrackingPoint(Comms::Packet packet, uint8_t ip){
@@ -153,8 +155,6 @@ namespace Rotator {
         trackingState[0] = gpsSeparationENU(rocketPosition, launchPosition)[0];
         trackingState[3] = gpsSeparationENU(rocketPosition, launchPosition)[1];
         trackingState[6] = gpsSeparationENU(rocketPosition, launchPosition)[2];
-
-        trackingUpdate();
 
         Serial.println("Updating tracking");
         Serial.println("Update azimuth reference position to ");
@@ -199,7 +199,6 @@ namespace Rotator {
     void setElvSetpoint(Comms::Packet packet, uint8_t ip){
         stopTracking();
         stopDiagnostic();
-        // TODO: Unwrap an RTSetElevation packet and update the elvRefPos variable
         PacketRTSetElevation parsed_packet = PacketRTSetElevation::fromRawPacket(&packet);
         elvRefPos = parsed_packet.m_Degrees;
         Serial.print("Set elevation setpoint to ");
@@ -209,7 +208,6 @@ namespace Rotator {
     void setAziSetpoint(Comms::Packet packet, uint8_t ip){
         stopTracking();
         stopDiagnostic();
-        // TODO: Unwrap an RTSetAzimuth packet and update the aziRefPos variable
         PacketRTSetAzimuth parsed_packet = PacketRTSetAzimuth::fromRawPacket(&packet);
         aziRefPos = parsed_packet.m_Degrees;
         Serial.print("Set azimuth setpoint to ");
@@ -276,8 +274,8 @@ namespace Rotator {
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
         //emit packet 
-        //Comms::emitPacketToGS(&newpacket);
-    } // TODO: emit trackingState[] as an RTTrackingState packet
+        Comms::emitPacketToGS(&newpacket);
+    }
 
     
     // if we are at 330, and we want to go to 0, there are two options: go forward 30 degrees, or backward 330 degrees
@@ -311,17 +309,14 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
         Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
-<<<<<<< HEAD
-        Comms::registerCallback(PACKET_ID_GPSValues, setTrackingPoint);
-=======
         Comms::registerCallback(PACKET_ID_LowIMUValues, accelUpdate);
         Comms::registerCallback(PACKET_ID_GPSValues, GPSUpdate);
->>>>>>> fe0fb2b6fff59e6452970b185d0d2b6882546e62
     }
 
     uint32_t updateAndMove(){
         if (tracking) { // tracking mode
             trackingUpdate();
+            sendTrackingState();
         } else if (diagnostic) { // diagnostic mode
             diagnosticUpdate();
         } else { // idle mode
@@ -334,7 +329,7 @@ namespace Rotator {
         aziRefPos = fmod(aziRefPos, 360.0);
         // Serial.println("done with updates");
         
-        motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
+        // motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
 
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = HAL::getSlope_0() * 1000 * 1000;
@@ -365,9 +360,9 @@ namespace Rotator {
         Serial.print(" Azi power: ");
         Serial.println(aziPower, 5);*/
 
-        lastMotorTime = micros();
+        /*lastMotorTime = micros();
         elvLastPos = elvPos;
-        aziLastPos = aziPos;
+        aziLastPos = aziPos;*/
 
         sendRotatorState();
 
