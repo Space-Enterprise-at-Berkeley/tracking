@@ -5,7 +5,7 @@
 // File: _coder_codegenTest_api.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef _CODER_CODEGENTEST_API_H
@@ -23,10 +23,13 @@ extern emlrtCTX emlrtRootTLSGlobal;
 extern emlrtContext emlrtContextGlobal;
 
 // Function Declarations
-void codegenTest(real_T testGPS[3], real_T testGPStime, real_T testAccel[3],
-                 real_T testAcceltime, real_T testExtrapolate, real_T state[9]);
+void codegenTest(real32_T testGPS[3], real32_T testGPStime,
+                 real32_T testAccel[3], real32_T testAcceltime,
+                 real32_T testExtrapolate, real32_T testProcessNoise[9],
+                 real32_T testGPSNoise[9], real32_T testAccelNoise[9],
+                 real32_T state[9]);
 
-void codegenTest_api(const mxArray *const prhs[5], const mxArray **plhs);
+void codegenTest_api(const mxArray *const prhs[8], const mxArray **plhs);
 
 void codegenTest_atexit();
 

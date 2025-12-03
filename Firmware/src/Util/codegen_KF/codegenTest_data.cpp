@@ -5,7 +5,7 @@
 // File: codegenTest_data.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 // Include Files
@@ -15,8 +15,6 @@
 // Variable Definitions
 const signed char iv[27]{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
                          0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0};
-
-const signed char iv1[9]{1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 //
 // File trailer for codegenTest_data.cpp

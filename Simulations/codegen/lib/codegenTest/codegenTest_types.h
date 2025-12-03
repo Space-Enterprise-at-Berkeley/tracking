@@ -5,7 +5,7 @@
 // File: codegenTest_types.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef CODEGENTEST_TYPES_H

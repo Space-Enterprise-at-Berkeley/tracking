@@ -5,7 +5,7 @@
 // File: codegenTest.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef CODEGENTEST_H
@@ -17,9 +17,11 @@
 #include <cstdlib>
 
 // Function Declarations
-extern void codegenTest(const double testGPS[3], double testGPStime,
-                        const double testAccel[3], double testAcceltime,
-                        double testExtrapolate, double state[9]);
+extern void codegenTest(const float testGPS[3], float testGPStime,
+                        const float testAccel[3], float testAcceltime,
+                        float testExtrapolate, const float testProcessNoise[9],
+                        const float testGPSNoise[9],
+                        const float testAccelNoise[9], float state[9]);
 
 #endif
 //

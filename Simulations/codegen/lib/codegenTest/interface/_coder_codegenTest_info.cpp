@@ -5,7 +5,7 @@
 // File: _coder_codegenTest_info.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 // Include Files
@@ -25,34 +25,35 @@ static const mxArray *emlrtMexFcnResolvedFunctionsInfo()
 {
   const mxArray *nameCaptureInfo;
   const char_T *data[8]{
-      "789ced58c16ed330184ea7814088ad17380f69b78a4a6352071c9058b675536957483ab4"
-      "3593ea265eebd5b1bbc459530924de8057e0c615de8037e008070ebc"
-      "002fc08974a9dbc6284a454ab676fd2feedfcffebfdfbfedafaea5d45e312549d292e49b"
-      "fbc06feff6fd74bf5d908226e2a97e7b53f0b9dd901603e338febedf",
-      "ea9430e832df21c08483910635110184a9dd36942c68537c0e8d0be40461a822132aa34e"
-      "a9e7993b23d0c0e941bdcf7213ea2dc53125ab690f33c4a3cea01eb5"
-      "90f92e46d44334b11e623fced7fe473e1eff4e041fc7756ac006242ab45980bf16933f6c"
-      "fdd37dc4a04e1dc321dfa7987c2f42f9827875fb587eaa556c68d91a",
-      "868476e80aeb20d26a0343dba2ba6342c26c4dd9ded49805f416220d4d41a683014394d8"
-      "da48b9b2662f5e54bd96c7cc5f6c87fd6ff97578f92395241f597fb8"
-      "94241fb7cbe27343e28dbbffee87f0a505dc50d1d1e16bf595ab16f36047c9b96e1b1d6e"
-      "0ef32847f044e52185f849c59ff6731c577797055fcc9fe33235eb88",
-      "4043ed6507ad4bfb9d89bb5e65c117f9385e9563ad9750aeac99944e2c24acbbbf3ee6be"
-      "26c9c76d5a75f75e085f5ac0d79bbbe5c65197e61e35f6cfe50ed926"
-      "1b9b6bd2ece8eecf90f1e3d6f16d48fcb48057f7e4e35513300cea16a56c556394e23a75"
-      "35bb092c680c4fef89637b2717a3ba96f1bbf73b64063d32c8bbea5b",
-      "04602de3771e0c2eec1469efdc173d95c61586306208da1742cde7fb21e67c9f45cc97e3"
-      "a3b967797e599e79d64f3c5b00d804c4fb4fe17d3d92ba7d79f7e9ef"
-      "31f93aa17c41bcba57fa7ffb21acacde4e484aafde7cfe96a8febffbfd2493241fb769d5"
-      "ff71efddcd8dd641611fae9d36dcc7f259d371cc62e5f9d6ece87f2d",
-      "64fc557d9fb81dc1c7f17c59a9b40dc0f83bd055b9a77f89c95f8de0e778757fc217e754"
-      "b0a2d74567669d2f291dad1c950e727965ebb4b47b56396d74cb60bd"
-      "ace7e73a2ada557be705baee5da5ff3ef7d3aea3c711fc1c9fbc8e062b7a5d7466d6f9e6"
-      "3a3a99f8b590f1d3aea3d0f5e4a14df15c4727a5a3c18a5e179d9975",
-      "beb98ec68bff074e5e0429",
+      "789ced59cd6ed340107650f91382f6c48113878a4ba4a082d402072470faa736a9859342"
+      "1a578a636f934d76bda9bda66e05126f80e0ca85478037e899178003"
+      "071e01891b279c3a9bd82b2c4738b88993b96c26dfce7cb363efe78d2364360b1941106e"
+      "089e9ddef1c6eb3d7fa1375e1082c6e399de7899f3995d14e602710c",
+      "7fdb1b356250e050cf31540cfa913ac1d0500d5a3aee00c10416412f817e861c40044a10"
+      "03d9ef14bb1e5ef3417da70b753f8b4da0b5651b0b66d31a5488fc4e"
+      "bf1fb590f5ce45f48337be1ffc3cc6d7f9473e96ff5a041fc335a28306304ac0a201fe5a"
+      "4cfe4ba1fc1e6241a381c080ef534cbeed50be205e5ddd171f29650b",
+      "98968280418ec86d7a048d7647d5953cd16c0c0c6a29f2ea53859aaad676ab5464886da4"
+      "52480c4bf1b52b87bbf9a2fa353f64fdfc38987fe56cfca97dcf24c9"
+      "77ebdd970f49f2313b2f3e2724dfb0f7dfcd10be050ea7ad0a2a18385f795159914e4ee0"
+      "52e519decd0fea902278a2ea1042fca4f24ffa3e8eabbbf39ccfd7cf",
+      "7091e03a34805eea5607cc737bcec4bd5e12e7f37c0caf8ab1ae17d7ae1c4eabee3a777f"
+      "bd4f928f59da75b72dc9cb85fc73676fe99e93374b25b180b7f1467a"
+      "74f74748fcb07d7c1d927f81c3ab9be2fe22562952eb26217451a184a03a7114aba99a40"
+      "1fecde03db72772e827525eb4def4dc8f66764a17bd4370d1529596f",
+      "723f786bad40bafbbee0aa342a53882085c03a136ab6de8f31d7fb3862bd0cf7d79e63f5"
+      "e558e539aff0dc968ab06ab8bf29dcaf7da55bc99da77562d7fde7e9"
+      "6f31f98e42f9827875b3f8ffee87b0b6ba7742527af5eaf3d744f5ffcdef87d924f998a5"
+      "5dff9b2bedddad1db0d46a380fc4c3a66de342f9498aceddb590f871",
+      "7d3f7135828fe116a045022dc0dec98ccb39fd34267f35829fe1d59d111f9c33c18e4e8b"
+      "cea49d2f291d2def157797d7e57cabb871586e358e25f5bea4adcf74"
+      "94b771d3d175492e777495b2f7e9331d8daba3c18e4e8bcea49d6fa6a3a3c95f0b891f57"
+      "1d1df6ff3255d300facbbe9f741ddd8fe067f8e87534d8d169d199b4",
+      "f3cd747434f96b21f193aea3c071e5a143d04c4747a5a3c18e4e8bcea49d6fa6a3f1f2ff"
+      "017eff45a0",
       ""};
   nameCaptureInfo = nullptr;
-  emlrtNameCaptureMxArrayR2016a(&data[0], 8592U, &nameCaptureInfo);
+  emlrtNameCaptureMxArrayR2016a(&data[0], 9944U, &nameCaptureInfo);
   return nameCaptureInfo;
 }
 
@@ -92,11 +93,11 @@ mxArray *emlrtMexFcnProperties()
       110U, 100U, 108U, 101U, 0U,   0U,   0U,   0U,   0U,   0U,   0U,   0U};
   xEntryPoints =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&epFieldName[0]);
-  xInputs = emlrtCreateLogicalMatrix(1, 5);
+  xInputs = emlrtCreateLogicalMatrix(1, 8);
   emlrtSetField(xEntryPoints, 0, "QualifiedName",
                 emlrtMxCreateString("codegenTest"));
   emlrtSetField(xEntryPoints, 0, "NumberOfInputs",
-                emlrtMxCreateDoubleScalar(5.0));
+                emlrtMxCreateDoubleScalar(8.0));
   emlrtSetField(xEntryPoints, 0, "NumberOfOutputs",
                 emlrtMxCreateDoubleScalar(1.0));
   emlrtSetField(xEntryPoints, 0, "ConstantInputs", xInputs);
@@ -106,7 +107,7 @@ mxArray *emlrtMexFcnProperties()
           "C:\\Users\\lenowo "
           "twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegenTest.m"));
   emlrtSetField(xEntryPoints, 0, "TimeStamp",
-                emlrtMxCreateDoubleScalar(739929.62820601847));
+                emlrtMxCreateDoubleScalar(739953.71061342594));
   emlrtSetField(xEntryPoints, 0, "Visible", emlrtMxCreateLogicalScalar(true));
   xResult =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&propFieldName[0]);
@@ -115,7 +116,7 @@ mxArray *emlrtMexFcnProperties()
   emlrtSetField(xResult, 0, "ResolvedFunctions",
                 (mxArray *)emlrtMexFcnResolvedFunctionsInfo());
   emlrtSetField(xResult, 0, "Checksum",
-                emlrtMxCreateString("ExQUv12UgRSjvucc3qfjlC"));
+                emlrtMxCreateString("PQFGY7LPtmotbzuagPpyD"));
   emlrtSetField(xResult, 0, "EntryPoints", xEntryPoints);
   emlrtSetField(xResult, 0, "AuxData",
                 emlrtMxCreateRowVectorUINT8((const uint8_T *)&v, 216U));

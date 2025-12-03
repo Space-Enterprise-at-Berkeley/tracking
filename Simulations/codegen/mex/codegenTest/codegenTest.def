@@ -1,0 +1,9 @@
+LIBRARY codegenTest.mexw64
+EXPORTS
+mexFunction
+mexfilerequiredapiversion
+emlrtMexFcnProperties
+codegenTest
+codegenTest_initialize
+codegenTest_terminate
+codegenTest_atexit

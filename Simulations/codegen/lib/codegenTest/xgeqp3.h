@@ -5,7 +5,7 @@
 // File: xgeqp3.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef XGEQP3_H
@@ -20,7 +20,7 @@
 namespace coder {
 namespace internal {
 namespace lapack {
-int xgeqp3(double A_data[], const int A_size[2], double tau_data[],
+int xgeqp3(float A_data[], const int A_size[2], float tau_data[],
            int jpvt_data[], int jpvt_size[2]);
 
 }

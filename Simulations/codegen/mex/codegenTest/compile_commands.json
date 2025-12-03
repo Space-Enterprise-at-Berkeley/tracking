@@ -1,0 +1,188 @@
+[
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  codegenTest_data.c -o build/win64/codegenTest_data.o",
+    "file": "codegenTest_data.c",
+    "output": "build/win64/codegenTest_data.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  rt_nonfinite.c -o build/win64/rt_nonfinite.o",
+    "file": "rt_nonfinite.c",
+    "output": "build/win64/rt_nonfinite.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  codegenTest_initialize.c -o build/win64/codegenTest_initialize.o",
+    "file": "codegenTest_initialize.c",
+    "output": "build/win64/codegenTest_initialize.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  codegenTest_terminate.c -o build/win64/codegenTest_terminate.o",
+    "file": "codegenTest_terminate.c",
+    "output": "build/win64/codegenTest_terminate.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  codegenTest.c -o build/win64/codegenTest.o",
+    "file": "codegenTest.c",
+    "output": "build/win64/codegenTest.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  validateattributes.c -o build/win64/validateattributes.o",
+    "file": "validateattributes.c",
+    "output": "build/win64/validateattributes.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  warning.c -o build/win64/warning.o",
+    "file": "warning.c",
+    "output": "build/win64/warning.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xnrm2.c -o build/win64/xnrm2.o",
+    "file": "xnrm2.c",
+    "output": "build/win64/xnrm2.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  KalmanFilter.c -o build/win64/KalmanFilter.o",
+    "file": "KalmanFilter.c",
+    "output": "build/win64/KalmanFilter.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  checkCovariance.c -o build/win64/checkCovariance.o",
+    "file": "checkCovariance.c",
+    "output": "build/win64/checkCovariance.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  anyNonFinite.c -o build/win64/anyNonFinite.o",
+    "file": "anyNonFinite.c",
+    "output": "build/win64/anyNonFinite.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  eigStandard.c -o build/win64/eigStandard.o",
+    "file": "eigStandard.c",
+    "output": "build/win64/eigStandard.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  trackingKF.c -o build/win64/trackingKF.o",
+    "file": "trackingKF.c",
+    "output": "build/win64/trackingKF.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  mtimes.c -o build/win64/mtimes.o",
+    "file": "mtimes.c",
+    "output": "build/win64/mtimes.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  qrsolve.c -o build/win64/qrsolve.o",
+    "file": "qrsolve.c",
+    "output": "build/win64/qrsolve.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_codegenTest_api.c -o build/win64/_coder_codegenTest_api.o",
+    "file": "interface/_coder_codegenTest_api.c",
+    "output": "build/win64/_coder_codegenTest_api.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_codegenTest_mex.c -o build/win64/_coder_codegenTest_mex.o",
+    "file": "interface/_coder_codegenTest_mex.c",
+    "output": "build/win64/_coder_codegenTest_mex.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  eml_int_forloop_overflow_check.c -o build/win64/eml_int_forloop_overflow_check.o",
+    "file": "eml_int_forloop_overflow_check.c",
+    "output": "build/win64/eml_int_forloop_overflow_check.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xzlarfg.c -o build/win64/xzlarfg.o",
+    "file": "xzlarfg.c",
+    "output": "build/win64/xzlarfg.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xzlascl.c -o build/win64/xzlascl.o",
+    "file": "xzlascl.c",
+    "output": "build/win64/xzlascl.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xgemv.c -o build/win64/xgemv.o",
+    "file": "xgemv.c",
+    "output": "build/win64/xgemv.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xgerc.c -o build/win64/xgerc.o",
+    "file": "xgerc.c",
+    "output": "build/win64/xgerc.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xzlarf.c -o build/win64/xzlarf.o",
+    "file": "xzlarf.c",
+    "output": "build/win64/xzlarf.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xhseqr.c -o build/win64/xhseqr.o",
+    "file": "xhseqr.c",
+    "output": "build/win64/xhseqr.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xdlanv2.c -o build/win64/xdlanv2.o",
+    "file": "xdlanv2.c",
+    "output": "build/win64/xdlanv2.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xzgebal.c -o build/win64/xzgebal.o",
+    "file": "xzgebal.c",
+    "output": "build/win64/xzgebal.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xswap.c -o build/win64/xswap.o",
+    "file": "xswap.c",
+    "output": "build/win64/xswap.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  xdlahqr.c -o build/win64/xdlahqr.o",
+    "file": "xdlahqr.c",
+    "output": "build/win64/xdlahqr.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  mrdivide_helper.c -o build/win64/mrdivide_helper.o",
+    "file": "mrdivide_helper.c",
+    "output": "build/win64/mrdivide_helper.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  interface/_coder_codegenTest_info.c -o build/win64/_coder_codegenTest_info.o",
+    "file": "interface/_coder_codegenTest_info.c",
+    "output": "build/win64/_coder_codegenTest_info.o"
+  },
+  {
+    "directory": "C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest",
+    "command": "C:\\ProgramData\\MATLAB\\SupportPackages\\R2025b\\3P.instrset\\mingw_w64.instrset\\bin\\gcc -c -fexceptions -fno-omit-frame-pointer -m64 -DMATLAB_MEX_FILE  -DMATLAB_MEX_FILE -O2 -fwrapv -DNDEBUG -std=c99 -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\" -I \"C:\\Users\\lenowo twinkpad\\Documents\\SEB\\tracking\\Simulations\\codegen\\mex\\codegenTest\\interface\" -I \"C:\\Program Files\\MATLAB\\R2025b\\extern\\include\" -I \".\" -DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE -DMW_HAVE_LAPACK_DECLS -DMODEL=codegenTest_mex -D__USE_MINGW_ANSI_STDIO=1 -msse2 -fno-predictive-commoning -Wno-stringop-overflow -Wno-maybe-uninitialized -fopenmp  \"C:/Program Files/MATLAB/R2025b/extern/version/c_mexapi_version.c\" -o build/win64/c_mexapi_version.o",
+    "file": "C:/Program Files/MATLAB/R2025b/extern/version/c_mexapi_version.c",
+    "output": "build/win64/c_mexapi_version.o"
+  }
+]

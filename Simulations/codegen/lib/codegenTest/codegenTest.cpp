@@ -5,7 +5,7 @@
 // File: codegenTest.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 // Include Files
@@ -15,29 +15,28 @@
 
 // Function Definitions
 //
-// function state = codegenTest(testGPS, testGPStime, testAccel, testAcceltime,
-// testExtrapolate)
-//
-// Arguments    : const double testGPS[3]
-//                double testGPStime
-//                const double testAccel[3]
-//                double testAcceltime
-//                double testExtrapolate
-//                double state[9]
+// Arguments    : const float testGPS[3]
+//                float testGPStime
+//                const float testAccel[3]
+//                float testAcceltime
+//                float testExtrapolate
+//                const float testProcessNoise[9]
+//                const float testGPSNoise[9]
+//                const float testAccelNoise[9]
+//                float state[9]
 // Return Type  : void
 //
-void codegenTest(const double testGPS[3], double testGPStime,
-                 const double testAccel[3], double testAcceltime,
-                 double testExtrapolate, double state[9])
+void codegenTest(const float testGPS[3], float testGPStime,
+                 const float testAccel[3], float testAcceltime,
+                 float testExtrapolate, const float testProcessNoise[9],
+                 const float testGPSNoise[9], const float testAccelNoise[9],
+                 float state[9])
 {
   CombinedTracker testTracker;
-  // 'codegenTest:2' testTracker = CombinedTracker();
   testTracker.init();
-  // 'codegenTest:3' GPSUpdate(testTracker, testGPStime, testGPS);
+  testTracker.setNoises(testProcessNoise, testGPSNoise, testAccelNoise);
   testTracker.GPSUpdate(testGPStime, testGPS);
-  // 'codegenTest:4' accelUpdate(testTracker, testAcceltime, testAccel);
   testTracker.accelUpdate(testAcceltime, testAccel);
-  // 'codegenTest:5' state = extrapolate(testTracker, testExtrapolate);
   testTracker.extrapolate(testExtrapolate, state);
 }
 

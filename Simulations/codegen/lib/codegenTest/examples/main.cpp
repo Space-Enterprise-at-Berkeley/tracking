@@ -5,7 +5,7 @@
 // File: main.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 /*************************************************************************/
@@ -36,35 +36,53 @@
 // Include Files
 #include "main.h"
 #include "codegenTest.h"
+#include "codegenTest_initialize.h"
+#include "codegenTest_terminate.h"
 #include "rt_nonfinite.h"
 
 // Function Declarations
-static void argInit_1x3_real_T(double result[3]);
+static void argInit_1x3_real32_T(float result[3]);
 
-static double argInit_real_T();
+static void argInit_3x3_real32_T(float result[9]);
+
+static float argInit_real32_T();
 
 // Function Definitions
 //
-// Arguments    : double result[3]
+// Arguments    : float result[3]
 // Return Type  : void
 //
-static void argInit_1x3_real_T(double result[3])
+static void argInit_1x3_real32_T(float result[3])
 {
   // Loop over the array to initialize each element.
   for (int idx1{0}; idx1 < 3; idx1++) {
     // Set the value of the array element.
     // Change this value to the value that the application requires.
-    result[idx1] = argInit_real_T();
+    result[idx1] = argInit_real32_T();
+  }
+}
+
+//
+// Arguments    : float result[9]
+// Return Type  : void
+//
+static void argInit_3x3_real32_T(float result[9])
+{
+  // Loop over the array to initialize each element.
+  for (int i{0}; i < 9; i++) {
+    // Set the value of the array element.
+    // Change this value to the value that the application requires.
+    result[i] = argInit_real32_T();
   }
 }
 
 //
 // Arguments    : void
-// Return Type  : double
+// Return Type  : float
 //
-static double argInit_real_T()
+static float argInit_real32_T()
 {
-  return 0.0;
+  return 0.0F;
 }
 
 //
@@ -74,9 +92,15 @@ static double argInit_real_T()
 //
 int main(int, char **)
 {
+  // Initialize the application.
+  // You do not need to do this more than one time.
+  codegenTest_initialize();
   // Invoke the entry-point functions.
   // You can call entry-point functions multiple times.
   main_codegenTest();
+  // Terminate the application.
+  // You do not need to do this more than one time.
+  codegenTest_terminate();
   return 0;
 }
 
@@ -86,17 +110,23 @@ int main(int, char **)
 //
 void main_codegenTest()
 {
-  double state[9];
-  double testGPS_tmp[3];
-  double testGPStime_tmp;
+  float state[9];
+  float testProcessNoise_tmp[9];
+  float testGPS_tmp[3];
+  float testGPStime_tmp;
   // Initialize function 'codegenTest' input arguments.
   // Initialize function input argument 'testGPS'.
-  argInit_1x3_real_T(testGPS_tmp);
-  testGPStime_tmp = argInit_real_T();
+  argInit_1x3_real32_T(testGPS_tmp);
+  testGPStime_tmp = argInit_real32_T();
   // Initialize function input argument 'testAccel'.
+  // Initialize function input argument 'testProcessNoise'.
+  argInit_3x3_real32_T(testProcessNoise_tmp);
+  // Initialize function input argument 'testGPSNoise'.
+  // Initialize function input argument 'testAccelNoise'.
   // Call the entry-point 'codegenTest'.
   codegenTest(testGPS_tmp, testGPStime_tmp, testGPS_tmp, testGPStime_tmp,
-              testGPStime_tmp, state);
+              testGPStime_tmp, testProcessNoise_tmp, testProcessNoise_tmp,
+              testProcessNoise_tmp, state);
 }
 
 //

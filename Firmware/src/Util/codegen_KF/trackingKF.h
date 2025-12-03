@@ -5,7 +5,7 @@
 // File: trackingKF.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef TRACKINGKF_H
@@ -20,43 +20,33 @@
 namespace coder {
 class trackingKF {
 public:
-  trackingKF *init();
-  void set_MeasurementNoise();
-  void predict(double varargin_1);
-  void setupInitialDistributions();
-  void get_MeasurementModel(double value_data[], int value_size[2]) const;
-  void predict(const double varargin_1[81], const double varargin_2[27]);
-  void correct(const double z[3]);
-  void KalmanFilter_correct(const double z[3]);
-  void get_MeasurementNoise(double value_data[], int value_size[2]) const;
-
-protected:
-  void setMeasurementNoise(const double val_data[]);
-  void ensureMethodDefinition();
-  void ensureSmootherStateSizeIsDefined();
-
-private:
-  trackingKF *LinearizedSmoother_init();
-  trackingKF *KalmanFilter_init();
-
-public:
-  double StateTransitionModel[81];
-  double pState[9];
-  double pStateCovariance[81];
-  double pMeasurementModel[27];
-  double pMeasurementNoise[9];
+  trackingKF *init(const float varargin_4[9]);
+  void set_ProcessNoise(const float b_value[9]);
+  void set_MeasurementNoise(const float b_value[9]);
+  void predict(float varargin_1);
+  void correct(const float z[3]);
+  float StateTransitionModel[81];
+  float pState[9];
+  float pStateCovariance[81];
+  float pMeasurementModel[27];
   bool pIsDistributionsSetup;
   bool pIsInitialized;
+  float pSmootherStateSize;
   bool pIsSmootherStateSizeInitialized;
+  bool pWasRetrodicted;
 
 protected:
-  double ProcessNoiseModel[27];
-  double pN;
-  double pV;
-  double pProcessNoise[9];
+  float ProcessNoiseModel[27];
+  float pN;
+  float pV;
+  float pProcessNoise[9];
+  float pMeasurementNoise[9];
+  bool pHasPrediction;
+  float LastJacobian[81];
   bool IsLastJacobianInitialized;
 
 private:
+  bool pIsSmoothingLocked;
   bool pIsStateTransitionLocked;
 };
 

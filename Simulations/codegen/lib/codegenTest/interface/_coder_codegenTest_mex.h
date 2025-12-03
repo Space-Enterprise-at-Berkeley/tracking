@@ -5,7 +5,7 @@
 // File: _coder_codegenTest_mex.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 #ifndef _CODER_CODEGENTEST_MEX_H
@@ -23,7 +23,7 @@ MEXFUNCTION_LINKAGE void mexFunction(int32_T nlhs, mxArray *plhs[],
 emlrtCTX mexFunctionCreateRootTLS();
 
 void unsafe_codegenTest_mexFunction(int32_T nlhs, mxArray *plhs[1],
-                                    int32_T nrhs, const mxArray *prhs[5]);
+                                    int32_T nrhs, const mxArray *prhs[8]);
 
 #endif
 //

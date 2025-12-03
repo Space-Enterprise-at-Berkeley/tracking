@@ -72,6 +72,18 @@
                   <Size type="coderapp.internal.codertype.Dimension"/>
                   <Size type="coderapp.internal.codertype.Dimension"/>
                 </Types>
+                <Types id="15" type="coderapp.internal.codertype.PrimitiveType">
+                  <ClassName>double</ClassName>
+                  <Size type="coderapp.internal.codertype.Dimension"/>
+                  <Size type="coderapp.internal.codertype.Dimension"/>
+                </Types>
+                <Types id="16" type="coderapp.internal.codertype.PrimitiveType">
+                  <ClassName>double</ClassName>
+                  <Size type="coderapp.internal.codertype.Dimension"/>
+                  <Size type="coderapp.internal.codertype.Dimension">
+                    <Length>3</Length>
+                  </Size>
+                </Types>
               </Types>
             </coderapp.internal.interface.project.Interface>
           </MF0>

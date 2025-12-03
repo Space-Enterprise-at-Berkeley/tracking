@@ -5,7 +5,7 @@
 // File: _coder_codegenTest_mex.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 08-Nov-2025 17:08:58
+// C/C++ source code generated on  : 02-Dec-2025 17:03:31
 //
 
 // Include Files
@@ -44,23 +44,23 @@ emlrtCTX mexFunctionCreateRootTLS()
 // Arguments    : int32_T nlhs
 //                mxArray *plhs[1]
 //                int32_T nrhs
-//                const mxArray *prhs[5]
+//                const mxArray *prhs[8]
 // Return Type  : void
 //
 void unsafe_codegenTest_mexFunction(int32_T nlhs, mxArray *plhs[1],
-                                    int32_T nrhs, const mxArray *prhs[5])
+                                    int32_T nrhs, const mxArray *prhs[8])
 {
   emlrtStack st{
       nullptr, // site
       nullptr, // tls
       nullptr  // prev
   };
-  const mxArray *b_prhs[5];
+  const mxArray *b_prhs[8];
   const mxArray *outputs;
   st.tls = emlrtRootTLSGlobal;
   // Check for proper number of arguments.
-  if (nrhs != 5) {
-    emlrtErrMsgIdAndTxt(&st, "EMLRT:runTime:WrongNumberOfInputs", 5, 12, 5, 4,
+  if (nrhs != 8) {
+    emlrtErrMsgIdAndTxt(&st, "EMLRT:runTime:WrongNumberOfInputs", 5, 12, 8, 4,
                         11, "codegenTest");
   }
   if (nlhs > 1) {
@@ -68,7 +68,7 @@ void unsafe_codegenTest_mexFunction(int32_T nlhs, mxArray *plhs[1],
                         "codegenTest");
   }
   // Call the function.
-  for (int32_T i{0}; i < 5; i++) {
+  for (int32_T i{0}; i < 8; i++) {
     b_prhs[i] = prhs[i];
   }
   codegenTest_api(b_prhs, &outputs);

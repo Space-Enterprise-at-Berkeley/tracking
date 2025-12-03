@@ -4,31 +4,32 @@ classdef CombinedTracker < handle
         State
         Filter
 
-        GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0]
-        GPSNoise = [5 0 0; 0 5 0; 0 0 5]
+        GPSModel
+        GPSNoise
 
-        AccelModel = [0 0 1 0 0 0 0 0 0; 0 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 0 1]
-        AccelNoise = [5 0 0; 0 5 0; 0 0 5]
+        AccelModel
+        AccelNoise
     end
     methods
         function obj = CombinedTracker()
             obj.Time = 0;
             obj.State = [0;0;0;0;0;0;0;0;0];
-            obj.Filter = trackingKF("MotionModel","3D Constant Acceleration");
+
+            obj.GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0];
+            obj.GPSNoise = [5 0 0; 0 5 0; 0 0 5];
+    
+            obj.AccelModel = [0 0 1 0 0 0 0 0 0; 0 0 0 0 0 1 0 0 0; 0 0 0 0 0 0 0 0 1];
+            obj.AccelNoise = [5 0 0; 0 5 0; 0 0 5];
+
+            obj.Filter = trackingKF("MotionModel","3D Constant Acceleration", "State", obj.State);
+        end
+        function setNoises(obj, ProcessNoise, GPSNoise, AccelNoise)
+            obj.Filter.ProcessNoise = ProcessNoise;
+            obj.GPSNoise = GPSNoise;
+            obj.AccelNoise = AccelNoise;
         end
         function state = extrapolate(obj, time)
-            dt = time - obj.Time;
-            dt2 = dt^2/2;
-            transition = [1 dt dt2 0 0  0   0 0  0;
-                          0 1  dt  0 0  0   0 0  0  ;
-                          0 0  1   0 0  0   0 0  0  ;
-                          0 0  0   1 dt dt2 0 0  0  ;
-                          0 0  0   0 1  dt  0 0  0  ;
-                          0 0  0   0 0  1   0 0  0  ;
-                          0 0  0   0 0  0   1 dt dt2;
-                          0 0  0   0 0  0   0 1  dt ;
-                          0 0  0   0 0  0   0 0  1  ];
-            state = transition * obj.State;
+            state = constacc(obj.State, time-obj.Time);
         end
         function obj = GPSUpdate(obj, time, value)
             obj.Filter.MeasurementModel = obj.GPSModel;
