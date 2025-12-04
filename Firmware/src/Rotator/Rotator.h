@@ -11,6 +11,7 @@
 #include "../proto/include/Packet_RTFlightTracking.h"
 #include "../proto/include/Packet_RTRunDiagnostic.h"
 #include "../proto/include/Packet_RTEnableFlightTracking.h"
+#include "../proto/include/Packet_RTZeroAzimuth.h"
 #include "../proto/include/Packet_LowIMUValues.h"
 #include "../proto/include/Packet_GPSValues.h"
 
