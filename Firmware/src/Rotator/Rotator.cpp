@@ -46,7 +46,7 @@ namespace Rotator {
     float elvSequence[] = {30, 60, 90, 120, 150, 30, 30,  30, 30,  30,   30, 30, 90, 150, 30};
     float aziSequence[] = {0,   0,  0,   0,   0,  0, 90, 180, 45, -90, -150,  0, 80, -80,  0};
     uint32_t lastDiagnosticTime;
-    uint32_t diagnosticDelay = 1000 * 1000;
+    uint32_t diagnosticDelay = 1500 * 1000;
 
     void startTracking(){
         launchDetected = false;
@@ -365,8 +365,6 @@ namespace Rotator {
             aziRefVel = 0;
         }
 
-        elvRefPos = fmod(elvRefPos, 360.0);
-        if (elvRefPos < 0) elvRefPos += 360;
         elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);
         aziRefPos = fmod(aziRefPos, 360.0);
         if (aziRefPos < 0) aziRefPos += 360;

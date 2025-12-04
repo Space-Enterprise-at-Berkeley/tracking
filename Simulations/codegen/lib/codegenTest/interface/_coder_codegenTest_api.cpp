@@ -5,7 +5,7 @@
 // File: _coder_codegenTest_api.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 03-Dec-2025 20:32:31
+// C/C++ source code generated on  : 03-Dec-2025 22:04:03
 //
 
 // Include Files
@@ -256,11 +256,11 @@ void codegenTest_api(const mxArray *const prhs[8], const mxArray **plhs)
       nullptr  // prev
   };
   real32_T state[9];
+  real32_T testAccelNoise[9];
   real32_T testGPSNoise[9];
   real32_T testProcessNoise[9];
+  real32_T testAccel[3];
   real32_T testGPS[3];
-  real32_T testAccel;
-  real32_T testAccelNoise;
   real32_T testAcceltime;
   real32_T testExtrapolate;
   real32_T testGPStime;
@@ -268,14 +268,15 @@ void codegenTest_api(const mxArray *const prhs[8], const mxArray **plhs)
   // Marshall function inputs
   emlrt_marshallIn(st, emlrtAliasP(prhs[0]), "testGPS", testGPS);
   testGPStime = emlrt_marshallIn(st, emlrtAliasP(prhs[1]), "testGPStime");
-  testAccel = emlrt_marshallIn(st, emlrtAliasP(prhs[2]), "testAccel");
+  emlrt_marshallIn(st, emlrtAliasP(prhs[2]), "testAccel", testAccel);
   testAcceltime = emlrt_marshallIn(st, emlrtAliasP(prhs[3]), "testAcceltime");
   testExtrapolate =
       emlrt_marshallIn(st, emlrtAliasP(prhs[4]), "testExtrapolate");
   b_emlrt_marshallIn(st, emlrtAliasP(prhs[5]), "testProcessNoise",
                      testProcessNoise);
   b_emlrt_marshallIn(st, emlrtAliasP(prhs[6]), "testGPSNoise", testGPSNoise);
-  testAccelNoise = emlrt_marshallIn(st, emlrtAliasP(prhs[7]), "testAccelNoise");
+  b_emlrt_marshallIn(st, emlrtAliasP(prhs[7]), "testAccelNoise",
+                     testAccelNoise);
   // Invoke the target function
   codegenTest(testGPS, testGPStime, testAccel, testAcceltime, testExtrapolate,
               testProcessNoise, testGPSNoise, testAccelNoise, state);

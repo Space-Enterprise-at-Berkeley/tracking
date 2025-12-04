@@ -10,7 +10,7 @@ diffvel = [diffvel, atan2(diffvel(:,2), diffvel(:,1))];
 vel(:,1:2) = vel(:,1) .* [cos(diffvel(:,3)), sin(diffvel(:,3))];
 
 % Generate GPS packets
-FARcoords = [35.3472294, -117.8108024, 628];
+FARcoords = [35.34770595331676, -117.80915328050497, 626.1];
 delay = 1;
 stdev = 15;
 gps = gpsSensor('ReferenceFrame', 'ENU', 'ReferenceLocation',FARcoords,'HorizontalPositionAccuracy',stdev,'VerticalPositionAccuracy',stdev,'VelocityAccuracy',stdev,'DecayFactor',0.95,'SampleRate',1/delay);

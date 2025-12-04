@@ -32,7 +32,8 @@ namespace HAL {
     void motorMovement(Comms::Packet packet, uint8_t ip){
         PacketRTEnableRotation parsed_packet = PacketRTEnableRotation::fromRawPacket(&packet);
         allowMotorMovement = parsed_packet.m_Action;
-        Serial.println("Motor enable set to: " + (uint8_t) allowMotorMovement);
+        Serial.print("Motor enable set to: ");
+        Serial.println((uint8_t) allowMotorMovement);
     }
 
     int init() {
@@ -258,7 +259,7 @@ namespace HAL {
 
     void sendPower_1(float power){
         if (encoderFault_1) power = 0;
-        sendPwm(pwm_1, power);
+        sendPwm(pwm_1, -power);
     }
 
     void stop_0() {
@@ -301,7 +302,7 @@ namespace HAL {
 
     uint32_t pushToBuffers(){
         degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 286.4, 360.0));
-        degreeBuff_1->insert(micros(), readDegrees(pulseWidth_1));
+        degreeBuff_1->insert(micros(), 360.0 - readDegrees(pulseWidth_1));
         return PULSE_MAX + 1;
     }
 

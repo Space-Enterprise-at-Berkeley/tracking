@@ -5,17 +5,16 @@
 // File: trackingKF.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 03-Dec-2025 20:32:31
+// C/C++ source code generated on  : 03-Dec-2025 22:04:03
 //
 
 // Include Files
 #include "trackingKF.h"
 #include "KalmanFilter.h"
 #include "codegenTest_data.h"
-#include "eye.h"
 #include "minOrMax.h"
-#include "mrdivide_helper.h"
 #include "rt_nonfinite.h"
+#include "xgeqp3.h"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -25,107 +24,79 @@ static const signed char iv1[9]{1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 // Function Definitions
 //
-// Arguments    : float value_data[]
-//                int value_size[2]
-// Return Type  : void
-//
-namespace coder {
-void trackingKF::get_MeasurementNoise(float value_data[],
-                                      int value_size[2]) const
-{
-  if (pV < 3.0F) {
-    float f;
-    int loop_ub;
-    f = pV;
-    if (f < 1.0F) {
-      loop_ub = 0;
-    } else {
-      loop_ub = static_cast<int>(f);
-    }
-    value_size[0] = loop_ub;
-    value_size[1] = loop_ub;
-    for (int i{0}; i < loop_ub; i++) {
-      for (int i1{0}; i1 < loop_ub; i1++) {
-        value_data[i1 + loop_ub * i] = pMeasurementNoise[i1 + 3 * i];
-      }
-    }
-  } else {
-    value_size[0] = 3;
-    value_size[1] = 3;
-    for (int i{0}; i < 9; i++) {
-      value_data[i] = pMeasurementNoise[i];
-    }
-  }
-}
-
-//
 // Arguments    : const float z[3]
 // Return Type  : void
 //
+namespace coder {
 void trackingKF::correct(const float z[3])
 {
   float P_corr[81];
   float gain[81];
+  float B_data[27];
+  float Y_data[27];
   float a_data[27];
-  float b_data[27];
   float gain_data[27];
-  float tmp_data[27];
-  float b_tmp_data[9];
-  float f;
+  float b_B_data[9];
+  float c_B_data[9];
+  float b_z[3];
+  float s;
+  float temp;
+  int jpvt_data[3];
+  int B_size[2];
   int a_size[2];
-  int b_tmp_size[2];
-  int gain_size[2];
-  int tmp_size[2];
+  int b_B_size[2];
   int b_loop_ub;
-  int c_loop_ub;
+  int jA;
+  int jAcol;
   int loop_ub;
+  int yk;
   if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
+    temp = pN;
+    if (temp < 1.0F) {
       loop_ub = 0;
     } else {
-      loop_ub = static_cast<int>(f);
+      loop_ub = static_cast<int>(temp);
     }
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < loop_ub; i1++) {
-        b_data[i1 + loop_ub * i] = pMeasurementModel[i1 + 3 * i];
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < loop_ub; ijA++) {
+        Y_data[ijA + loop_ub * k] = pMeasurementModel[ijA + 3 * k];
       }
     }
   } else {
     loop_ub = 3;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &b_data[0]);
+    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &Y_data[0]);
   }
   if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
+    temp = pN;
+    if (temp < 1.0F) {
+      yk = 0;
     } else {
-      b_loop_ub = static_cast<int>(f);
+      yk = static_cast<int>(temp);
     }
-    tmp_size[0] = b_loop_ub;
-    tmp_size[1] = 9;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        tmp_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
+    B_size[0] = yk;
+    B_size[1] = 9;
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < yk; ijA++) {
+        B_data[ijA + yk * k] = pMeasurementModel[ijA + 3 * k];
       }
     }
   } else {
-    tmp_size[0] = 3;
-    tmp_size[1] = 9;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &tmp_data[0]);
+    B_size[0] = 3;
+    B_size[1] = 9;
+    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &B_data[0]);
   }
   if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
+    temp = pN;
+    if (temp < 1.0F) {
+      yk = 0;
     } else {
-      b_loop_ub = static_cast<int>(f);
+      yk = static_cast<int>(temp);
     }
-    a_size[0] = b_loop_ub;
+    a_size[0] = yk;
     a_size[1] = 9;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        a_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < yk; ijA++) {
+        a_data[ijA + yk * k] = pMeasurementModel[ijA + 3 * k];
       }
     }
   } else {
@@ -133,65 +104,303 @@ void trackingKF::correct(const float z[3])
     a_size[1] = 9;
     std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &a_data[0]);
   }
-  get_MeasurementNoise(b_tmp_data, b_tmp_size);
-  gain_size[0] = 9;
-  gain_size[1] = loop_ub;
-  for (int i2{0}; i2 < loop_ub; i2++) {
-    for (int i{0}; i < 9; i++) {
-      gain_data[i + 9 * i2] = 0.0F;
+  if (pV < 3.0F) {
+    temp = pV;
+    if (temp < 1.0F) {
+      yk = 0;
+    } else {
+      yk = static_cast<int>(temp);
     }
-    for (int i{0}; i < 9; i++) {
-      f = b_data[i2 + loop_ub * i];
-      for (int i1{0}; i1 < 9; i1++) {
-        b_loop_ub = i1 + 9 * i2;
-        gain_data[b_loop_ub] += pStateCovariance[i1 + 9 * i] * f;
+    if (temp < 1.0F) {
+      jA = 0;
+    } else {
+      jA = static_cast<int>(temp);
+    }
+    b_B_size[0] = yk;
+    b_B_size[1] = jA;
+    for (int ijA{0}; ijA < jA; ijA++) {
+      for (int b_j{0}; b_j < yk; b_j++) {
+        b_B_data[b_j + yk * ijA] = pMeasurementNoise[b_j + 3 * ijA];
+      }
+    }
+  } else {
+    b_B_size[0] = 3;
+    b_B_size[1] = 3;
+    for (int k{0}; k < 9; k++) {
+      b_B_data[k] = pMeasurementNoise[k];
+    }
+  }
+  b_loop_ub = loop_ub;
+  for (int j{0}; j < loop_ub; j++) {
+    for (int ijA{0}; ijA < 9; ijA++) {
+      gain_data[ijA + 9 * j] = 0.0F;
+    }
+    for (int k{0}; k < 9; k++) {
+      temp = Y_data[j + loop_ub * k];
+      for (int b_j{0}; b_j < 9; b_j++) {
+        yk = b_j + 9 * j;
+        gain_data[yk] += pStateCovariance[b_j + 9 * k] * temp;
       }
     }
   }
-  if ((a_size[0] == b_tmp_size[0]) && (tmp_size[0] == b_tmp_size[1])) {
-    float b_a_data[9];
-    c_loop_ub = a_size[0];
+  if ((a_size[0] == b_B_size[0]) && (B_size[0] == b_B_size[1])) {
+    jAcol = a_size[0];
     loop_ub = a_size[0];
-    for (int i2{0}; i2 < 9; i2++) {
-      for (int i{0}; i < c_loop_ub; i++) {
-        b_data[i + loop_ub * i2] = 0.0F;
+    for (int b_j{0}; b_j < 9; b_j++) {
+      for (int ijA{0}; ijA < jAcol; ijA++) {
+        Y_data[ijA + loop_ub * b_j] = 0.0F;
       }
-      for (int i{0}; i < 9; i++) {
-        f = pStateCovariance[i + 9 * i2];
-        for (int i1{0}; i1 < c_loop_ub; i1++) {
-          b_loop_ub = i1 + loop_ub * i2;
-          b_data[b_loop_ub] += a_data[i1 + a_size[0] * i] * f;
+      for (int k{0}; k < 9; k++) {
+        temp = pStateCovariance[k + 9 * b_j];
+        for (int ijA{0}; ijA < jAcol; ijA++) {
+          yk = ijA + loop_ub * b_j;
+          Y_data[yk] += a_data[ijA + a_size[0] * k] * temp;
         }
       }
     }
-    b_loop_ub = tmp_size[0];
-    a_size[1] = tmp_size[0];
-    for (int i{0}; i < c_loop_ub; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        f = 0.0F;
-        for (int i2{0}; i2 < 9; i2++) {
-          f += b_data[i + loop_ub * i2] * tmp_data[i1 + tmp_size[0] * i2];
+    jA = B_size[0];
+    b_B_size[0] = a_size[0];
+    b_B_size[1] = B_size[0];
+    for (int ijA{0}; ijA < jAcol; ijA++) {
+      for (int b_j{0}; b_j < jA; b_j++) {
+        temp = 0.0F;
+        for (int k{0}; k < 9; k++) {
+          temp += Y_data[ijA + loop_ub * k] * B_data[b_j + B_size[0] * k];
         }
-        b_a_data[i + a_size[0] * i1] = f + b_tmp_data[i + b_tmp_size[0] * i1];
+        yk = ijA + b_B_size[0] * b_j;
+        b_B_data[yk] += temp;
       }
     }
-    internal::mrdiv(gain_data, gain_size, b_a_data, a_size);
   } else {
-    binary_expand_op_1(gain_data, gain_size, a_data, a_size, this, tmp_data,
-                       tmp_size, b_tmp_data, b_tmp_size);
+    binary_expand_op_1(b_B_data, b_B_size, a_data, a_size, this, B_data,
+                       B_size);
+  }
+  if ((b_loop_ub == 0) || ((b_B_size[0] == 0) || (b_B_size[1] == 0))) {
+    b_loop_ub = b_B_size[0];
+    yk = 9 * b_B_size[0];
+    if (yk - 1 >= 0) {
+      std::memset(&gain_data[0], 0,
+                  static_cast<unsigned int>(yk) * sizeof(float));
+    }
+  } else if (b_B_size[0] == b_B_size[1]) {
+    int Y_data_tmp;
+    int jp1j;
+    int n;
+    n = b_B_size[1];
+    jpvt_data[0] = 1;
+    yk = 1;
+    for (int k{2}; k <= n; k++) {
+      yk++;
+      jpvt_data[k - 1] = yk;
+    }
+    if (b_B_size[1] - 1 <= b_B_size[1]) {
+      Y_data_tmp = b_B_size[1];
+    } else {
+      Y_data_tmp = 2;
+    }
+    for (int j{0}; j <= Y_data_tmp - 2; j++) {
+      int mmj;
+      mmj = n - j;
+      loop_ub = j * (n + 1);
+      jp1j = loop_ub + 2;
+      if (mmj - 1 < 0) {
+        yk = -1;
+      } else {
+        yk = 0;
+        if (mmj - 1 > 0) {
+          temp = std::abs(b_B_data[loop_ub]);
+          for (int k{2}; k <= mmj; k++) {
+            s = std::abs(b_B_data[(loop_ub + k) - 1]);
+            if (s > temp) {
+              yk = k - 1;
+              temp = s;
+            }
+          }
+        }
+      }
+      if (b_B_data[loop_ub + yk] != 0.0F) {
+        if (yk != 0) {
+          jA = j + yk;
+          jpvt_data[j] = jA + 1;
+          for (int k{0}; k < n; k++) {
+            yk = k * n;
+            jAcol = j + yk;
+            temp = b_B_data[jAcol];
+            yk += jA;
+            b_B_data[jAcol] = b_B_data[yk];
+            b_B_data[yk] = temp;
+          }
+        }
+        yk = loop_ub + mmj;
+        for (int k{jp1j}; k <= yk; k++) {
+          b_B_data[k - 1] /= b_B_data[loop_ub];
+        }
+      }
+      yk = loop_ub + n;
+      jA = yk;
+      for (int k{0}; k <= mmj - 2; k++) {
+        temp = b_B_data[yk + k * n];
+        if (temp != 0.0F) {
+          jAcol = jA + 2;
+          jp1j = mmj + jA;
+          for (int ijA{jAcol}; ijA <= jp1j; ijA++) {
+            b_B_data[ijA - 1] += b_B_data[((loop_ub + ijA) - jA) - 1] * -temp;
+          }
+        }
+        jA += n;
+      }
+    }
+    for (int b_j{0}; b_j < n; b_j++) {
+      jp1j = 9 * b_j - 1;
+      yk = n * b_j;
+      for (int k{0}; k < b_j; k++) {
+        jA = 9 * k;
+        temp = b_B_data[k + yk];
+        if (temp != 0.0F) {
+          for (int ijA{0}; ijA < 9; ijA++) {
+            jAcol = (ijA + jp1j) + 1;
+            gain_data[jAcol] -= temp * gain_data[ijA + jA];
+          }
+        }
+      }
+      temp = 1.0F / b_B_data[b_j + yk];
+      for (int ijA{0}; ijA < 9; ijA++) {
+        yk = (ijA + jp1j) + 1;
+        gain_data[yk] *= temp;
+      }
+    }
+    for (int k{n}; k >= 1; k--) {
+      yk = 9 * (k - 1) - 1;
+      jAcol = n * (k - 1) - 1;
+      jp1j = k + 1;
+      for (int b_j{jp1j}; b_j <= n; b_j++) {
+        jA = 9 * (b_j - 1);
+        temp = b_B_data[b_j + jAcol];
+        if (temp != 0.0F) {
+          for (int j{0}; j < 9; j++) {
+            Y_data_tmp = (j + yk) + 1;
+            gain_data[Y_data_tmp] -= temp * gain_data[j + jA];
+          }
+        }
+      }
+    }
+    yk = b_B_size[1] - 1;
+    for (int k{yk}; k >= 1; k--) {
+      jA = jpvt_data[k - 1];
+      if (jA != k) {
+        for (int b_j{0}; b_j < 9; b_j++) {
+          jAcol = b_j + 9 * (k - 1);
+          temp = gain_data[jAcol];
+          jp1j = b_j + 9 * (jA - 1);
+          gain_data[jAcol] = gain_data[jp1j];
+          gain_data[jp1j] = temp;
+        }
+      }
+    }
+  } else {
+    int Y_data_tmp;
+    int mmj;
+    int n;
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < b_loop_ub; ijA++) {
+        B_data[ijA + b_loop_ub * k] = gain_data[k + 9 * ijA];
+      }
+    }
+    yk = b_B_size[1];
+    jA = b_B_size[0];
+    for (int k{0}; k < jA; k++) {
+      for (int ijA{0}; ijA < yk; ijA++) {
+        c_B_data[ijA + yk * k] = b_B_data[k + b_B_size[0] * ijA];
+      }
+    }
+    b_B_size[0] = b_B_size[1];
+    b_B_size[1] = jA;
+    yk *= jA;
+    std::copy(&c_B_data[0], &c_B_data[yk], &b_B_data[0]);
+    internal::lapack::xgeqp3(b_B_data, b_B_size, b_z, jpvt_data, B_size);
+    n = 0;
+    if (b_B_size[0] < b_B_size[1]) {
+      yk = b_B_size[0];
+      jA = b_B_size[1];
+    } else {
+      yk = b_B_size[1];
+      jA = b_B_size[0];
+    }
+    if (yk > 0) {
+      temp = 1.1920929E-6F * static_cast<float>(jA) * std::abs(b_B_data[0]);
+      while ((n < yk) && (!(std::abs(b_B_data[n + b_B_size[0] * n]) <= temp))) {
+        n++;
+      }
+    }
+    loop_ub = b_B_size[1];
+    yk = b_B_size[1] * 9;
+    if (yk - 1 >= 0) {
+      std::memset(&Y_data[0], 0, static_cast<unsigned int>(yk) * sizeof(float));
+    }
+    yk = b_B_size[0];
+    mmj = b_B_size[1];
+    if (yk <= mmj) {
+      mmj = yk;
+    }
+    for (int j{0}; j < mmj; j++) {
+      int jp1j;
+      jp1j = b_B_size[0];
+      if (b_z[j] != 0.0F) {
+        Y_data_tmp = j + 2;
+        for (int b_j{0}; b_j < 9; b_j++) {
+          jA = b_loop_ub * b_j;
+          yk = j + jA;
+          temp = B_data[yk];
+          s = temp;
+          for (int k{Y_data_tmp}; k <= jp1j; k++) {
+            s += b_B_data[(k + b_B_size[0] * j) - 1] * B_data[(k + jA) - 1];
+          }
+          s *= b_z[j];
+          if (s != 0.0F) {
+            B_data[yk] = temp - s;
+            yk = j + 2;
+            for (int k{yk}; k <= jp1j; k++) {
+              jAcol = (k + jA) - 1;
+              B_data[jAcol] -= b_B_data[(k + b_B_size[0] * j) - 1] * s;
+            }
+          }
+        }
+      }
+    }
+    for (int j{0}; j < 9; j++) {
+      for (int k{0}; k < n; k++) {
+        Y_data[(jpvt_data[k] + loop_ub * j) - 1] = B_data[k + b_loop_ub * j];
+      }
+      for (int k{n}; k >= 1; k--) {
+        yk = loop_ub * j;
+        jA = (jpvt_data[k - 1] + yk) - 1;
+        jAcol = b_B_size[0] * (k - 1);
+        Y_data[jA] /= b_B_data[(k + jAcol) - 1];
+        for (int ijA{0}; ijA <= k - 2; ijA++) {
+          Y_data_tmp = (jpvt_data[ijA] + yk) - 1;
+          Y_data[Y_data_tmp] -= Y_data[jA] * b_B_data[ijA + jAcol];
+        }
+      }
+    }
+    b_loop_ub = b_B_size[1];
+    for (int ijA{0}; ijA < loop_ub; ijA++) {
+      for (int k{0}; k < 9; k++) {
+        gain_data[k + 9 * ijA] = Y_data[ijA + loop_ub * k];
+      }
+    }
   }
   if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
+    temp = pN;
+    if (temp < 1.0F) {
+      yk = 0;
     } else {
-      b_loop_ub = static_cast<int>(f);
+      yk = static_cast<int>(temp);
     }
-    a_size[0] = b_loop_ub;
+    a_size[0] = yk;
     a_size[1] = 9;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        a_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < yk; ijA++) {
+        a_data[ijA + yk * k] = pMeasurementModel[ijA + 3 * k];
       }
     }
   } else {
@@ -200,270 +409,64 @@ void trackingKF::correct(const float z[3])
     std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &a_data[0]);
   }
   if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
+    temp = pN;
+    if (temp < 1.0F) {
       loop_ub = 0;
     } else {
-      loop_ub = static_cast<int>(f);
+      loop_ub = static_cast<int>(temp);
     }
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < loop_ub; i1++) {
-        b_data[i1 + loop_ub * i] = pMeasurementModel[i1 + 3 * i];
+    for (int k{0}; k < 9; k++) {
+      for (int ijA{0}; ijA < loop_ub; ijA++) {
+        Y_data[ijA + loop_ub * k] = pMeasurementModel[ijA + 3 * k];
       }
     }
   } else {
     loop_ub = 3;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &b_data[0]);
+    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &Y_data[0]);
   }
-  b_loop_ub = gain_size[1];
   std::memset(&gain[0], 0, 81U * sizeof(float));
-  for (int i{0}; i < 9; i++) {
-    for (int i1{0}; i1 < b_loop_ub; i1++) {
-      f = b_data[i1 + loop_ub * i];
-      for (int i2{0}; i2 < 9; i2++) {
-        c_loop_ub = i2 + 9 * i;
-        gain[c_loop_ub] += gain_data[i2 + 9 * i1] * f;
+  for (int ijA{0}; ijA < 9; ijA++) {
+    for (int k{0}; k < b_loop_ub; k++) {
+      temp = Y_data[k + loop_ub * ijA];
+      for (int b_j{0}; b_j < 9; b_j++) {
+        yk = b_j + 9 * ijA;
+        gain[yk] += gain_data[b_j + 9 * k] * temp;
       }
     }
   }
-  for (int i1{0}; i1 < 9; i1++) {
-    for (int i2{0}; i2 < 9; i2++) {
-      f = 0.0F;
-      for (int i{0}; i < 9; i++) {
-        f += gain[i1 + 9 * i] * pStateCovariance[i + 9 * i2];
+  for (int ijA{0}; ijA < 9; ijA++) {
+    for (int b_j{0}; b_j < 9; b_j++) {
+      temp = 0.0F;
+      for (int k{0}; k < 9; k++) {
+        temp += gain[ijA + 9 * k] * pStateCovariance[k + 9 * b_j];
       }
-      b_loop_ub = i1 + 9 * i2;
-      P_corr[b_loop_ub] = pStateCovariance[b_loop_ub] - f;
+      yk = ijA + 9 * b_j;
+      P_corr[yk] = pStateCovariance[yk] - temp;
     }
   }
   if (a_size[0] == 3) {
-    float b_z[3];
-    float f1;
-    float f2;
-    for (int i{0}; i < 3; i++) {
-      f = 0.0F;
-      for (int i1{0}; i1 < 9; i1++) {
-        f += a_data[i + 3 * i1] * pState[i1];
+    float f;
+    for (int k{0}; k < 3; k++) {
+      temp = 0.0F;
+      for (int ijA{0}; ijA < 9; ijA++) {
+        temp += a_data[k + 3 * ijA] * pState[ijA];
       }
-      b_z[i] = z[i] - f;
+      b_z[k] = z[k] - temp;
     }
-    f = b_z[0];
-    f1 = b_z[1];
-    f2 = b_z[2];
-    for (int i{0}; i < 9; i++) {
-      pState[i] +=
-          (gain_data[i] * f + gain_data[i + 9] * f1) + gain_data[i + 18] * f2;
+    temp = b_z[0];
+    s = b_z[1];
+    f = b_z[2];
+    for (int k{0}; k < 9; k++) {
+      pState[k] +=
+          (gain_data[k] * temp + gain_data[k + 9] * s) + gain_data[k + 18] * f;
     }
   } else {
     binary_expand_op(this, gain_data, z, a_data, a_size);
   }
-  for (int i{0}; i < 9; i++) {
-    for (int i1{0}; i1 < 9; i1++) {
-      b_loop_ub = i1 + 9 * i;
-      pStateCovariance[b_loop_ub] =
-          (P_corr[b_loop_ub] + P_corr[i + 9 * i1]) * 0.5F;
-    }
-  }
-  if (!pIsInitialized) {
-    pIsDistributionsSetup = true;
-  }
-}
-
-//
-// Arguments    : float z
-// Return Type  : void
-//
-void trackingKF::correct(float z)
-{
-  float P_corr[81];
-  float gain[81];
-  float a_data[27];
-  float b_data[27];
-  float gain_data[27];
-  float tmp_data[27];
-  float b_tmp_data[9];
-  float z_data[3];
-  float f;
-  int a_size[2];
-  int b_tmp_size[2];
-  int gain_size[2];
-  int tmp_size[2];
-  int b_loop_ub;
-  int c_loop_ub;
-  int loop_ub;
-  if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      loop_ub = 0;
-    } else {
-      loop_ub = static_cast<int>(f);
-    }
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < loop_ub; i1++) {
-        b_data[i1 + loop_ub * i] = pMeasurementModel[i1 + 3 * i];
-      }
-    }
-  } else {
-    loop_ub = 3;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &b_data[0]);
-  }
-  if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
-    } else {
-      b_loop_ub = static_cast<int>(f);
-    }
-    tmp_size[0] = b_loop_ub;
-    tmp_size[1] = 9;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        tmp_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
-      }
-    }
-  } else {
-    tmp_size[0] = 3;
-    tmp_size[1] = 9;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &tmp_data[0]);
-  }
-  if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
-    } else {
-      b_loop_ub = static_cast<int>(f);
-    }
-    a_size[0] = b_loop_ub;
-    a_size[1] = 9;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        a_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
-      }
-    }
-  } else {
-    a_size[0] = 3;
-    a_size[1] = 9;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &a_data[0]);
-  }
-  get_MeasurementNoise(b_tmp_data, b_tmp_size);
-  gain_size[0] = 9;
-  gain_size[1] = loop_ub;
-  for (int i2{0}; i2 < loop_ub; i2++) {
-    for (int i{0}; i < 9; i++) {
-      gain_data[i + 9 * i2] = 0.0F;
-    }
-    for (int i{0}; i < 9; i++) {
-      f = b_data[i2 + loop_ub * i];
-      for (int i1{0}; i1 < 9; i1++) {
-        b_loop_ub = i1 + 9 * i2;
-        gain_data[b_loop_ub] += pStateCovariance[i1 + 9 * i] * f;
-      }
-    }
-  }
-  if ((a_size[0] == b_tmp_size[0]) && (tmp_size[0] == b_tmp_size[1])) {
-    float b_a_data[9];
-    c_loop_ub = a_size[0];
-    loop_ub = a_size[0];
-    for (int i2{0}; i2 < 9; i2++) {
-      for (int i{0}; i < c_loop_ub; i++) {
-        b_data[i + loop_ub * i2] = 0.0F;
-      }
-      for (int i{0}; i < 9; i++) {
-        f = pStateCovariance[i + 9 * i2];
-        for (int i1{0}; i1 < c_loop_ub; i1++) {
-          b_loop_ub = i1 + loop_ub * i2;
-          b_data[b_loop_ub] += a_data[i1 + a_size[0] * i] * f;
-        }
-      }
-    }
-    b_loop_ub = tmp_size[0];
-    a_size[1] = tmp_size[0];
-    for (int i{0}; i < c_loop_ub; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        f = 0.0F;
-        for (int i2{0}; i2 < 9; i2++) {
-          f += b_data[i + loop_ub * i2] * tmp_data[i1 + tmp_size[0] * i2];
-        }
-        b_a_data[i + a_size[0] * i1] = f + b_tmp_data[i + b_tmp_size[0] * i1];
-      }
-    }
-    internal::mrdiv(gain_data, gain_size, b_a_data, a_size);
-  } else {
-    binary_expand_op_1(gain_data, gain_size, a_data, a_size, this, tmp_data,
-                       tmp_size, b_tmp_data, b_tmp_size);
-  }
-  if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      b_loop_ub = 0;
-    } else {
-      b_loop_ub = static_cast<int>(f);
-    }
-    a_size[0] = b_loop_ub;
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < b_loop_ub; i1++) {
-        a_data[i1 + b_loop_ub * i] = pMeasurementModel[i1 + 3 * i];
-      }
-    }
-  } else {
-    a_size[0] = 3;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &a_data[0]);
-  }
-  if (pN < 3.0F) {
-    f = pN;
-    if (f < 1.0F) {
-      loop_ub = 0;
-    } else {
-      loop_ub = static_cast<int>(f);
-    }
-    for (int i{0}; i < 9; i++) {
-      for (int i1{0}; i1 < loop_ub; i1++) {
-        b_data[i1 + loop_ub * i] = pMeasurementModel[i1 + 3 * i];
-      }
-    }
-  } else {
-    loop_ub = 3;
-    std::copy(&pMeasurementModel[0], &pMeasurementModel[27], &b_data[0]);
-  }
-  c_loop_ub = gain_size[1];
-  std::memset(&gain[0], 0, 81U * sizeof(float));
-  for (int i{0}; i < 9; i++) {
-    for (int i1{0}; i1 < c_loop_ub; i1++) {
-      f = b_data[i1 + loop_ub * i];
-      for (int i2{0}; i2 < 9; i2++) {
-        b_loop_ub = i2 + 9 * i;
-        gain[b_loop_ub] += gain_data[i2 + 9 * i1] * f;
-      }
-    }
-  }
-  for (int i1{0}; i1 < 9; i1++) {
-    for (int i2{0}; i2 < 9; i2++) {
-      f = 0.0F;
-      for (int i{0}; i < 9; i++) {
-        f += gain[i1 + 9 * i] * pStateCovariance[i + 9 * i2];
-      }
-      b_loop_ub = i1 + 9 * i2;
-      P_corr[b_loop_ub] = pStateCovariance[b_loop_ub] - f;
-    }
-  }
-  b_loop_ub = a_size[0];
-  for (int i{0}; i < b_loop_ub; i++) {
-    f = 0.0F;
-    for (int i1{0}; i1 < 9; i1++) {
-      f += a_data[i + a_size[0] * i1] * pState[i1];
-    }
-    z_data[i] = z - f;
-  }
-  for (int i1{0}; i1 < 9; i1++) {
-    f = 0.0F;
-    for (int i{0}; i < c_loop_ub; i++) {
-      f += gain_data[i1 + 9 * i] * z_data[i];
-    }
-    pState[i1] += f;
-    for (int i{0}; i < 9; i++) {
-      b_loop_ub = i + 9 * i1;
-      pStateCovariance[b_loop_ub] =
-          (P_corr[b_loop_ub] + P_corr[i1 + 9 * i]) * 0.5F;
+  for (int k{0}; k < 9; k++) {
+    for (int ijA{0}; ijA < 9; ijA++) {
+      yk = ijA + 9 * k;
+      pStateCovariance[yk] = (P_corr[yk] + P_corr[k + 9 * ijA]) * 0.5F;
     }
   }
   if (!pIsInitialized) {
@@ -495,11 +498,9 @@ trackingKF *trackingKF::init(const float varargin_4[9])
       0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
       0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
   trackingKF *KF;
-  double tmp_data[9];
-  float val_data[9];
-  float dims[2];
   float n;
   int loop_ub;
+  signed char b_data[9];
   KF = this;
   KF->pIsStateTransitionLocked = false;
   KF->pIsSmootherStateSizeInitialized = false;
@@ -528,16 +529,27 @@ trackingKF *trackingKF::init(const float varargin_4[9])
     KF->pMeasurementModel[i] = iv[i];
   }
   n = KF->pV;
-  dims[0] = n;
-  dims[1] = n;
   if (n == 1.0F) {
-    val_data[0] = 1.0F;
+    b_data[0] = 1;
   } else {
-    int tmp_size[2];
-    eye(dims, tmp_data, tmp_size);
-    loop_ub = tmp_size[0] * tmp_size[1];
-    for (int i{0}; i < loop_ub; i++) {
-      val_data[i] = static_cast<float>(tmp_data[i]);
+    int d;
+    if (n < 0.0F) {
+      n = 0.0F;
+    }
+    loop_ub = static_cast<int>(n);
+    d = static_cast<int>(n);
+    if (loop_ub <= d) {
+      d = loop_ub;
+    }
+    loop_ub = static_cast<int>(n) * static_cast<int>(n);
+    if (loop_ub - 1 >= 0) {
+      std::memset(&b_data[0], 0,
+                  static_cast<unsigned int>(loop_ub) * sizeof(signed char));
+    }
+    if (d > 0) {
+      for (int i{0}; i < d; i++) {
+        b_data[i + static_cast<int>(n) * i] = 1;
+      }
     }
   }
   n = KF->pV;
@@ -548,7 +560,7 @@ trackingKF *trackingKF::init(const float varargin_4[9])
   }
   for (int i{0}; i < loop_ub; i++) {
     for (int b_i{0}; b_i < loop_ub; b_i++) {
-      KF->pMeasurementNoise[b_i + 3 * i] = val_data[b_i + loop_ub * i];
+      KF->pMeasurementNoise[b_i + 3 * i] = b_data[b_i + loop_ub * i];
     }
   }
   KF->pIsStateTransitionLocked = true;
@@ -675,21 +687,6 @@ void trackingKF::predict(float varargin_1)
 }
 
 //
-// Arguments    : const float MeasurementModelMatrix[9]
-// Return Type  : void
-//
-void trackingKF::set_MeasurementModel(const float MeasurementModelMatrix[9])
-{
-  int n_tmp;
-  n_tmp = static_cast<int>(pN);
-  for (int i{0}; i < 9; i++) {
-    for (int i1{0}; i1 < n_tmp; i1++) {
-      pMeasurementModel[i1 + 3 * i] = MeasurementModelMatrix[i1 + n_tmp * i];
-    }
-  }
-}
-
-//
 // Arguments    : const float b_value[9]
 // Return Type  : void
 //
@@ -708,49 +705,6 @@ void trackingKF::set_MeasurementNoise(const float b_value[9])
   }
   for (int i{0}; i < 9; i++) {
     pMeasurementNoise[i] = b_value[i];
-  }
-}
-
-//
-// Arguments    : float b_value
-// Return Type  : void
-//
-void trackingKF::set_MeasurementNoise(float b_value)
-{
-  double tmp_data[9];
-  float absx;
-  int exponent;
-  absx = std::abs(b_value);
-  if ((!std::isinf(absx)) && (!std::isnan(absx)) &&
-      (!(absx < 2.3509887E-38F))) {
-    std::frexp(absx, &exponent);
-  }
-  if (b_value > 0.0F) {
-    float val_data[9];
-    float dims[2];
-    absx = pV;
-    dims[0] = absx;
-    dims[1] = absx;
-    if (absx == 1.0F) {
-      val_data[0] = b_value;
-    } else {
-      int tmp_size[2];
-      eye(dims, tmp_data, tmp_size);
-      exponent = tmp_size[0] * tmp_size[1];
-      for (int i{0}; i < exponent; i++) {
-        val_data[i] = b_value * static_cast<float>(tmp_data[i]);
-      }
-    }
-    if (absx < 1.0F) {
-      exponent = 0;
-    } else {
-      exponent = static_cast<int>(absx);
-    }
-    for (int i{0}; i < exponent; i++) {
-      for (int i1{0}; i1 < exponent; i1++) {
-        pMeasurementNoise[i1 + 3 * i] = val_data[i1 + exponent * i];
-      }
-    }
   }
 }
 
