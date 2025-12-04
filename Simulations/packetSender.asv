@@ -1,0 +1,54 @@
+sim_data = readmatrix("Clean Prospect sim.csv");
+samples = length(sim_data);
+time = sim_data(:,1);
+pos = sim_data(:,[7,8,2]);
+
+% Get actual velocity vectors
+vel = sim_data(:,[11,11,3]);
+diffvel = [0, 0; (pos(2:end,1:2) - pos(1:end-1,1:2)) ./ (time(2:end) - time(1:end-1))];
+diffvel = [diffvel, atan2(diffvel(:,2), diffvel(:,1))];
+vel(:,1:2) = vel(:,1) .* [cos(diffvel(:,3)), sin(diffvel(:,3))];
+
+% Generate GPS packets
+FARcoords = [35.3472294, -117.8108024, 628];
+delay = 1;
+stdev = 15;
+gps = gpsSensor('ReferenceFrame', 'ENU', 'ReferenceLocation',FARcoords,'HorizontalPositionAccuracy',stdev,'VerticalPositionAccuracy',stdev,'VelocityAccuracy',stdev,'DecayFactor',0.95,'SampleRate',1/delay);
+
+% Schedule GPS measurements
+start_time = 10 / delay;
+end_time = 10 / delay;
+schedule = delay:delay:time(end);
+len = length(schedule) + start_time + end_time;
+measurements = zeros(len, 3);
+for i = 1:start_time
+    measurements(i, :) = gps([0,0,0], [0,0,0]);
+end
+for i = (i+1):(i+length(schedule))
+    index = find(time >= schedule(i-start_time), 1);
+    measurements(i, :) = gps(pos(index, :), vel(index, :));
+end
+for i = (i+1):(i+end_time)
+    measurements(i, :) = gps(pos(end, :), [0,0,0]);
+end
+
+pause('on');
+u = udpport('LocalHost', '10.0.0.199', 'LocalPort', 42069);
+packetID = 10;
+packetLen = 46;
+for i = 1:len
+    typecast(single(measurements(i, :)), 'uint8')
+    pause(delay);
+end
+
+function sum = computeChecksum(data)
+    sum1 = uint32(0);
+    sum2 = uint32(0);
+
+    sum1 = sum1 + id;
+    sum2 = sum2 + sum1;
+    sum1 = sum1 + len;
+    sum2 = sum2 + sum1;
+
+    for i=1:leng
+end

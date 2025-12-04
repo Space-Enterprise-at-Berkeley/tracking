@@ -159,6 +159,13 @@ namespace Rotator {
         gpsSeparationENU(rocketPosition, launchPosition, enu);
 
         tracker.GPSUpdate((float) (micros() - trackingStartTime)/1000000.0, enu);
+
+        Serial.print("Ran GPS update with ");
+        Serial.print(enu[0]);
+        Serial.print(" ");
+        Serial.print(enu[1]);
+        Serial.print(" ");
+        Serial.println(enu[2]);
     }
 
     void startDiagnostic(){
