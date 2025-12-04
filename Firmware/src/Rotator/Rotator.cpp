@@ -16,6 +16,7 @@ namespace Rotator {
     
     // Reference setpoints
     float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
+    float aziOffset = 0;
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
@@ -233,6 +234,15 @@ namespace Rotator {
         }
     }
 
+    void zeroAzimuth(Comms::Packet packet, uint8_t ip){
+        stopDiagnostic();
+        stopTracking();
+        aziOffset = fmod(aziOffset + 360.0 - aziPos, 360.0);
+        aziRefPos = 0;
+        Serial.print("Set azimuth offset to ");
+        Serial.println(aziOffset);
+    }
+
     void sendRotatorState(){
         //PacketRTRotatorState newpacket = PacketRTRotatorState::writeRawPacket();
         //make packet
@@ -277,7 +287,6 @@ namespace Rotator {
         //emit packet 
         Comms::emitPacketToGS(&newpacket);
     }
-
     
     // if we are at 330, and we want to go to 0, there are two options: go forward 30 degrees, or backward 330 degrees
     // this function checks which option is shorter, and returns the target angle adjusted for wraparound
@@ -301,6 +310,7 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTSetAzimuth, setAziSetpoint);
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
         Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
+        Comms::registerCallback(PACKET_ID_RTZeroAzimuth, zeroAzimuth);
         Comms::registerCallback(PACKET_ID_LowIMUValues, accelUpdate);
         Comms::registerCallback(PACKET_ID_GPSValues, GPSUpdate);
     }
@@ -317,8 +327,10 @@ namespace Rotator {
         }
 
         elvRefPos = fmod(elvRefPos, 360.0);
+        if (elvRefPos < 0) elvRefPos += 360;
         elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);
         aziRefPos = fmod(aziRefPos, 360.0);
+        if (aziRefPos < 0) aziRefPos += 360;
         // Serial.println("done with updates");
         
         // motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
@@ -335,7 +347,7 @@ namespace Rotator {
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower); // Clamp power to +-maxPower
         HAL::sendPower_0(elvPower); 
 
-        aziPos = HAL::getEncoderDegrees_1(); // Same thing for azimuth
+        aziPos = fmod(HAL::getEncoderDegrees_1() + aziOffset, 360.0); // Same thing for azimuth
         aziVel = HAL::getSlope_1() * 1000 * 1000;
         aziError = check_wraparound(aziRefPos, aziPos);
         aziPower = aziKp * aziError + aziKd * (aziRefVel - aziVel);
