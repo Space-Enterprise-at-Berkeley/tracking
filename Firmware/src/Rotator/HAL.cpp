@@ -269,16 +269,16 @@ namespace HAL {
         sendPower_1(0);
     }
 
-    const float PULSE_MAX = 1024;
-    const float PULSE_MIN = 1;
+    const int PULSE_MAX = 1027;
+    const int PULSE_MIN = 1;
     
     float readDegrees(long raw_pulse) {
-        Serial.print(raw_pulse);
-        Serial.print(" ");
-        raw_pulse = raw_pulse % 1025;
+        // Serial.print(raw_pulse);
+        // Serial.print(" ");
+        raw_pulse = raw_pulse % (PULSE_MAX + 1);
         long relative_pulse = raw_pulse - PULSE_MIN;
-        Serial.println(relative_pulse);
-        return (float)relative_pulse * 360/(PULSE_MAX - PULSE_MIN);
+        // Serial.println(relative_pulse);
+        return (float)relative_pulse * 360.0/(PULSE_MAX - PULSE_MIN);
     }
 
     void monitor_TBE_0(){
@@ -300,9 +300,9 @@ namespace HAL {
     }
 
     uint32_t pushToBuffers(){
-        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 287.9, 360.0));
+        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 286.4, 360.0));
         degreeBuff_1->insert(micros(), readDegrees(pulseWidth_1));
-        return 1025;
+        return PULSE_MAX + 1;
     }
 
     float getEncoderDegrees_0() {
