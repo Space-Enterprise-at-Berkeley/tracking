@@ -5,7 +5,7 @@
 // File: trackingKF.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 02-Dec-2025 17:03:31
+// C/C++ source code generated on  : 03-Dec-2025 20:32:31
 //
 
 #ifndef TRACKINGKF_H
@@ -25,15 +25,17 @@ public:
   void set_MeasurementNoise(const float b_value[9]);
   void predict(float varargin_1);
   void correct(const float z[3]);
+  void get_MeasurementNoise(float value_data[], int value_size[2]) const;
+  void set_MeasurementModel(const float MeasurementModelMatrix[9]);
+  void set_MeasurementNoise(float b_value);
+  void correct(float z);
   float StateTransitionModel[81];
   float pState[9];
   float pStateCovariance[81];
   float pMeasurementModel[27];
   bool pIsDistributionsSetup;
   bool pIsInitialized;
-  float pSmootherStateSize;
   bool pIsSmootherStateSizeInitialized;
-  bool pWasRetrodicted;
 
 protected:
   float ProcessNoiseModel[27];
@@ -41,12 +43,9 @@ protected:
   float pV;
   float pProcessNoise[9];
   float pMeasurementNoise[9];
-  bool pHasPrediction;
-  float LastJacobian[81];
   bool IsLastJacobianInitialized;
 
 private:
-  bool pIsSmoothingLocked;
   bool pIsStateTransitionLocked;
 };
 
