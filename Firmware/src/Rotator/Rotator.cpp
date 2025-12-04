@@ -2,8 +2,6 @@
 #include "EEPROM.h"
 #include "HAL.h"
 #include <cmath>
-#include <math.h>
-#include <array>
 
 namespace Rotator {
     // State flags
@@ -50,12 +48,16 @@ namespace Rotator {
     uint32_t diagnosticDelay = 1000 * 1000;
 
     void startTracking(){
+        launchDetected = false;
+        launchDone = false;
         tracking = true;
         trackingStartTime = micros();
         tracker.init();
     }
 
     void stopTracking(){
+        launchDetected = false;
+        launchDone = false;
         tracking = false;
     }
 
