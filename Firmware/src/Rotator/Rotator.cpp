@@ -30,12 +30,15 @@ namespace Rotator {
     // Tracking stuff
     CombinedTracker tracker;
     uint32_t trackingStartTime;
+    uin32_t trackignLaunchStartTime;
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
 
     //Rocket stuff
     float launchPosition[] = {35.3472294, -117.8108024, 628}; // in terms of longitude, latitude, and altitude
-
+    // Launch detection flags
+    bool launchDetected = false;
+    bool launchDone = false;
     // Timing for derivatives and tracking updates
     /*uint32_t lastTrackingUpdate, lastMotorTime;
     float elvLastPos, aziLastPos, motorDt;*/
@@ -144,7 +147,42 @@ namespace Rotator {
         elvRefVel *= 180/M_PI;
     }
 
-    void accelUpdate(Comms::Packet packet, uint8_t ip) {}
+    void accelUpdate(Comms::Packet packet, uint8_t ip) {
+        if (!tracking) return;
+        PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
+        float accelX = parsed_packet.m_AccelX;
+        float threshold  = 1.5;
+        // Check if we're done with launch detect
+            // If so, return
+        if(launchDone && !launchDetected){
+            return;
+        // Check if we're in launch detect
+        if(launchDetected){
+            tracker.accelUpdate((float) (micros() - trackingLaunchStartTime)/1000000.0, {accelX, 0, 0});
+            if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
+                launchDone = true;
+                launchDetected = false;
+                Serial.println("Launch completed.");
+                return;
+            }
+        }
+            // If so, feed in accel update 
+            // Check if it's been long enough to exit launch detect
+                // If so, remove the launch detect flag and set the done flag
+                // Return
+        if(accelX > threshold){
+            launchDetected = true;
+            tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, {accelX, 0, 0});
+            trackingLaunchStartTime = micros();
+            Serial.println("Launch detected!"); 
+        }
+
+        // Otherwise, check if we've launched
+            // If so, set the launch detech flag and record the launch time
+            // Feed in accel update 
+
+        // to update, imagine something like tracker.accelUpdate()
+    }
         
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
         if (!tracking) return;
