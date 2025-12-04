@@ -149,18 +149,16 @@ namespace Rotator {
     }
 
     void accelUpdate(Comms::Packet packet, uint8_t ip) {
-        if (!tracking) return;
+        if (!tracking || launchDone) return;
+
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
         float accelX = parsed_packet.m_AccelX;
         float threshold  = 1.5;
         // Check if we're done with launch detect
             // If so, return
-        if(launchDone && !launchDetected){
-            return;
-        }
+
         // Check if we're in launch detect
         if(launchDetected){
-            tracker.accelUpdate((float) (micros() - trackingLaunchStartTime)/1000000.0, accelX*9.81);
             if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
                 launchDone = true;
                 launchDetected = false;
@@ -174,10 +172,11 @@ namespace Rotator {
                 // Return
         if(accelX > threshold){
             launchDetected = true;
-            tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accelX*9.81);
             trackingLaunchStartTime = micros();
             Serial.println("Launch detected!"); 
         }
+
+        tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, (accelX-1)*9.81);
 
         // Otherwise, check if we've launched
             // If so, set the launch detech flag and record the launch time
