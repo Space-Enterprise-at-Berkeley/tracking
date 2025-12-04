@@ -19,8 +19,8 @@ classdef CombinedTracker < handle
             obj.GPSModel = [1 0 0 0 0 0 0 0 0; 0 0 0 1 0 0 0 0 0; 0 0 0 0 0 0 1 0 0];
             obj.GPSNoise = [5 0 0; 0 5 0; 0 0 5];
     
-            obj.AccelModel = [0 0 0 0 0 0 0 0 1];
-            obj.AccelNoise = 5;
+            obj.AccelModel = [0 0 0 0 0 0 0 0 1; 0 0 0 0 0 0 0 0 1; 0 0 0 0 0 0 0 0 1];
+            obj.AccelNoise = [5 0 0; 0 5 0; 0 0 5];
 
             obj.Filter = trackingKF("MotionModel","3D Constant Acceleration", "State", obj.State);
         end

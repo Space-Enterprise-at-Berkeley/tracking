@@ -5,7 +5,7 @@
 // File: CombinedTracker.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 03-Dec-2025 20:32:31
+// C/C++ source code generated on  : 03-Dec-2025 22:04:03
 //
 
 #ifndef COMBINEDTRACKER_H
@@ -22,17 +22,17 @@ class CombinedTracker {
 public:
   CombinedTracker *init();
   void setNoises(const float ProcessNoise[9], const float b_GPSNoise[9],
-                 float b_AccelNoise);
+                 const float b_AccelNoise[9]);
   void GPSUpdate(float b_time, const float b_value[3]);
-  void accelUpdate(float b_time, float b_value);
+  void accelUpdate(float b_time, const float b_value[3]);
   void extrapolate(float b_time, float state[9]) const;
   float Time;
   float State[9];
   coder::trackingKF *Filter;
   float GPSModel[27];
   float GPSNoise[9];
-  float AccelModel[9];
-  float AccelNoise;
+  float AccelModel[27];
+  float AccelNoise[9];
   coder::trackingKF coder_buffer_pobj0;
 };
 

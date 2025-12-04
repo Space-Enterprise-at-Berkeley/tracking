@@ -2,7 +2,7 @@
 ## Makefile generated for component 'codegenTest'. 
 ## 
 ## Makefile     : codegenTest_rtw.mk
-## Generated on : Wed Dec 03 20:33:07 2025
+## Generated on : Wed Dec 03 22:04:31 2025
 ## Final product: ./codegenTest.lib
 ## Product type : static-library
 ## 
@@ -183,7 +183,7 @@ DEFINES = $(DEFINES_) $(DEFINES_CUSTOM) $(DEFINES_STANDARD)
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/codegen/lib/codegenTest/codegenTest_data.cpp $(START_DIR)/codegen/lib/codegenTest/rt_nonfinite.cpp $(START_DIR)/codegen/lib/codegenTest/rtGetNaN.cpp $(START_DIR)/codegen/lib/codegenTest/rtGetInf.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest_initialize.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest_terminate.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest.cpp $(START_DIR)/codegen/lib/codegenTest/minOrMax.cpp $(START_DIR)/codegen/lib/codegenTest/eye.cpp $(START_DIR)/codegen/lib/codegenTest/xnrm2.cpp $(START_DIR)/codegen/lib/codegenTest/mrdivide_helper.cpp $(START_DIR)/codegen/lib/codegenTest/xgeqp3.cpp $(START_DIR)/codegen/lib/codegenTest/constacc.cpp $(START_DIR)/codegen/lib/codegenTest/KalmanFilter.cpp $(START_DIR)/codegen/lib/codegenTest/trackingKF.cpp $(START_DIR)/codegen/lib/codegenTest/CombinedTracker.cpp
+SRCS = $(START_DIR)/codegen/lib/codegenTest/codegenTest_data.cpp $(START_DIR)/codegen/lib/codegenTest/rt_nonfinite.cpp $(START_DIR)/codegen/lib/codegenTest/rtGetNaN.cpp $(START_DIR)/codegen/lib/codegenTest/rtGetInf.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest_initialize.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest_terminate.cpp $(START_DIR)/codegen/lib/codegenTest/codegenTest.cpp $(START_DIR)/codegen/lib/codegenTest/minOrMax.cpp $(START_DIR)/codegen/lib/codegenTest/xnrm2.cpp $(START_DIR)/codegen/lib/codegenTest/xgeqp3.cpp $(START_DIR)/codegen/lib/codegenTest/constacc.cpp $(START_DIR)/codegen/lib/codegenTest/KalmanFilter.cpp $(START_DIR)/codegen/lib/codegenTest/trackingKF.cpp $(START_DIR)/codegen/lib/codegenTest/CombinedTracker.cpp
 
 ALL_SRCS = $(SRCS)
 
@@ -191,7 +191,7 @@ ALL_SRCS = $(SRCS)
 ## OBJECTS
 ###########################################################################
 
-OBJS = codegenTest_data.obj rt_nonfinite.obj rtGetNaN.obj rtGetInf.obj codegenTest_initialize.obj codegenTest_terminate.obj codegenTest.obj minOrMax.obj eye.obj xnrm2.obj mrdivide_helper.obj xgeqp3.obj constacc.obj KalmanFilter.obj trackingKF.obj CombinedTracker.obj
+OBJS = codegenTest_data.obj rt_nonfinite.obj rtGetNaN.obj rtGetInf.obj codegenTest_initialize.obj codegenTest_terminate.obj codegenTest.obj minOrMax.obj xnrm2.obj xgeqp3.obj constacc.obj KalmanFilter.obj trackingKF.obj CombinedTracker.obj
 
 ALL_OBJS = $(OBJS)
 
@@ -462,15 +462,7 @@ minOrMax.obj : $(START_DIR)/codegen/lib/codegenTest/minOrMax.cpp
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-eye.obj : $(START_DIR)/codegen/lib/codegenTest/eye.cpp
-	$(CPP) $(CPPFLAGS) -o "$@" "$<"
-
-
 xnrm2.obj : $(START_DIR)/codegen/lib/codegenTest/xnrm2.cpp
-	$(CPP) $(CPPFLAGS) -o "$@" "$<"
-
-
-mrdivide_helper.obj : $(START_DIR)/codegen/lib/codegenTest/mrdivide_helper.cpp
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 

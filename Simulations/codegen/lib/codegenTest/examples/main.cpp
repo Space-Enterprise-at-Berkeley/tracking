@@ -5,7 +5,7 @@
 // File: main.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 03-Dec-2025 20:32:31
+// C/C++ source code generated on  : 03-Dec-2025 22:04:03
 //
 
 /*************************************************************************/
@@ -112,19 +112,21 @@ void main_codegenTest()
 {
   float state[9];
   float testProcessNoise_tmp[9];
-  float fv[3];
+  float testGPS_tmp[3];
   float testGPStime_tmp;
   // Initialize function 'codegenTest' input arguments.
   // Initialize function input argument 'testGPS'.
+  argInit_1x3_real32_T(testGPS_tmp);
   testGPStime_tmp = argInit_real32_T();
+  // Initialize function input argument 'testAccel'.
   // Initialize function input argument 'testProcessNoise'.
   argInit_3x3_real32_T(testProcessNoise_tmp);
   // Initialize function input argument 'testGPSNoise'.
+  // Initialize function input argument 'testAccelNoise'.
   // Call the entry-point 'codegenTest'.
-  argInit_1x3_real32_T(fv);
-  codegenTest(fv, testGPStime_tmp, testGPStime_tmp, testGPStime_tmp,
+  codegenTest(testGPS_tmp, testGPStime_tmp, testGPS_tmp, testGPStime_tmp,
               testGPStime_tmp, testProcessNoise_tmp, testProcessNoise_tmp,
-              testGPStime_tmp, state);
+              testProcessNoise_tmp, state);
 }
 
 //

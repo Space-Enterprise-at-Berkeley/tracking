@@ -6,9 +6,7 @@ codegenTest_initialize.obj
 codegenTest_terminate.obj
 codegenTest.obj
 minOrMax.obj
-eye.obj
 xnrm2.obj
-mrdivide_helper.obj
 xgeqp3.obj
 constacc.obj
 KalmanFilter.obj

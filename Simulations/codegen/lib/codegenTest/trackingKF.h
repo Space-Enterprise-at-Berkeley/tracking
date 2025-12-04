@@ -5,7 +5,7 @@
 // File: trackingKF.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 03-Dec-2025 20:32:31
+// C/C++ source code generated on  : 03-Dec-2025 22:04:03
 //
 
 #ifndef TRACKINGKF_H
@@ -25,10 +25,6 @@ public:
   void set_MeasurementNoise(const float b_value[9]);
   void predict(float varargin_1);
   void correct(const float z[3]);
-  void get_MeasurementNoise(float value_data[], int value_size[2]) const;
-  void set_MeasurementModel(const float MeasurementModelMatrix[9]);
-  void set_MeasurementNoise(float b_value);
-  void correct(float z);
   float StateTransitionModel[81];
   float pState[9];
   float pStateCovariance[81];
