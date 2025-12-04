@@ -1,10 +1,7 @@
 #include "Rotator.h"
 #include "EEPROM.h"
 #include "HAL.h"
-#include <FlexCAN_T4.h>
 #include <cmath>
-#include <math.h>
-#include <array>
 
 namespace Rotator {
     // State flags
@@ -31,10 +28,13 @@ namespace Rotator {
     // Tracking stuff
     CombinedTracker tracker;
     uint32_t trackingStartTime;
+    uint32_t trackingLaunchStartTime;
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
 
     //Rocket stuff
+    bool launchDetected = false;
+    bool launchDone = false;
     float launchPosition[] = {35.34770595331676, -117.80915328050497, 626.1}; // in terms of longitude, latitude, and altitude
 
     // Timing for derivatives and tracking updates
@@ -49,12 +49,16 @@ namespace Rotator {
     uint32_t diagnosticDelay = 1000 * 1000;
 
     void startTracking(){
+        launchDetected = false;
+        launchDone = false;
         tracking = true;
         trackingStartTime = micros();
         tracker.init();
     }
 
     void stopTracking(){
+        launchDetected = false;
+        launchDone = false;
         tracking = false;
     }
 
@@ -145,7 +149,43 @@ namespace Rotator {
         elvRefVel *= 180/M_PI;
     }
 
-    void accelUpdate(Comms::Packet packet, uint8_t ip) {}
+    void accelUpdate(Comms::Packet packet, uint8_t ip) {
+        if (!tracking) return;
+        PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
+        float accelX = parsed_packet.m_AccelX;
+        float threshold  = 1.5;
+        // Check if we're done with launch detect
+            // If so, return
+        if(launchDone && !launchDetected){
+            return;
+        }
+        // Check if we're in launch detect
+        if(launchDetected){
+            tracker.accelUpdate((float) (micros() - trackingLaunchStartTime)/1000000.0, accelX*9.81);
+            if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
+                launchDone = true;
+                launchDetected = false;
+                Serial.println("Launch completed.");
+                return;
+            }
+        }
+            // If so, feed in accel update 
+            // Check if it's been long enough to exit launch detect
+                // If so, remove the launch detect flag and set the done flag
+                // Return
+        if(accelX > threshold){
+            launchDetected = true;
+            tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accelX*9.81);
+            trackingLaunchStartTime = micros();
+            Serial.println("Launch detected!"); 
+        }
+
+        // Otherwise, check if we've launched
+            // If so, set the launch detech flag and record the launch time
+            // Feed in accel update 
+
+        // to update, imagine something like tracker.accelUpdate()
+    }
         
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
         if (!tracking) return;

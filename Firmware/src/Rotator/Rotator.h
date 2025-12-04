@@ -19,6 +19,4 @@ namespace Rotator {
     void init();
     uint32_t updateAndMove();
     bool *getStateFlags();
-    std::array<float, 3> gpsToECEF(float lat, float lon, float alt);
-    std::array<float, 3> gpsSeparationENU(float gps1[], float gps2[]);
 }
