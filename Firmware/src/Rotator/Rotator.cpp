@@ -1,7 +1,6 @@
 #include "Rotator.h"
 #include "EEPROM.h"
 #include "HAL.h"
-#include <FlexCAN_T4.h>
 #include <cmath>
 #include <math.h>
 #include <array>
@@ -30,7 +29,7 @@ namespace Rotator {
     // Tracking stuff
     CombinedTracker tracker;
     uint32_t trackingStartTime;
-    uin32_t trackignLaunchStartTime;
+    uint32_t trackingLaunchStartTime;
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
 
@@ -156,9 +155,10 @@ namespace Rotator {
             // If so, return
         if(launchDone && !launchDetected){
             return;
+        }
         // Check if we're in launch detect
         if(launchDetected){
-            tracker.accelUpdate((float) (micros() - trackingLaunchStartTime)/1000000.0, {accelX, 0, 0});
+            tracker.accelUpdate((float) (micros() - trackingLaunchStartTime)/1000000.0, accelX*9.81);
             if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
                 launchDone = true;
                 launchDetected = false;
@@ -172,7 +172,7 @@ namespace Rotator {
                 // Return
         if(accelX > threshold){
             launchDetected = true;
-            tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, {accelX, 0, 0});
+            tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accelX*9.81);
             trackingLaunchStartTime = micros();
             Serial.println("Launch detected!"); 
         }
