@@ -5,7 +5,7 @@
 // File: CombinedTracker.cpp
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 02-Dec-2025 17:03:31
+// C/C++ source code generated on  : 03-Dec-2025 20:32:31
 //
 
 // Include Files
@@ -50,22 +50,15 @@ void CombinedTracker::GPSUpdate(float b_time, const float b_value[3])
 
 //
 // Arguments    : float b_time
-//                const float b_value[3]
+//                float b_value
 // Return Type  : void
 //
-void CombinedTracker::accelUpdate(float b_time, const float b_value[3])
+void CombinedTracker::accelUpdate(float b_time, float b_value)
 {
   coder::trackingKF *obj;
-  float MeasurementModelMatrix[27];
   float c_value[9];
-  obj = Filter;
-  for (int i{0}; i < 27; i++) {
-    MeasurementModelMatrix[i] = AccelModel[i];
-  }
-  for (int i{0}; i < 27; i++) {
-    obj->pMeasurementModel[i] = MeasurementModelMatrix[i];
-  }
   float out;
+  Filter->set_MeasurementModel(AccelModel);
   Filter->set_MeasurementNoise(AccelNoise);
   out = Time;
   Filter->predict(b_time - out);
@@ -99,9 +92,8 @@ void CombinedTracker::extrapolate(float b_time, float state[9]) const
 //
 CombinedTracker *CombinedTracker::init()
 {
-  static const signed char b_iv1[27]{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                                     0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
   static const signed char b_iv[9]{5, 0, 0, 0, 5, 0, 0, 0, 5};
+  static const signed char b_iv1[9]{0, 0, 0, 0, 0, 0, 0, 0, 1};
   CombinedTracker *obj;
   coder::trackingKF *fcnOutput;
   obj = this;
@@ -115,12 +107,10 @@ CombinedTracker *CombinedTracker::init()
   for (int i{0}; i < 9; i++) {
     obj->GPSNoise[i] = b_iv[i];
   }
-  for (int i{0}; i < 27; i++) {
+  for (int i{0}; i < 9; i++) {
     obj->AccelModel[i] = b_iv1[i];
   }
-  for (int i{0}; i < 9; i++) {
-    obj->AccelNoise[i] = b_iv[i];
-  }
+  obj->AccelNoise = 5.0F;
   fcnOutput = obj->coder_buffer_pobj0.init(obj->State);
   obj->Filter = fcnOutput;
   return obj;
@@ -129,18 +119,17 @@ CombinedTracker *CombinedTracker::init()
 //
 // Arguments    : const float ProcessNoise[9]
 //                const float b_GPSNoise[9]
-//                const float b_AccelNoise[9]
+//                float b_AccelNoise
 // Return Type  : void
 //
 void CombinedTracker::setNoises(const float ProcessNoise[9],
-                                const float b_GPSNoise[9],
-                                const float b_AccelNoise[9])
+                                const float b_GPSNoise[9], float b_AccelNoise)
 {
   Filter->set_ProcessNoise(ProcessNoise);
   for (int i{0}; i < 9; i++) {
     GPSNoise[i] = b_GPSNoise[i];
-    AccelNoise[i] = b_AccelNoise[i];
   }
+  AccelNoise = b_AccelNoise;
 }
 
 //

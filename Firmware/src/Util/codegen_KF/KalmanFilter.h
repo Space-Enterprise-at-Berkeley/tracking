@@ -5,7 +5,7 @@
 // File: KalmanFilter.h
 //
 // MATLAB Coder version            : 25.2
-// C/C++ source code generated on  : 02-Dec-2025 17:03:31
+// C/C++ source code generated on  : 03-Dec-2025 20:32:31
 //
 
 #ifndef KALMANFILTER_H
@@ -26,11 +26,6 @@ class trackingKF;
 void binary_expand_op(coder::trackingKF *in1, const float in2_data[],
                       const float in3[3], const float in4_data[],
                       const int in4_size[2]);
-
-void binary_expand_op_1(float in1_data[], int in1_size[2],
-                        const float in2_data[], const int in2_size[2],
-                        const coder::trackingKF *in3, const float in4_data[],
-                        const int in4_size[2]);
 
 #endif
 //

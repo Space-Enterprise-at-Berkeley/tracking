@@ -32,13 +32,13 @@ namespace Rotator {
     uint32_t trackingStartTime;
     uin32_t trackignLaunchStartTime;
     float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
-    float rotatorPosition[] = {-500, 0, 0}; // XYZ position (m) relative to launch site
+    float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
 
     //Rocket stuff
-    float launchPosition[] = {35.3472294, -117.8108024, 628}; // in terms of longitude, latitude, and altitude
-    // Launch detection flags
     bool launchDetected = false;
     bool launchDone = false;
+    float launchPosition[] = {35.34770595331676, -117.80915328050497, 626.1}; // in terms of longitude, latitude, and altitude
+
     // Timing for derivatives and tracking updates
     /*uint32_t lastTrackingUpdate, lastMotorTime;
     float elvLastPos, aziLastPos, motorDt;*/
@@ -85,8 +85,8 @@ namespace Rotator {
     }
 
     // Compute local ENU separation between two GPS coordinates
-    // gps1 = reference point (lat, lon, alt)
-    // gps2 = target point (lat, lon, alt)
+    // gps1 = target point (lat, lon, alt)
+    // gps2 = reference point (lat, lon, alt)
     // enu[3] = output {East, North, Up} in meters
     void gpsSeparationENU(float gps1[], float gps2[], float out[]) {
         float rocketpos[3];
@@ -98,10 +98,10 @@ namespace Rotator {
         float dy = rocketpos[1] - launchpos[1];
         float dz = rocketpos[2] - launchpos[2];
 
-        // Convert ECEF delta to ENU relative to gps1
+        // Convert ECEF delta to ENU relative to gps2
         const float deg2rad = M_PI / 180.0f;
-        float lat0 = gps1[0] * deg2rad;
-        float lon0 = gps1[1] * deg2rad;
+        float lat0 = gps2[0] * deg2rad;
+        float lon0 = gps2[1] * deg2rad;
 
         float sinLat = sinf(lat0), cosLat = cosf(lat0);
         float sinLon = sinf(lon0), cosLon = cosf(lon0);
@@ -138,9 +138,9 @@ namespace Rotator {
         aziRefPos = 180/M_PI * atan2(delta_y,delta_x);
         elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket);
 
-        aziRefPos = fmod(aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
+        aziRefPos = fmod(90 - aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
         // elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
-        aziRefVel = (y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
+        aziRefVel = -(y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
         elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
 
         aziRefVel *= 180/M_PI;
