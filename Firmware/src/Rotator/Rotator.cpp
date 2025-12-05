@@ -166,18 +166,15 @@ namespace Rotator {
                 Serial.println("Launch completed.");
                 return;
             }
-        }
-            // If so, feed in accel update 
-            // Check if it's been long enough to exit launch detect
-                // If so, remove the launch detect flag and set the done flag
-                // Return
-        if(accelX > threshold){
+        } else if(accelX > threshold){
             launchDetected = true;
             trackingLaunchStartTime = micros();
             Serial.println("Launch detected!"); 
         }
 
-        tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, (accelX-1)*9.81);
+        float acc = (accelX - 1.0)*9.81;
+        float accVals[] = {acc, acc, acc};
+        tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accVals);
 
         // Otherwise, check if we've launched
             // If so, set the launch detech flag and record the launch time
