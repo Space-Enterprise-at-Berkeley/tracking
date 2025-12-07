@@ -309,7 +309,6 @@ namespace HAL {
     float getEncoderDegrees_0() {
         if (micros() - pulseStart_0 > 50 * 1000) encoderFault_0 = true;
         else encoderFault_0 = false;
-        if (encoderFault_0) Serial.println("Fault 0");
         return degreeBuff_0->getFiltered();
     }
 
@@ -320,7 +319,6 @@ namespace HAL {
     float getEncoderDegrees_1() {
         if (micros() - pulseStart_1 > 50 * 1000) encoderFault_1 = true;
         else encoderFault_1 = false;
-        if (encoderFault_1) Serial.println("Fault 1");
         return degreeBuff_1->getFiltered();
     }
 

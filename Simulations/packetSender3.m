@@ -20,39 +20,51 @@ start_time = 15 / delay;
 end_time = 30 / delay;
 schedule = delay:delay:time(end);
 len = length(schedule) + start_time + end_time;
-measurements = zeros(len, 3);
+gpsMeasurements = zeros(len, 3);
+accelMeasurements = zeros(len, 3);
 real = zeros(len, 3);
 for i = 1:start_time
-    measurements(i, 1) = (0+1)*(1+randn/20);
+    gpsMeasurements(i, :) = gps([0,0,0], [0,0,0]);
+    accelMeasurements(i, 1) = (0+1)*(1+randn/5);
     real(i, :) = [0, 0, 0];
 end
 for i = (i+1):(i+length(schedule))
     index = find(time >= schedule(i-start_time), 1);
-    measurements(i, 1) = (sim_data(index,4)/9.81+1)*(1+randn/20);
+    gpsMeasurements(i, :) = gps(pos(index, :), vel(index, :));
+    accelMeasurements(i, 1) = (sim_data(index,4)/9.81+1)*(1+randn/5)*sind(sim_data(index,17));
     real(i, :) = pos(index, :);
 end
 for i = (i+1):(i+end_time)
-    measurements(i, 1) = (0+1)*(1+randn/20);
+    gpsMeasurements(i, :) = gps(pos(end, :), [0,0,0]);
+    accelMeasurements(i, 1) = (0+1)*(1+randn/5);
     real(i, :) = pos(end, :);
 end
 
 pause('on');
 clear u
 u = udpport('LocalHost', '10.0.0.199', 'LocalPort', 42069);
-packetID = uint8(8);
-packetLen = uint8(32);
+
+gpsID = uint8(10);
+gpsLen = uint8(46);
+accelID = uint8(8);
+accelLen = uint8(32);
 for i = 1:len
-    measurements(i, :)
-    data = typecast(single(measurements(i, :)), 'uint8');
-    sum = computeChecksum(data);
-    packet = uint8([packetID packetLen 0 0 0 0 sum data]);
+    real(i, :)
+    data1 = typecast(single(gpsMeasurements(i, :)), 'uint8');
+    sum = computeChecksum(data1, gpsID, gpsLen);
+    packet = uint8([gpsID gpsLen 0 0 0 0 sum data1]);
+    write(u, packet, 'uint8', '10.0.0.91', 42099)
+
+    data2 = typecast(single(accelMeasurements(i, :)), 'uint8');
+    sum = computeChecksum(data2, accelID, accelLen);
+    packet = uint8([accelID accelLen 0 0 0 0 sum data2]);
     write(u, packet, 'uint8', '10.0.0.91', 42099)
     pause(delay);
 end
 
-function sum = computeChecksum(data)
-    packetID = uint32(8);
-    packetLen = uint32(32);
+function sum = computeChecksum(data, id, len)
+    packetID = cast(id, 'uint32');
+    packetLen = cast(len, 'uint32');
     sum1 = uint32(0);
     sum2 = uint32(0);
 

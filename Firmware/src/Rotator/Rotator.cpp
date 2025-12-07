@@ -33,8 +33,7 @@ namespace Rotator {
     float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
 
     //Rocket stuff
-    bool launchDetected = false;
-    bool launchDone = false;
+    uint8_t launchState = 0;
     float launchPosition[] = {35.34770595331676, -117.80915328050497, 626.1}; // in terms of longitude, latitude, and altitude
 
     // Timing for derivatives and tracking updates
@@ -48,17 +47,21 @@ namespace Rotator {
     uint32_t lastDiagnosticTime;
     uint32_t diagnosticDelay = 1500 * 1000;
 
+    // Timing for data rate reporting
+    uint32_t lastGPSUpdate = 0;
+    uint32_t lastGPSDelay = 0;
+    uint32_t lastAccUpdate = 0;
+    uint32_t lastAccDelay = 0;
+
     void startTracking(){
-        launchDetected = false;
-        launchDone = false;
+        launchState = 0;
         tracking = true;
         trackingStartTime = micros();
         tracker.init();
     }
 
     void stopTracking(){
-        launchDetected = false;
-        launchDone = false;
+        launchState = 0;
         tracking = false;
     }
 
@@ -150,40 +153,42 @@ namespace Rotator {
     }
 
     void accelUpdate(Comms::Packet packet, uint8_t ip) {
-        if (!tracking || launchDone) return;
+        uint32_t now = micros();
+        lastAccDelay = now - lastAccUpdate;
+        lastAccUpdate = now;
+
+        if (!tracking || launchState == 2) return;
 
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
         float accelX = parsed_packet.m_AccelX;
-        float threshold  = 1.5;
-        // Check if we're done with launch detect
-            // If so, return
+        float threshold  = 2; // In g
 
         // Check if we're in launch detect
-        if(launchDetected){
+        if(launchState == 1){
             if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
-                launchDone = true;
-                launchDetected = false;
                 Serial.println("Launch completed.");
+                launchState = 2;
                 return;
             }
-        } else if(accelX > threshold){
-            launchDetected = true;
+        } else if(accelX - 1.0 > threshold){
             trackingLaunchStartTime = micros();
+            launchState = 1;
             Serial.println("Launch detected!"); 
         }
 
         float acc = (accelX - 1.0)*9.81;
         float accVals[] = {acc, acc, acc};
         tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accVals);
-
-        // Otherwise, check if we've launched
-            // If so, set the launch detech flag and record the launch time
-            // Feed in accel update 
-
-        // to update, imagine something like tracker.accelUpdate()
+       
+        Serial.print("Ran accel update with ");
+        Serial.println(acc);
     }
         
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
+        uint32_t now = micros();
+        lastGPSDelay = now - lastGPSUpdate;
+        lastGPSUpdate = now;
+
         if (!tracking) return;
 
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
@@ -282,6 +287,25 @@ namespace Rotator {
     void sendRotatorState(){
         //PacketRTRotatorState newpacket = PacketRTRotatorState::writeRawPacket();
         //make packet
+        uint32_t now = micros();
+        uint32_t sinceAcc = now - lastAccUpdate;
+        uint32_t sinceGPS = now - lastGPSUpdate;
+        float accRate;
+        float gpsRate;
+
+        if (lastAccDelay == 0 || sinceAcc > 5000*1000){
+            accRate = 0;
+        } else {
+            if (sinceAcc > lastAccDelay) lastAccDelay = sinceAcc;
+            accRate = 1.0/lastAccDelay*1000*1000;
+        }
+        if (lastGPSDelay == 0 || sinceGPS > 5000*1000){
+            gpsRate = 0;
+        } else {
+            if (sinceGPS > lastGPSDelay) lastGPSDelay = sinceGPS;
+            gpsRate = 1.0/lastGPSDelay*1000*1000;
+        }
+
         PacketRTRotatorState state = PacketRTRotatorState::Builder()
             .withElvPos(elvPos)
             .withElvRefPos(elvRefPos)
@@ -293,6 +317,12 @@ namespace Rotator {
             .withAziVel(aziVel)
             .withAziRefVel(aziRefVel)
             .withAziPower(aziPower*100)
+            .withEnableState(HAL::getMotorEnable())
+            .withElvEncoderFault(HAL::getFault_0())
+            .withAziEncoderFault(HAL::getFault_1())
+            .withLaunchDetectState(launchState)
+            .withGpsRate(gpsRate)
+            .withAccelRate(accRate)
             .build();
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);
