@@ -1,10 +1,11 @@
 #include <Arduino.h>
 #include <Common.h>
 #include "Util/codegen_KF/CombinedTracker.h"
+#include "Util/custom_KF/CombinedTracker.h"
 
 uint32_t lastMessage;
 uint32_t startTime;
-CombinedTracker tracker;
+kalman_filter::CombinedTracker tracker;
 uint32_t update;
 
 void setup() {
