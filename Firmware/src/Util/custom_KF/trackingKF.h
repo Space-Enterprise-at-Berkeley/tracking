@@ -21,9 +21,6 @@ public:
   float pState[9];
   float pStateCovariance[81];
   float pMeasurementModel[27];
-  bool pIsDistributionsSetup;
-  bool pIsInitialized;
-  bool pIsSmootherStateSizeInitialized;
 
 protected:
   float ProcessNoiseModel[27];
@@ -31,10 +28,6 @@ protected:
   float pV;
   float pProcessNoise[9];
   float pMeasurementNoise[9];
-  bool IsLastJacobianInitialized;
-
-private:
-  bool pIsStateTransitionLocked;
 };
 
 } // namespace kalman_filter

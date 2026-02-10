@@ -84,13 +84,6 @@ namespace kalman_filter {
 
 trackingKF *trackingKF::init(const float varargin_4[9])
 {
-  trackingKF *KF = this;
-
-  pIsStateTransitionLocked = false;
-  pIsSmootherStateSizeInitialized = false;
-  IsLastJacobianInitialized = false;
-  pIsDistributionsSetup = false;
-  pIsInitialized = false;
 
   SetIdentity(StateTransitionModel, 9);
   std::memcpy(pState, varargin_4, sizeof(pState));
@@ -103,8 +96,7 @@ trackingKF *trackingKF::init(const float varargin_4[9])
   std::fill(pMeasurementNoise, pMeasurementNoise + 9, 0.0F);
   SetDefaultMeasurementModel(pMeasurementModel);
 
-  pIsStateTransitionLocked = true;
-  return KF;
+  return this;
 }
 
 void trackingKF::set_ProcessNoise(const float b_value[9])
@@ -119,16 +111,6 @@ void trackingKF::set_MeasurementNoise(const float b_value[9])
 
 void trackingKF::predict(float varargin_1)
 {
-  if (!pIsSmootherStateSizeInitialized) {
-    pIsSmootherStateSizeInitialized = true;
-  }
-  if (!IsLastJacobianInitialized) {
-    IsLastJacobianInitialized = true;
-  }
-  if (!pIsDistributionsSetup) {
-    pIsDistributionsSetup = true;
-  }
-
   const float dt = varargin_1;
   const float half_dt2 = 0.5F * dt * dt;
 
@@ -227,7 +209,6 @@ void trackingKF::predict(float varargin_1)
     }
   }
 
-  pIsStateTransitionLocked = true;
 }
 
 void trackingKF::correct(const float z[3])
@@ -324,9 +305,6 @@ void trackingKF::correct(const float z[3])
     }
   }
 
-  if (!pIsInitialized) {
-    pIsDistributionsSetup = true;
-  }
 }
 
 } // namespace kalman_filter

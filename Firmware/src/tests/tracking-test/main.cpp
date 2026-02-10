@@ -5,7 +5,7 @@
 
 uint32_t lastMessage;
 uint32_t startTime;
-kalman_filter::CombinedTracker tracker;
+kalman_filter::CombinedTracker tracker; // the kalman filter namespace imports the custom KF
 uint32_t update;
 
 void setup() {
