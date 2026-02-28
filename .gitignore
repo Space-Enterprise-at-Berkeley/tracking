@@ -9,3 +9,4 @@ __pycache__
 Firmware/proto/include/*.h
 .Firmware/proto/src/__pycache__
 *.pyc
+.venv
