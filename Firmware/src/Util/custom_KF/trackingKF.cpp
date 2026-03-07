@@ -240,7 +240,6 @@ void trackingKF::correct(const float z[3])
   std::fill(S, S + 9, 0.0F);
   for (int col = 0; col < 3; ++col) {
     for (int k = 0; k < 9; ++k) {
-      const float h = pMeasurementModel[col + 3 * k];
       for (int row = 0; row < 3; ++row) {
         S[row + 3 * col] += pMeasurementModel[row + 3 * k] * PHt[k + 9 * col];
       }
