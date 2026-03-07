@@ -404,7 +404,7 @@ namespace Rotator {
         elvError = elvRefPos - elvPos;
         elvPower = elvKp * elvError + elvKd * (elvRefVel - elvVel); // PD control
 
-        if (abs(elvError) < 1) {
+        if (abs(elvError) < 0.2) {
             elvPower = 0;
         }
 
@@ -416,7 +416,7 @@ namespace Rotator {
         aziError = check_wraparound(aziRefPos, aziPos);
         aziPower = aziKp * aziError + aziKd * (aziRefVel - aziVel);
 
-        if (abs(aziError) < 1) {
+        if (abs(aziError) < 0.2) {
             aziPower = 0;
         }
 
