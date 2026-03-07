@@ -18,9 +18,9 @@ void SetIdentity(float *mat, int n)
 void SetDefaultMeasurementModel(float model[27])
 {
   std::fill(model, model + 27, 0.0F);
-  model[0] = 1.0F;  // row 0, col 0
-  model[4] = 1.0F;  // row 1, col 1
-  model[8] = 1.0F;  // row 2, col 2
+  model[0] = 1.0F;   // row 0, col 0  -> measure x
+  model[10] = 1.0F;  // row 1, col 3  -> measure y
+  model[20] = 1.0F;  // row 2, col 6  -> measure z
 }
 
 void PropagateState(float state[9], float dt)
