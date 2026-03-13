@@ -19,12 +19,12 @@ namespace Rotator {
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
-    float elvKp = 0.005;
-    float elvKi = 0.005;
+    float elvKp = 0.008;
+    float elvKi = 0.0005;
     float elvMaxPower = 0.15;
-    float aziKp = 0.005;
-    float aziKi = 0.005;
-    float aziMaxPower = 0.2;
+    float aziKp = 0.008;
+    float aziKi = 0.0005;
+    float aziMaxPower = 0.15;
 
     // Tracking stuff
     CombinedTracker tracker;
@@ -368,7 +368,7 @@ namespace Rotator {
 
     float PIController(float error, float Kp, float Ki, float maxPower, float &integral){
         float power = Kp * error + integral;
-        float clipped = max(min(power, -maxPower), maxPower);
+        float clipped = max(min(power, maxPower), -maxPower);
         float antiwindup = (clipped - power) / Kp;
         integral += (error + antiwindup) * Ki * (float) updatePeriod / (1000 * 1000);
         if (!HAL::getMotorEnable()) integral = 0;
