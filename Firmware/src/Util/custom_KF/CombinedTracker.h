@@ -1,11 +1,10 @@
 // Custom KF skeleton interface matching codegen_KF/CombinedTracker.h.
-#ifndef CUSTOM_COMBINEDTRACKER_H
-#define CUSTOM_COMBINEDTRACKER_H
-
+#pragma once
 // Include Files
 #include "trackingKF.h"
 #include <cstddef>
 #include <cstdlib>
+#include <memory>
 
 // Type Definitions
 namespace kalman_filter {
@@ -19,13 +18,11 @@ public:
   void extrapolate(float b_time, float state[9]) const;
   float Time;
   float State[9];
-  kalman_filter::trackingKF *Filter;
+  std::unique_ptr<trackingKF> Filter;
   float GPSModel[27];
   float GPSNoise[9];
   float AccelModel[27];
   float AccelNoise[9];
-  kalman_filter::trackingKF coder_buffer_pobj0;
 };
 } // namespace kalman_filter
 
-#endif //   CUSTOM_COMBINEDTRACKER_H 
