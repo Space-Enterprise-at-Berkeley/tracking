@@ -41,7 +41,10 @@ CombinedTracker *CombinedTracker::init()
   std::memcpy(AccelModel, kDefaultAccelModel, sizeof(AccelModel));
   std::memcpy(AccelNoise, kDefaultNoise, sizeof(AccelNoise));
 
-  Filter = coder_buffer_pobj0.init(State);
+  Filter = std::unique_ptr<trackingKF>(new trackingKF());
+  if (Filter->init(State) == nullptr) {
+    Filter.reset();
+  }
   return this;
 }
 

@@ -3,7 +3,11 @@
 #include <Arduino.h>
 #include <TeensyComms.h>
 #include "Util/PIDController.h"
+#if defined(USE_CODEGEN_KF)
 #include "Util/codegen_KF/CombinedTracker.h"
+#else
+#include "Util/custom_KF/CombinedTracker.h"
+#endif
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_RTRotatorState.h"
 #include "../proto/include/Packet_RTSetElevation.h"

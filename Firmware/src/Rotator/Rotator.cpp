@@ -10,6 +10,8 @@ namespace Rotator {
 
     // Motor state
     float elvPos, elvVel, elvError, elvPower, aziPos, aziVel, aziError, aziPower;
+    float elvIntegral = 0;
+    float aziIntegral = 0;
     
     // Reference setpoints
     float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
@@ -17,13 +19,12 @@ namespace Rotator {
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
-    float elvKp = 0.005;
-    float elvKd = 0;
+    float elvKp = 0.008;
+    float elvKi = 0.0005;
     float elvMaxPower = 0.15;
-    // float elvMaxBacklash = 3.2;
-    float aziKp = 0.005;
-    float aziKd = 0;
-    float aziMaxPower = 0.2;
+    float aziKp = 0.008;
+    float aziKi = 0.0005;
+    float aziMaxPower = 0.15;
 
     // Tracking stuff
     CombinedTracker tracker;
@@ -35,10 +36,6 @@ namespace Rotator {
     //Rocket stuff
     uint8_t launchState = 0;
     float launchPosition[] = {35.34770595331676, -117.80915328050497, 626.1}; // in terms of longitude, latitude, and altitude
-
-    // Timing for derivatives and tracking updates
-    /*uint32_t lastTrackingUpdate, lastMotorTime;
-    float elvLastPos, aziLastPos, motorDt;*/
 
     // Diagnostic stuff
     uint8_t diagnosticStep = 0;
@@ -192,6 +189,7 @@ namespace Rotator {
         if (!tracking) return;
 
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
+        
         float lat = parsed_packet.m_Latitude;
         float lon = parsed_packet.m_Longitude;
         float alt = parsed_packet.m_Altitude;
@@ -368,6 +366,15 @@ namespace Rotator {
         }
     }
 
+    float PIController(float error, float Kp, float Ki, float maxPower, float &integral){
+        float power = Kp * error + integral;
+        float clipped = max(min(power, maxPower), -maxPower);
+        float antiwindup = (clipped - power) / Kp;
+        integral += (error + antiwindup) * Ki * (float) updatePeriod / (1000 * 1000);
+        if (!HAL::getMotorEnable()) integral = 0;
+        return clipped;
+    }
+
     void init(){
         tracking = false;
         diagnostic = false;
@@ -392,35 +399,21 @@ namespace Rotator {
             aziRefVel = 0;
         }
 
-        elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);
-        aziRefPos = fmod(aziRefPos, 360.0);
-        if (aziRefPos < 0) aziRefPos += 360;
-        // Serial.println("done with updates");
-        
-        // motorDt = ((float) (micros() - lastMotorTime)) / 1000000; // Time since last motor update (not tracking)
-
+        elvRefPos = max(min(elvRefPos, HAL::maxDegrees_0), HAL::minDegrees_0);       
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = HAL::getSlope_0() * 1000 * 1000;
+
         elvError = elvRefPos - elvPos;
-        elvPower = elvKp * elvError + elvKd * (elvRefVel - elvVel); // PD control
-
-        if (abs(elvError) < 1) {
-            elvPower = 0;
-        }
-
-        elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower); // Clamp power to +-maxPower
+        elvPower = PIController(elvError, elvKp, elvKi, elvMaxPower, elvIntegral);
         HAL::sendPower_0(elvPower); 
-
-        aziPos = fmod(HAL::getEncoderDegrees_1() + aziOffset, 360.0); // Same thing for azimuth
+        
+        aziRefPos = fmod(aziRefPos, 360.0);
+        if (aziRefPos < 0) aziRefPos += 360; 
+        aziPos = fmod(HAL::getEncoderDegrees_1() + aziOffset, 360.0);
         aziVel = HAL::getSlope_1() * 1000 * 1000;
+
         aziError = check_wraparound(aziRefPos, aziPos);
-        aziPower = aziKp * aziError + aziKd * (aziRefVel - aziVel);
-
-        if (abs(aziError) < 1) {
-            aziPower = 0;
-        }
-
-        aziPower = min(max(aziPower, -aziMaxPower), aziMaxPower);
+        aziPower = PIController(aziError, aziKp, aziKi, aziMaxPower, aziIntegral);
         HAL::sendPower_1(aziPower);
 
         /*Serial.print("Elv power: ");

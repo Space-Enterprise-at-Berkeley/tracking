@@ -1,8 +1,5 @@
 // Custom KF skeleton interface matching codegen_KF/trackingKF.h.
-
-#ifndef CUSTOM_KF_TRACKINGKF_H
-#define CUSTOM_KF_TRACKINGKF_H
-
+#pragma once
 // Include Files
 #include <cstddef>
 #include <cstdlib>
@@ -32,4 +29,3 @@ protected:
 
 } // namespace kalman_filter
 
-#endif
