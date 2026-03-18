@@ -8,8 +8,8 @@
 #include "../proto/include/Packet_BaroValues.h"
 
 namespace Tracking {
-    std::array<float, 9> trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
-    bool accelUpdate(Comms::Packet packet, uint8_t ip){}
-    bool GPSUpdate(Comms::Packet packet, uint8_t ip){}
-    bool baroUpdate(Comms::Packet packet, uint8_t ip){}
+    std::array<float, 9> trackingState;
+    bool accelUpdate(Comms::Packet packet, uint8_t ip);
+    bool GPSUpdate(Comms::Packet packet, uint8_t ip);
+    bool baroUpdate(Comms::Packet packet, uint8_t ip);
 }
