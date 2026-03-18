@@ -10,3 +10,32 @@ Firmware/proto/include/*.h
 .Firmware/proto/src/__pycache__
 *.pyc
 .venv
+Simulations/IMU Analysis/accerplot.py
+Simulations/IMU Analysis/Altitude_Comparison.png
+Simulations/IMU Analysis/Altitude_data.csv
+Simulations/IMU Analysis/Book1.csv
+Simulations/IMU Analysis/cleaned_prospect_flight_data.csv
+Simulations/IMU Analysis/Full_Flight_Analysis_Dashboard.png
+Simulations/IMU Analysis/IMU-data.csv
+Simulations/IMU Analysis/newaccerplot.py
+Simulations/IMU Analysis/prospect_flight.csv
+Simulations/IMU Analysis/prospect_flight_displacement
+Simulations/IMU Analysis/prospect_flight_gps.csv
+Simulations/IMU Analysis/rocketutils.py
+Simulations/IMU Analysis/rotatordatanew.csv
+Simulations/IMU Analysis/rotatordataplot.py
+Simulations/IMU_Analysis/accerplot.py
+Simulations/IMU_Analysis/Altitude_Comparison.png
+Simulations/IMU_Analysis/Altitude_data.csv
+Simulations/IMU_Analysis/Book1.csv
+Simulations/IMU_Analysis/cleaned_prospect_flight_data.csv
+Simulations/IMU_Analysis/Full_Flight_Analysis_Dashboard.png
+Simulations/IMU_Analysis/IMU-data-new.csv
+Simulations/IMU_Analysis/IMU-data.csv
+Simulations/IMU_Analysis/newaccerplot.py
+Simulations/IMU_Analysis/prospect_flight.csv
+Simulations/IMU_Analysis/prospect_flight_displacement
+Simulations/IMU_Analysis/prospect_flight_gps.csv
+Simulations/IMU_Analysis/rocketutils.py
+Simulations/IMU_Analysis/rotatordatanew.csv
+Simulations/IMU_Analysis/rotatordataplot.py
