@@ -23,4 +23,5 @@ namespace Rotator {
     void init();
     uint32_t updateAndMove();
     bool *getStateFlags();
+    void gpsSeparationENU(float gps1[], float gps2[], float out[]);
 }
