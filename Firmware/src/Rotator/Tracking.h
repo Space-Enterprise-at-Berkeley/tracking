@@ -21,7 +21,7 @@ namespace Tracking {
     bool trackingStart = false;
     bool apogeeReached = false;
 
-    bool accelUpdate(Comms::Packet packet, uint8_t ip){}
-    bool GPSUpdate(Comms::Packet packet, uint8_t ip){}
-    bool baroUpdate(Comms::Packet packet, uint8_t ip){}
+    bool accelUpdate(Comms::Packet packet, uint8_t ip);
+    bool GPSUpdate(Comms::Packet packet, uint8_t ip);
+    bool baroUpdate(Comms::Packet packet, uint8_t ip);
 }

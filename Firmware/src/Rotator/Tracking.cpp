@@ -118,7 +118,7 @@ namespace Tracking {
             launchPressure = pressure;
             launchPosition[2] = altitude;
             trackingStart = true;
-            return;
+            return false;
         }
         //if barometer altitude doesn't differ by a huge amount according to our last update
         if(std::abs(altitude - trackingState[6]) < 500){
