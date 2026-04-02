@@ -4,9 +4,14 @@
 namespace Tracking {
     void resetTracking(){
         trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+        accelCalSamples = 0;
+        GPSCalSamples = 0;
+        baroCalSamples = 0;
         // Insert other preflight initialization (e.g. zeroing baro) here
     }
     bool accelUpdate(Comms::Packet packet, uint8_t ip){
+        if(!trackingStart || apogeeReached) return false;
+
         // Insert accel callback here
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
 
@@ -18,21 +23,20 @@ namespace Tracking {
         float gyroY = parsed_packet.m_GyroY;
         float gyroZ = parsed_packet.m_GyroZ;
 
-        if(apogeeReached) return false; //if we've already reached apogee, we don't want to use accel data anymore, so we can ignore it
-
-        if(!apogeeReached && !trackingStart){
+        if(accelCalSamples < accelCalThreshold){
+            // Do initial averaging
             launchAcceleration[0] = accelX;
             launchAcceleration[1] = accelY;
             launchAcceleration[2] = accelZ;
             launchGyro[0] = gyroX;
             launchGyro[1] = gyroY;
             launchGyro[2] = gyroZ;
-            trackingStart = true;
-            return true; //data validated, and we have set our launch acceleration and gyro
+            accelCalSamples ++;
+            return false; //data validated, and we have set our launch acceleration and gyro
         }
 
         //reduce biases from launch accel and gyro
-        accelX = (accelX - launchAcceleration[0]+1) * 9.80655;
+        accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655; 
         accelY = (accelY - launchAcceleration[1]) * 9.80655;
         accelZ = (accelZ - launchAcceleration[2]) * 9.80655;
         gyroX = (gyroX - launchGyro[0])*(PI/180);
@@ -71,7 +75,7 @@ namespace Tracking {
         trackingState[3] += trackingState[4] * dt;
         trackingState[6] += trackingState[7] * dt;
 
-        if(trackingState[7] < -10 && !apogeeReached){ //if vertical velocity is negative for some time, we have reached apogee
+        if(trackingState[6] > apoAltThresh && trackingState[7] < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
             apogeeReached = true;
         }
         return true; //data validated
@@ -104,8 +108,6 @@ namespace Tracking {
             return true; //data validated
         }
         return false; //data not validated
-
-
 
     }
     bool baroUpdate(Comms::Packet packet, uint8_t ip){

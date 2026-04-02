@@ -17,9 +17,19 @@ namespace Tracking {
     float launchPressure;
     float dt;
     
-    
     bool trackingStart = false;
     bool apogeeReached = false;
+
+    uint8_t accelCalSamples = 0;
+    uint8_t accelCalThreshold = 30;
+    float apoAltThresh = 100;
+    float apoVelThresh = 5;
+
+    uint8_t GPSCalSamples = 0;
+    uint8_t GPSCalThreshold = 10;
+
+    uint8_t baroCalSamples = 0;
+    uint8_t baroCalThreshold = 20;
 
     bool accelUpdate(Comms::Packet packet, uint8_t ip);
     bool GPSUpdate(Comms::Packet packet, uint8_t ip);
