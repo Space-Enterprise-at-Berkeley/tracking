@@ -7,6 +7,7 @@
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_LowIMUValues.h"
 #include "../proto/include/Packet_GPSValues.h"
+#include "../proto/include/Packet_GPSExtraValues.h"
 #include "../proto/include/Packet_BaroValues.h"
 
 namespace Tracking {
@@ -24,6 +25,8 @@ namespace Tracking {
     uint8_t accelCalThreshold = 30;
     float apoAltThresh = 100;
     float apoVelThresh = 5;
+
+    
 
     uint8_t GPSCalSamples = 0;
     uint8_t GPSCalThreshold = 10;

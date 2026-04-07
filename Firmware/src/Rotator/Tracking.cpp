@@ -4,6 +4,7 @@
 namespace Tracking {
     void resetTracking(){
         trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+        //calibration samples reset
         accelCalSamples = 0;
         GPSCalSamples = 0;
         baroCalSamples = 0;
@@ -25,15 +26,21 @@ namespace Tracking {
 
         if(accelCalSamples < accelCalThreshold){
             // Do initial averaging
-            launchAcceleration[0] = accelX;
-            launchAcceleration[1] = accelY;
-            launchAcceleration[2] = accelZ;
-            launchGyro[0] = gyroX;
-            launchGyro[1] = gyroY;
-            launchGyro[2] = gyroZ;
+            launchAcceleration[0] += accelX;
+            launchAcceleration[1] += accelY;
+            launchAcceleration[2] += accelZ;
+            launchGyro[0] += gyroX;
+            launchGyro[1] += gyroY;
+            launchGyro[2] += gyroZ;
             accelCalSamples ++;
             return false; //data validated, and we have set our launch acceleration and gyro
         }
+        launchAcceleration[0] /= accelCalSamples;
+        launchAcceleration[1] /= accelCalSamples;
+        launchAcceleration[2] /= accelCalSamples;
+        launchGyro[0] /= accelCalSamples;
+        launchGyro[1] /= accelCalSamples;
+        launchGyro[2] /= accelCalSamples;
 
         //reduce biases from launch accel and gyro
         accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655; 
