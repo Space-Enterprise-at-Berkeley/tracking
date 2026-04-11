@@ -111,13 +111,12 @@ namespace Tracking {
 
         if(GPSCalSamples < GPSCalThreshold){
             // TODO: do the same averaging here
-            launchPosition[0] = lat;
-            launchPosition[1] = lon;
-            launchPosition[2] = alt;
+            launchPosition[0] = launchPosition[0] * (GPSCalSamples - 1) / GPSCalSamples + lat * 1 / GPSCalSamples;
+            launchPosition[1] = launchPosition[1] * (GPSCalSamples - 1) / GPSCalSamples + lon * 1 / GPSCalSamples;
+            launchPosition[2] = launchPosition[2] * (GPSCalSamples - 1) / GPSCalSamples + alt * 1 / GPSCalSamples;
             GPSCalSamples++;
             return false; //calibration
         }
-
         float rocketPosition[] = {lat,lon,alt};
         float enu[3];
         Rotator::gpsSeparationENU(rocketPosition, launchPosition.data(), enu);
@@ -138,9 +137,9 @@ namespace Tracking {
 
         if(baroCalSamples < baroCalThreshold){
             // TODO: Calibration
-            launchPressure = pressure;
-            launchPosition[2] = altitude;
-            baroCalSamples ++;
+            launchPressure = launchPressure * (baroCalSamples - 1) / baroCalSamples + pressure * 1 / baroCalSamples;
+            launchPosition[2] = launchPosition[2] * (baroCalSamples - 1) / baroCalSamples + altitude * 1 / baroCalSamples;
+            baroCalSamples++;
             return false;
         }
         //if barometer altitude doesn't differ by a huge amount according to our last update
