@@ -31,15 +31,15 @@ namespace Tracking {
         float gyroZ = parsed_packet.m_GyroZ;
 
         if(accelCalSamples < accelCalThreshold){
+            accelCalSamples ++;
             // average = last * (n-1)/n + new * 1/n
             // Do initial averaging
-            launchAcceleration[0] = accelX;
-            launchAcceleration[1] = accelY;
-            launchAcceleration[2] = accelZ;
-            launchGyro[0] = gyroX;
-            launchGyro[1] = gyroY;
-            launchGyro[2] = gyroZ;
-            accelCalSamples ++;
+            launchAcceleration[0] = (1/accelCalSamples)*(launchAcceleration[0] * (accelCalSamples-1) + accelX);
+            launchAcceleration[1] = (1/accelCalSamples)*(launchAcceleration[1] * (accelCalSamples-1) + accelY);
+            launchAcceleration[2] = (1/accelCalSamples)*(launchAcceleration[2] * (accelCalSamples-1) + accelZ);
+            launchGyro[0] = (1/accelCalSamples)*(launchGyro[0] * (accelCalSamples-1) + gyroX);
+            launchGyro[1] = (1/accelCalSamples)*(launchGyro[1] * (accelCalSamples-1) + gyroY);
+            launchGyro[2] = (1/accelCalSamples)*(launchGyro[2] * (accelCalSamples-1) + gyroZ);
             return false; //data validated, and we have set our launch acceleration and gyro
 
             // TODO: divide to make the average correct
