@@ -8,6 +8,7 @@
 #else
 #include "Util/custom_KF/CombinedTracker.h"
 #endif
+#include "Tracking.h"
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_RTRotatorState.h"
 #include "../proto/include/Packet_RTSetElevation.h"

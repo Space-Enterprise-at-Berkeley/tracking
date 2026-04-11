@@ -2,18 +2,52 @@
 #include <cmath>
 
 namespace Tracking {
+    // Main state
+    std::array<float, 9> trackingState; // Xpos, Xvel, Xaccel, Ypos, ...
+    bool tracking = false;
+    
+    // Accelerometer variables
+    uint8_t accelCalSamples = 0;
+    uint8_t accelCalThreshold = 30;
+    std::array<float, 3> launchAcceleration;
+    std::array<float, 3> launchGyro;
+    float apoAltThresh = 100;
+    float apoVelThresh = 5;
+    bool apogeeReached = false;
+    Quaternion::quat q = {1, 0, 0, 0};   
+
+    // GPS variables
+    uint8_t GPSCalSamples = 0;
+    uint8_t GPSCalThreshold = 10;
+    std::array<float, 3> launchPosition;
+
+    // Baro variables
+    uint8_t baroCalSamples = 0;
+    uint8_t baroCalThreshold = 20;
+    float launchPressure;
+    float launchAltitude;
+
+    
+    float dt = 0.1;
+
     void resetTracking(){
         tracking = true;
         trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+
         //calibration samples reset
         accelCalSamples = 0;
-        GPSCalSamples = 0;
-        baroCalSamples = 0;
-        launchAltitude = 0;
-        launchGyro = {0, 0, 0};
         launchAcceleration = {0, 0, 0};
-        quat = {1, 0, 0, 0};
+        launchGyro = {0, 0, 0};
         apogeeReached = false;
+        q = {1, 0, 0, 0};
+
+        GPSCalSamples = 0;
+        launchPosition = {0, 0, 0};
+
+        baroCalSamples = 0;
+        launchPressure = 0;
+        launchAltitude = 0;
+        
         // TODO: reset all calibration constants (check all of them)
         // Insert other preflight initialization (e.g. zeroing baro) here
     }
@@ -62,24 +96,24 @@ namespace Tracking {
         gyroY = (gyroY - launchGyro[1])*(PI/180);
         gyroZ = (gyroZ - launchGyro[2])*(PI/180);
 
-        Quaternion qDot;
-        qDot.w = 0.5 * (-quat.x * gyroX - quat.y * gyroY - quat.z * gyroZ);
-        qDot.x = 0.5 * (quat.w * gyroX + quat.y * gyroZ - quat.z * gyroY);
-        qDot.y = 0.5 * (quat.w * gyroY - quat.x * gyroZ + quat.z * gyroX);
-        qDot.z = 0.5 * (quat.w * gyroZ + quat.x * gyroY - quat.y * gyroX);
+        Quaternion::quat qDot;
+        qDot.w = 0.5 * (-q.x * gyroX - q.y * gyroY - q.z * gyroZ);
+        qDot.x = 0.5 * (q.w * gyroX + q.y * gyroZ - q.z * gyroY);
+        qDot.y = 0.5 * (q.w * gyroY - q.x * gyroZ + q.z * gyroX);
+        qDot.z = 0.5 * (q.w * gyroZ + q.x * gyroY - q.y * gyroX);
 
-        quat.w += qDot.w * dt;
-        quat.x += qDot.x * dt;
-        quat.y += qDot.y * dt;
-        quat.z += qDot.z * dt;
+        q.w += qDot.w * dt;
+        q.x += qDot.x * dt;
+        q.y += qDot.y * dt;
+        q.z += qDot.z * dt;
 
-        quat.normalize();
+        q = Quaternion::normalize(q);
 
-        Quaternion accelQuat = {0, accelX, accelY, accelZ};
-        Quaternion qConj = quat.conjugate();
+        Quaternion::quat accelQuat = {0, accelX, accelY, accelZ};
+        Quaternion::quat qConj = Quaternion::conjugate(q);
         // rotated = q * accel * q^-1
-        Quaternion temp = multiply(q, accelQuat);
-        Quaternion rotated = multiply(temp, qConj);
+        Quaternion::quat temp = Quaternion::multiply(q, accelQuat);
+        Quaternion::quat rotated = Quaternion::multiply(temp, qConj);
 
         float ax_world = rotated.x - 9.80655;
         float ay_world = rotated.y;
