@@ -16,6 +16,7 @@ namespace Tracking {
     std::array<float, 3> launchAcceleration;
     std::array<float, 3> launchGyro;
     float launchPressure;
+    float launchAltitude;
     float dt;
     
     bool tracking = false;

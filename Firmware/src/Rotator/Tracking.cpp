@@ -9,6 +9,9 @@ namespace Tracking {
         accelCalSamples = 0;
         GPSCalSamples = 0;
         baroCalSamples = 0;
+        launchAltitude = 0;
+        launchGyro = {0, 0, 0};
+        launchAcceleration = {0, 0, 0};
         quat = {1, 0, 0, 0};
         apogeeReached = false;
         // TODO: reset all calibration constants (check all of them)
@@ -111,6 +114,7 @@ namespace Tracking {
 
         if(GPSCalSamples < GPSCalThreshold){
             // TODO: do the same averaging here
+            //average = last * (n-1)/n + new * 1/n
             launchPosition[0] = launchPosition[0] * (GPSCalSamples - 1) / GPSCalSamples + lat * 1 / GPSCalSamples;
             launchPosition[1] = launchPosition[1] * (GPSCalSamples - 1) / GPSCalSamples + lon * 1 / GPSCalSamples;
             launchPosition[2] = launchPosition[2] * (GPSCalSamples - 1) / GPSCalSamples + alt * 1 / GPSCalSamples;
@@ -137,8 +141,9 @@ namespace Tracking {
 
         if(baroCalSamples < baroCalThreshold){
             // TODO: Calibration
+            //average = last * (n-1)/n + new * 1/n
             launchPressure = launchPressure * (baroCalSamples - 1) / baroCalSamples + pressure * 1 / baroCalSamples;
-            launchPosition[2] = launchPosition[2] * (baroCalSamples - 1) / baroCalSamples + altitude * 1 / baroCalSamples;
+            launchAltitude = launchAltitude * (baroCalSamples - 1) / baroCalSamples + altitude * 1 / baroCalSamples;
             baroCalSamples++;
             return false;
         }
@@ -147,7 +152,7 @@ namespace Tracking {
             if(trackingState[6] == 0.0 && trackingState[0] == 0.0 && trackingState[3] == 0.0){
                 //if GPS is bad, use the barometer to estimate vertical position
                 //Kalman filter here!!!!
-                trackingState[6] = altitude - launchPosition[2];
+                trackingState[6] = altitude - launchAltitude;
                 return true;
                 //data validated, but we are using barometer data instead of GPS, so we only update the Z position
             }
