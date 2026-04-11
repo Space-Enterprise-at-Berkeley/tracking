@@ -7,6 +7,7 @@
 #include "../proto/include/common.h"
 #include "../proto/include/Packet_LowIMUValues.h"
 #include "../proto/include/Packet_GPSValues.h"
+#include "../proto/include/Packet_GPSExtraValues.h"
 #include "../proto/include/Packet_BaroValues.h"
 
 namespace Tracking {
@@ -15,6 +16,7 @@ namespace Tracking {
     std::array<float, 3> launchAcceleration;
     std::array<float, 3> launchGyro;
     float launchPressure;
+    float launchAltitude;
     float dt;
     
     bool tracking = false;
@@ -25,6 +27,8 @@ namespace Tracking {
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     Quaternion quat = {1, 0, 0, 0};
+
+    
 
     uint8_t GPSCalSamples = 0;
     uint8_t GPSCalThreshold = 10;

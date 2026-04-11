@@ -5,9 +5,13 @@ namespace Tracking {
     void resetTracking(){
         tracking = true;
         trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+        //calibration samples reset
         accelCalSamples = 0;
         GPSCalSamples = 0;
         baroCalSamples = 0;
+        launchAltitude = 0;
+        launchGyro = {0, 0, 0};
+        launchAcceleration = {0, 0, 0};
         quat = {1, 0, 0, 0};
         apogeeReached = false;
         // TODO: reset all calibration constants (check all of them)
@@ -34,16 +38,23 @@ namespace Tracking {
             accelCalSamples ++;
             // average = last * (n-1)/n + new * 1/n
             // Do initial averaging
-            launchAcceleration[0] = (1/accelCalSamples)*(launchAcceleration[0] * (accelCalSamples-1) + accelX);
-            launchAcceleration[1] = (1/accelCalSamples)*(launchAcceleration[1] * (accelCalSamples-1) + accelY);
-            launchAcceleration[2] = (1/accelCalSamples)*(launchAcceleration[2] * (accelCalSamples-1) + accelZ);
-            launchGyro[0] = (1/accelCalSamples)*(launchGyro[0] * (accelCalSamples-1) + gyroX);
-            launchGyro[1] = (1/accelCalSamples)*(launchGyro[1] * (accelCalSamples-1) + gyroY);
-            launchGyro[2] = (1/accelCalSamples)*(launchGyro[2] * (accelCalSamples-1) + gyroZ);
+            launchAcceleration[0] += accelX;
+            launchAcceleration[1] += accelY;
+            launchAcceleration[2] += accelZ;
+            launchGyro[0] += gyroX;
+            launchGyro[1] += gyroY;
+            launchGyro[2] += gyroZ;
+            accelCalSamples ++;
             return false; //data validated, and we have set our launch acceleration and gyro
 
             // TODO: divide to make the average correct
         }
+        launchAcceleration[0] /= accelCalSamples;
+        launchAcceleration[1] /= accelCalSamples;
+        launchAcceleration[2] /= accelCalSamples;
+        launchGyro[0] /= accelCalSamples;
+        launchGyro[1] /= accelCalSamples;
+        launchGyro[2] /= accelCalSamples;
 
         //reduce biases from launch accel and gyro
         accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655; 
@@ -104,13 +115,13 @@ namespace Tracking {
 
         if(GPSCalSamples < GPSCalThreshold){
             // TODO: do the same averaging here
-            launchPosition[0] = lat;
-            launchPosition[1] = lon;
-            launchPosition[2] = alt;
+            //average = last * (n-1)/n + new * 1/n
+            launchPosition[0] = launchPosition[0] * (GPSCalSamples - 1) / GPSCalSamples + lat * 1 / GPSCalSamples;
+            launchPosition[1] = launchPosition[1] * (GPSCalSamples - 1) / GPSCalSamples + lon * 1 / GPSCalSamples;
+            launchPosition[2] = launchPosition[2] * (GPSCalSamples - 1) / GPSCalSamples + alt * 1 / GPSCalSamples;
             GPSCalSamples++;
             return false; //calibration
         }
-
         float rocketPosition[] = {lat,lon,alt};
         float enu[3];
         Rotator::gpsSeparationENU(rocketPosition, launchPosition.data(), enu);
@@ -131,9 +142,10 @@ namespace Tracking {
 
         if(baroCalSamples < baroCalThreshold){
             // TODO: Calibration
-            launchPressure = pressure;
-            launchPosition[2] = altitude;
-            baroCalSamples ++;
+            //average = last * (n-1)/n + new * 1/n
+            launchPressure = launchPressure * (baroCalSamples - 1) / baroCalSamples + pressure * 1 / baroCalSamples;
+            launchAltitude = launchAltitude * (baroCalSamples - 1) / baroCalSamples + altitude * 1 / baroCalSamples;
+            baroCalSamples++;
             return false;
         }
         //if barometer altitude doesn't differ by a huge amount according to our last update
@@ -141,7 +153,7 @@ namespace Tracking {
             if(trackingState[6] == 0.0 && trackingState[0] == 0.0 && trackingState[3] == 0.0){
                 //if GPS is bad, use the barometer to estimate vertical position
                 //Kalman filter here!!!!
-                trackingState[6] = altitude - launchPosition[2];
+                trackingState[6] = altitude - launchAltitude;
                 return true;
                 //data validated, but we are using barometer data instead of GPS, so we only update the Z position
             }
