@@ -17,9 +17,11 @@ namespace Tracking {
         // TODO: reset all calibration constants (check all of them)
         // Insert other preflight initialization (e.g. zeroing baro) here
     }
+    
     void stopTracking(){
         tracking = false;
     }
+
     bool accelUpdate(Comms::Packet packet, uint8_t ip){
         if(!tracking || apogeeReached) return false;
 
@@ -97,6 +99,7 @@ namespace Tracking {
         }
         return true; //data validated
     }
+
     bool GPSUpdate(Comms::Packet packet, uint8_t ip){
         if (!tracking) return false;
 
@@ -117,9 +120,8 @@ namespace Tracking {
             launchPosition[2] = (launchPosition[2] * (GPSCalSamples - 1) + alt) / GPSCalSamples;
             return false; //calibration
         }
-        float rocketPosition[] = {lat,lon,alt};
-        float enu[3];
-        Rotator::gpsSeparationENU(rocketPosition, launchPosition.data(), enu);
+        std::array<float, 3> rocketPosition = {lat,lon,alt};
+        std::array<float, 3> enu = gpsSeparationENU(rocketPosition, launchPosition);
         //Update the tracker with the new position
         //Something something Kalman Filter here
         trackingState[0] = enu[0];
@@ -127,6 +129,7 @@ namespace Tracking {
         trackingState[6] = enu[2];
         return true; //data validated
     }
+
     bool baroUpdate(Comms::Packet packet, uint8_t ip){
         if (!tracking) return false;
 
@@ -154,5 +157,47 @@ namespace Tracking {
         return false; //data not validated
     }
 
+    std::array<float, 3> gpsToECEF(std::array<float, 3> gps) {
+        const float a = 6378137.0f;           // WGS84 semi-major axis
+        const float e2 = 6.69437999014e-3f;   // first eccentricity squared
+        const float deg2rad = M_PI / 180.0f;
 
+        float latRad = gps[0] * deg2rad;
+        float lonRad = gps[1] * deg2rad;
+        float alt = gps[2];
+
+        float N = a / sqrtf(1.0f - e2 * sinf(latRad) * sinf(latRad));
+        std::array<float, 3> ecef;
+        ecef[0] = (N + alt) * cosf(latRad) * cosf(lonRad);
+        ecef[1] = (N + alt) * cosf(latRad) * sinf(lonRad);
+        ecef[2] = (N * (1.0f - e2) + alt) * sinf(latRad);
+        return ecef;
+    }
+
+    // Compute local ENU separation between two GPS coordinates
+    // gps1 = target point (lat, lon, alt)
+    // gps2 = reference point (lat, lon, alt)
+    // enu[3] = output {East, North, Up} in meters
+    std::array<float, 3> gpsSeparationENU(std::array<float, 3> gps1, std::array<float, 3> gps2) {
+        std::array<float, 3> rocketpos = gpsToECEF(gps1);
+        std::array<float, 3> launchpos = gpsToECEF(gps2);
+
+        float dx = rocketpos[0] - launchpos[0];
+        float dy = rocketpos[1] - launchpos[1];
+        float dz = rocketpos[2] - launchpos[2];
+
+        // Convert ECEF delta to ENU relative to gps2
+        const float deg2rad = M_PI / 180.0f;
+        float lat0 = gps2[0] * deg2rad;
+        float lon0 = gps2[1] * deg2rad;
+
+        float sinLat = sinf(lat0), cosLat = cosf(lat0);
+        float sinLon = sinf(lon0), cosLon = cosf(lon0);
+        
+        std::array<float, 3> out;
+        out[0] = -sinLon * dx + cosLon * dy;                      // East
+        out[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
+        out[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
+        return out;
+    }
 }
