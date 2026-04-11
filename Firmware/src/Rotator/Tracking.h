@@ -18,13 +18,14 @@ namespace Tracking {
     float launchPressure;
     float dt;
     
-    bool trackingStart = false;
+    bool tracking = false;
     bool apogeeReached = false;
 
     uint8_t accelCalSamples = 0;
     uint8_t accelCalThreshold = 30;
     float apoAltThresh = 100;
     float apoVelThresh = 5;
+    Quaternion quat = {1, 0, 0, 0};
 
     
 

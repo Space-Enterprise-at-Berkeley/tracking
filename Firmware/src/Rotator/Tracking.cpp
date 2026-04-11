@@ -3,15 +3,22 @@
 
 namespace Tracking {
     void resetTracking(){
+        tracking = true;
         trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
         //calibration samples reset
         accelCalSamples = 0;
         GPSCalSamples = 0;
         baroCalSamples = 0;
+        quat = {1, 0, 0, 0};
+        apogeeReached = false;
+        // TODO: reset all calibration constants (check all of them)
         // Insert other preflight initialization (e.g. zeroing baro) here
     }
+    void stopTracking(){
+        tracking = false;
+    }
     bool accelUpdate(Comms::Packet packet, uint8_t ip){
-        if(!trackingStart || apogeeReached) return false;
+        if(!tracking || apogeeReached) return false;
 
         // Insert accel callback here
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
@@ -25,6 +32,7 @@ namespace Tracking {
         float gyroZ = parsed_packet.m_GyroZ;
 
         if(accelCalSamples < accelCalThreshold){
+            // average = last * (n-1)/n + new * 1/n
             // Do initial averaging
             launchAcceleration[0] += accelX;
             launchAcceleration[1] += accelY;
@@ -34,6 +42,8 @@ namespace Tracking {
             launchGyro[2] += gyroZ;
             accelCalSamples ++;
             return false; //data validated, and we have set our launch acceleration and gyro
+
+            // TODO: divide to make the average correct
         }
         launchAcceleration[0] /= accelCalSamples;
         launchAcceleration[1] /= accelCalSamples;
@@ -51,20 +61,20 @@ namespace Tracking {
         gyroZ = (gyroZ - launchGyro[2])*(PI/180);
 
         Quaternion qDot;
-        qDot.w = 0.5 * (-q.x * gyroX - q.y * gyroY - q.z * gyroZ);
-        qDot.x = 0.5 * (q.w * gyroX + q.y * gyroZ - q.z * gyroY);
-        qDot.y = 0.5 * (q.w * gyroY - q.x * gyroZ + q.z * gyroX);
-        qDot.z = 0.5 * (q.w * gyroZ + q.x * gyroY - q.y * gyroX);
+        qDot.w = 0.5 * (-quat.x * gyroX - quat.y * gyroY - quat.z * gyroZ);
+        qDot.x = 0.5 * (quat.w * gyroX + quat.y * gyroZ - quat.z * gyroY);
+        qDot.y = 0.5 * (quat.w * gyroY - quat.x * gyroZ + quat.z * gyroX);
+        qDot.z = 0.5 * (quat.w * gyroZ + quat.x * gyroY - quat.y * gyroX);
 
-        q.w += qDot.w * dt;
-        q.x += qDot.x * dt;
-        q.y += qDot.y * dt;
-        q.z += qDot.z * dt;
+        quat.w += qDot.w * dt;
+        quat.x += qDot.x * dt;
+        quat.y += qDot.y * dt;
+        quat.z += qDot.z * dt;
 
-        q.normalize();
+        quat.normalize();
 
         Quaternion accelQuat = {0, accelX, accelY, accelZ};
-        Quaternion qConj = q.conjugate();
+        Quaternion qConj = quat.conjugate();
         // rotated = q * accel * q^-1
         Quaternion temp = multiply(q, accelQuat);
         Quaternion rotated = multiply(temp, qConj);
@@ -88,6 +98,8 @@ namespace Tracking {
         return true; //data validated
     }
     bool GPSUpdate(Comms::Packet packet, uint8_t ip){
+        if (!tracking) return false;
+
         // Insert GPS callback here
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
         float lat = parsed_packet.m_Latitude;
@@ -95,38 +107,40 @@ namespace Tracking {
         float alt = parsed_packet.m_Altitude;
         uint8_t siv = parsed_packet.m_Siv;
 
-        if(!trackingStart && siv >= 10){
+        if (siv < 10) return false;
+
+        if(GPSCalSamples < GPSCalThreshold){
+            // TODO: do the same averaging here
             launchPosition[0] = lat;
             launchPosition[1] = lon;
             launchPosition[2] = alt;
-            trackingStart = true;
-            return true;//data validated, and we have set our launch position
+            GPSCalSamples++;
+            return false; //calibration
         }
 
-        if(siv >= 10){
-            float rocketPosition[] = {lat,lon,alt};
-            float enu[3];
-            Rotator::gpsSeparationENU(rocketPosition, launchPosition.data(), enu);
-            //Update the tracker with the new position
-            //Something something Kalman Filter here
-            trackingState[0] = enu[0];
-            trackingState[3] = enu[1];
-            trackingState[6] = enu[2];
-            return true; //data validated
-        }
-        return false; //data not validated
-
+        float rocketPosition[] = {lat,lon,alt};
+        float enu[3];
+        Rotator::gpsSeparationENU(rocketPosition, launchPosition.data(), enu);
+        //Update the tracker with the new position
+        //Something something Kalman Filter here
+        trackingState[0] = enu[0];
+        trackingState[3] = enu[1];
+        trackingState[6] = enu[2];
+        return true; //data validated
     }
     bool baroUpdate(Comms::Packet packet, uint8_t ip){
+        if (!tracking) return false;
+
         // Insert baro callback here
         PacketBaroValues parsed_packet = PacketBaroValues::fromRawPacket(&packet);
         float altitude = parsed_packet.m_Altitude;
         float pressure = parsed_packet.m_Pressure;
 
-        if(!trackingStart){
+        if(baroCalSamples < baroCalThreshold){
+            // TODO: Calibration
             launchPressure = pressure;
             launchPosition[2] = altitude;
-            trackingStart = true;
+            baroCalSamples ++;
             return false;
         }
         //if barometer altitude doesn't differ by a huge amount according to our last update
