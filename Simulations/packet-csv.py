@@ -5,12 +5,13 @@ import socket
 import struct
 import sys
 import time
+import serial
 
 # -------------------------------
 # CLI
 # -------------------------------
 _script_dir = os.path.dirname(os.path.abspath(__file__))
-_default_csv = os.path.join(_script_dir, "rotatordatanew.csv")
+_default_csv = os.path.join(_script_dir, "trackingdatanew.csv")
 
 ap = argparse.ArgumentParser(
     description="Replay Baro/IMU/GPS packets from CSV over UDP (time and fc1 columns). Default window: t from -20 s to 180 s."
@@ -122,9 +123,9 @@ def build_low_imu_packet(accel_x: float, accel_y: float, accel_z: float,
                _f32(gyro_x) + _f32(gyro_y) + _f32(gyro_z))
     return _make_packet(PKT_ID_LOW_IMU, ts_bytes, payload)
 
-def build_gps_packet(latitude: float, longitude: float, altitude: float, ts_bytes: list[int]) -> list[int]:
-    # GPSValues: lat, long, alt (f32), horizontalAccuracy, verticalAccuracy (u32), heading (f32), headingAccuracy (u32), fixType (u8)
-    payload = (_f32(latitude) + _f32(longitude) + _f32(altitude) +
+def build_gps_packet(latitude: float, longitude: float, altitude: float, siv: int, ts_bytes: list[int]) -> list[int]:
+    # GPSValues: lat, long, alt (f32), siv, horizontalAccuracy, verticalAccuracy (u32), heading (f32), headingAccuracy (u32), fixType (u8)
+    payload = (_f32(latitude) + _f32(longitude) + _f32(altitude) + _u32(siv) +
                _u32(0) + _u32(0) + _f32(0.0) + _u32(0) + _u8(0))
     return _make_packet(PKT_ID_GPS, ts_bytes, payload)
 
@@ -151,6 +152,7 @@ CSV_COLUMNS = [
     "fc1LowImuValuesGyroX.distinct",
     "fc1LowImuValuesGyroY.distinct",
     "fc1LowImuValuesGyroZ.distinct",
+    "fc1GpsExtraValuesSiv.distinct",
 ]
 
 def _parse_val(s: str):
@@ -237,6 +239,7 @@ def run_csv_replay():
     drift_min = float("inf")
     drift_max = float("-inf")
     drift_n = 0
+    last_gps_siv = 0
     for row in rows:
         t_sec = row.get("Time Reference(seconds)")
         if t_sec is not None:
@@ -264,6 +267,7 @@ def run_csv_replay():
         gps_alt = row.get("fc1GpsValuesAltitude.distinct")
         gps_lon = row.get("fc1GpsValuesLongitude.distinct")
         gps_lat = row.get("fc1GpsValuesLatitude.distinct")
+        gps_siv = row.get("fc1GpsExtraValuesSiv.distinct")
         acc_x = row.get("fc1LowImuValuesAccelX.distinct")
         acc_y = row.get("fc1LowImuValuesAccelY.distinct")
         acc_z = row.get("fc1LowImuValuesAccelZ.distinct")
@@ -272,6 +276,8 @@ def run_csv_replay():
         gyro_z = row.get("fc1LowImuValuesGyroZ.distinct")
         has_baro = baro_alt is not None
         has_gps = gps_lat is not None and gps_lon is not None and gps_alt is not None
+        if gps_siv is not None:
+            last_gps_siv = int(gps_siv)
         has_imu = all(
             v is not None
             for v in (acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z)
@@ -279,12 +285,15 @@ def run_csv_replay():
         if has_baro:
             pkt = build_baro_packet(baro_alt, ts_bytes)
             _send_packet(pkt, csv_t_sec=t_sec)
+            #print(f"Sent Baro packet: alt={baro_alt:.2f} m\n")
         if has_imu:
             pkt = build_low_imu_packet(acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, ts_bytes)
             _send_packet(pkt, csv_t_sec=t_sec)
+            
         if has_gps:
-            pkt = build_gps_packet(gps_lat, gps_lon, gps_alt, ts_bytes)
+            pkt = build_gps_packet(gps_lat, gps_lon, gps_alt,last_gps_siv, ts_bytes)
             _send_packet(pkt, csv_t_sec=t_sec)
+            print(f"Sent GPS packet: lat={gps_lat:.6f} lon={gps_lon:.6f} alt={gps_alt:.2f} m SIV={last_gps_siv}\n")
     print("[csv] Replay finished.")
     if drift_n > 0:
         mean_drift = drift_sum / drift_n
