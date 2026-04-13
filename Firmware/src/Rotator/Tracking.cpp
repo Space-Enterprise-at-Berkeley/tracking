@@ -3,8 +3,8 @@
 
 namespace Tracking {
     // Main state
-    std::array<float, 9> trackingState; // Xpos, Xvel, Xaccel, Ypos, ...
     bool tracking = false;
+    std::array<float, 9> trackingState;
     
     // Accelerometer variables
     uint8_t accelCalSamples = 0;
@@ -32,7 +32,7 @@ namespace Tracking {
 
     void resetTracking(){
         tracking = true;
-        trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
+        KalmanFilter::init();
 
         //calibration samples reset
         accelCalSamples = 0;
