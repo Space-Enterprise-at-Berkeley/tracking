@@ -34,20 +34,18 @@ namespace KalmanFilter {
         stateCov = Matrix<float, 9, 9>::Zero();
     }
 
-    std::array<float, 9> extrapolate(float t) {
+    Vector<float, 9> extrapolate(float t) {
         float dt = t - time;
-        Vector<float, 9> updated = stateTransition(dt) * state;
-        std::array<float, 9> out;
-        for (int i = 0; i < 9; i++) out[i] = updated(i);
-        return out;
+        return stateTransition(dt) * state;
     }
 
-    void predict(float t) {
+    Vector<float, 9> predict(float t) {
         float dt = t - time;
         Matrix<float, 9, 9> A = stateTransition(dt);
         state = A * state;
         stateCov = A * stateCov * A.transpose() + dt * processNoiseCovRate;
         time = t;
+        return state;
     }
 
     void accelUpdate(float t, std::array<float, 3> accel) {

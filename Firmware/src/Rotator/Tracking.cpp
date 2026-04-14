@@ -88,12 +88,6 @@ namespace Tracking {
             launchGyro[2] = (1/accelCalSamples)*(launchGyro[2] * (accelCalSamples-1) + gyroZ);
             return false; //data validated, and we have set our launch acceleration and gyro
         }
-        launchAcceleration[0] /= accelCalSamples;
-        launchAcceleration[1] /= accelCalSamples;
-        launchAcceleration[2] /= accelCalSamples;
-        launchGyro[0] /= accelCalSamples;
-        launchGyro[1] /= accelCalSamples;
-        launchGyro[2] /= accelCalSamples;
 
         //reduce biases from launch accel and gyro
         accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655; 
@@ -122,18 +116,12 @@ namespace Tracking {
         Quaternion::quat temp = Quaternion::multiply(q, accelQuat);
         Quaternion::quat rotated = Quaternion::multiply(temp, qConj);
 
-        float ax_world = rotated.x - 9.80655;
+        std::array<float, 3> a_world = {rotated.x - 9.80655, rotated.y, rotated.z};
+        /*float ax_world = rotated.x - 9.80655;
         float ay_world = rotated.y;
-        float az_world = rotated.z;
+        float az_world = rotated.z;*/
 
-        //Kalman filter update here!!!!
-        //simple integration to get velocity and position
-        trackingState[7] += ax_world * dt; //since x is actually upward
-        trackingState[4] += ay_world * dt; 
-        trackingState[1] += az_world * dt; //since z is actually forward
-        trackingState[0] += trackingState[1] * dt;
-        trackingState[3] += trackingState[4] * dt;
-        trackingState[6] += trackingState[7] * dt;
+        KalmanFilter::accelUpdate(filterTime(), a_world);
 
         if(trackingState[6] > apoAltThresh && trackingState[7] < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
             apogeeReached = true;
@@ -204,7 +192,7 @@ namespace Tracking {
             std::array<float, 9> state = KalmanFilter::extrapolate(filterTime());
             
         }
-        return 10 * 1000;
+        return 100 * 1000;
     }
 
     std::array<float, 3> gpsToECEF(std::array<float, 3> gps) {
