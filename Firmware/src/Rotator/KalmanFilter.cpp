@@ -1,8 +1,5 @@
 #include "KalmanFilter.h"
 
-using Eigen::Matrix;
-using Eigen::Vector;
-
 namespace KalmanFilter {
     float time;
     Vector<float, 9> state; // Xpos, Xvel, Xacc, Ypos, ...
@@ -27,7 +24,7 @@ namespace KalmanFilter {
         return out;
     }
 
-    void init() {
+    void reset() {
         time = 0;
         state = Vector<float, 9>::Zero();
         stateCov = Matrix<float, 9, 9>::Zero();

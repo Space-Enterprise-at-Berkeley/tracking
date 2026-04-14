@@ -31,7 +31,7 @@ namespace Tracking {
     void startTracking(){
         enable = true;
         trackingStartTime = micros();
-        KalmanFilter::init();
+        KalmanFilter::reset();
 
         //calibration samples reset
         accelCalSamples = 0;
@@ -192,10 +192,7 @@ namespace Tracking {
             Vector<float, 9> state = KalmanFilter::predict(filterTime());
             if(state(6) > apoAltThresh && state(7) < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
                 apogeeReached = true;
-            }
-            
-            
-            
+            } 
         }
         return 100 * 1000;
     }
