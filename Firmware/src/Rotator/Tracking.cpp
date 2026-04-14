@@ -3,9 +3,8 @@
 
 namespace Tracking {
     // Main state
-    bool tracking = false;
     uint32_t trackingStartTime;
-    Vector <float, 9> trackingState;
+    bool enable = false;
     
     // Accelerometer variables
     uint8_t accelCalSamples = 0;
@@ -15,7 +14,8 @@ namespace Tracking {
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     bool apogeeReached = false;
-    Quaternion::quat q = {1, 0, 0, 0};   
+    Quaternion::quat q = {1, 0, 0, 0};
+    uint32_t lastAccelTime;   
 
     // GPS variables
     uint8_t GPSCalSamples = 0;
@@ -28,20 +28,9 @@ namespace Tracking {
     float launchPressure;
     float launchAltitude;
 
-    float elvPos, elvVel, elvError, elvPower, aziPos, aziVel, aziError, aziPower;
-    float elvIntegral = 0;
-    float aziIntegral = 0;
-    
-    // Reference setpoints
-    float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
-    float aziOffset = 0;
-    
-    float dt = 0.1;
-
     void startTracking(){
-        tracking = true;
+        enable = true;
         trackingStartTime = micros();
-        trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         KalmanFilter::init();
 
         //calibration samples reset
@@ -50,6 +39,7 @@ namespace Tracking {
         launchGyro = {0, 0, 0};
         apogeeReached = false;
         q = {1, 0, 0, 0};
+        lastAccelTime = micros();
 
         GPSCalSamples = 0;
         launchPosition = {0, 0, 0};
@@ -63,15 +53,23 @@ namespace Tracking {
     }
     
     void stopTracking(){
-        tracking = false;
+        enable = false;
+    }
+
+    bool getEnable(){
+        return enable;
     }
 
     inline float filterTime(){
         return ((float) (micros() - trackingStartTime)) / (1000 * 1000); 
     }
 
-    bool accelUpdate(Comms::Packet packet, uint8_t ip){
-        if(!tracking || apogeeReached) return false;
+    void accelUpdate(Comms::Packet packet, uint8_t ip){
+        uint32_t now = micros();
+        uint32_t dt_micro = now - lastAccelTime;
+        lastAccelTime = now;
+
+        if(!enable || apogeeReached) return;// false;
 
         // Insert accel callback here
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
@@ -93,13 +91,13 @@ namespace Tracking {
             launchGyro[0] = (1/accelCalSamples)*(launchGyro[0] * (accelCalSamples-1) + gyroX);
             launchGyro[1] = (1/accelCalSamples)*(launchGyro[1] * (accelCalSamples-1) + gyroY);
             launchGyro[2] = (1/accelCalSamples)*(launchGyro[2] * (accelCalSamples-1) + gyroZ);
-            return false; //data validated, and we have set our launch acceleration and gyro
+            return;// false; //data validated, and we have set our launch acceleration and gyro
         }
 
         //reduce biases from launch accel and gyro
-        accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655; 
-        accelY = (accelY - launchAcceleration[1]) * 9.80655;
-        accelZ = (accelZ - launchAcceleration[2]) * 9.80655;
+        accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655F; 
+        accelY = (accelY - launchAcceleration[1]) * 9.80655F;
+        accelZ = (accelZ - launchAcceleration[2]) * 9.80655F;
         gyroX = (gyroX - launchGyro[0])*(PI/180);
         gyroY = (gyroY - launchGyro[1])*(PI/180);
         gyroZ = (gyroZ - launchGyro[2])*(PI/180);
@@ -110,6 +108,7 @@ namespace Tracking {
         qDot.y = 0.5 * (q.w * gyroY - q.x * gyroZ + q.z * gyroX);
         qDot.z = 0.5 * (q.w * gyroZ + q.x * gyroY - q.y * gyroX);
 
+        float dt = ((float) dt_micro) / (1000 * 1000);
         q.w += qDot.w * dt;
         q.x += qDot.x * dt;
         q.y += qDot.y * dt;
@@ -123,18 +122,15 @@ namespace Tracking {
         Quaternion::quat temp = Quaternion::multiply(q, accelQuat);
         Quaternion::quat rotated = Quaternion::multiply(temp, qConj);
 
-        std::array<float, 3> a_world = {rotated.x - 9.80655, rotated.y, rotated.z};
-        /*float ax_world = rotated.x - 9.80655;
-        float ay_world = rotated.y;
-        float az_world = rotated.z;*/
+        Vector<float, 3> a_world = {rotated.x - 9.80655F, rotated.y, rotated.z};
 
         KalmanFilter::accelUpdate(filterTime(), a_world);
 
-        return true; //data validated
+        return;// true; //data validated
     }
 
-    bool GPSUpdate(Comms::Packet packet, uint8_t ip){
-        if (!tracking) return false;
+    void GPSUpdate(Comms::Packet packet, uint8_t ip){
+        if (!enable) return;// false;
 
         // Insert GPS callback here
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
@@ -143,7 +139,7 @@ namespace Tracking {
         float alt = parsed_packet.m_Altitude;
         uint8_t siv = parsed_packet.m_Siv;
 
-        if (siv < 10) return false;
+        if (siv < 10) return;// false;
 
         if(GPSCalSamples < GPSCalThreshold){
             GPSCalSamples++;
@@ -151,19 +147,19 @@ namespace Tracking {
             launchPosition[0] = (launchPosition[0] * (GPSCalSamples - 1) + lat) / GPSCalSamples;
             launchPosition[1] = (launchPosition[1] * (GPSCalSamples - 1) + lon) / GPSCalSamples;
             launchPosition[2] = (launchPosition[2] * (GPSCalSamples - 1) + alt) / GPSCalSamples;
-            return false; //calibration
+            return;// false; //calibration
         }
         std::array<float, 3> rocketPosition = {lat,lon,alt};
         std::array<float, 3> enu = gpsSeparationENU(rocketPosition, launchPosition);
         //Update the tracker with the new position
         //Something something Kalman Filter here
-        std::array<float, 3> gpsPos = {enu[0], enu[1], enu[2]};
+        Vector<float, 3> gpsPos = {enu[0], enu[1], enu[2]}; // TODO: could just Vector all this
         KalmanFilter::GPSUpdate(filterTime(), gpsPos);
-        return true; //data validated
+        return;// true; //data validated
     }
 
-    bool baroUpdate(Comms::Packet packet, uint8_t ip){
-        if (!tracking) return false;
+    void baroUpdate(Comms::Packet packet, uint8_t ip){
+        if (!enable) return;// false;
 
         // Insert baro callback here
         PacketBaroValues parsed_packet = PacketBaroValues::fromRawPacket(&packet);
@@ -174,10 +170,10 @@ namespace Tracking {
             baroCalSamples++;
             launchPressure = (launchPressure * (baroCalSamples - 1) + pressure) / baroCalSamples;
             launchAltitude = (launchAltitude * (baroCalSamples - 1) + altitude) / baroCalSamples;
-            return false;
+            return;// false;
         }
         //if barometer altitude doesn't differ by a huge amount according to our last update
-        if(std::abs(altitude - trackingState[6]) < 500){
+        /*if(std::abs(altitude - trackingState[6]) < 500){
             if(trackingState[6] == 0.0 && trackingState[0] == 0.0 && trackingState[3] == 0.0){
                 //if GPS is bad, use the barometer to estimate vertical position
                 //Kalman filter here!!!!
@@ -185,15 +181,15 @@ namespace Tracking {
                 return true;
                 //data validated, but we are using barometer data instead of GPS, so we only update the Z position
             }
-        }
-        KalmanFilter::GPSUpdate(filterTime(), {trackingState(0), trackingState(3), altitude - launchAltitude});
-        return false; //data not validated
+        }*/
+        // TODO: better sanity check
+        KalmanFilter::baroUpdate(filterTime(), altitude - launchAltitude);
+        return;// false; //data not validated
     }
 
     uint32_t maintenance() {
-        if (tracking) {
-            KalmanFilter::predict(filterTime());
-            Vector<float, 9> state = KalmanFilter::extrapolate(filterTime());
+        if (enable) {
+            Vector<float, 9> state = KalmanFilter::predict(filterTime());
             if(state(6) > apoAltThresh && state(7) < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
                 apogeeReached = true;
             }
@@ -246,42 +242,9 @@ namespace Tracking {
         out[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
         out[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
         return out;
-    }
-    void trackingUpdate(){
-        float x_position = trackingState(0);
-        float x_velocity = trackingState(1);
-        float y_position = trackingState(3);
-        float y_velocity = trackingState(4);
-        float z_position = trackingState(6);
-        float z_velocity = trackingState(7);
-        
-        float x_rotator = launchPosition[0];
-        float y_rotator = launchPosition[1];
-        float z_rotator = launchPosition[2];
-        
-        float delta_x = x_position-x_rotator;
-        float delta_y = y_position-y_rotator;
-        float delta_z = z_position-z_rotator;
+    } 
 
-        float distance_from_rocket = sqrt(pow(delta_x,2.0)+pow(delta_y,2.0));
-        float total_distance_from_rocket = sqrt(pow(distance_from_rocket,2.0) + pow(delta_z,2.0));
-
-        const float MIN_DISTANCE_THRESHOLD = 0.01;
-        if (total_distance_from_rocket < MIN_DISTANCE_THRESHOLD) return;
-        
-        aziRefPos = 180/M_PI * atan2(delta_y,delta_x);
-        elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket);
-
-        aziRefPos = fmod(90 - aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
-        // elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
-        aziRefVel = -(y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
-        elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
-
-        aziRefVel *= 180/M_PI;
-        elvRefVel *= 180/M_PI;
-    }     
-
-    void sendTrackingState(){
+    void sendTrackingState(Vector<float, 9> trackingState){
         PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
             .withXPos(trackingState(0))
             .withXVel(trackingState(1))
@@ -297,5 +260,11 @@ namespace Tracking {
         state.writeRawPacket(&newpacket);
         //emit packet 
         Comms::emitPacketToGS(&newpacket);
+    }
+
+    Vector<float, 9> getState(){
+        Vector<float, 9> trackingState = KalmanFilter::extrapolate(filterTime());
+        sendTrackingState(trackingState);
+        return trackingState;
     }
 }

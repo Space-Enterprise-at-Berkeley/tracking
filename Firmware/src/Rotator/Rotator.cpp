@@ -3,9 +3,10 @@
 #include "HAL.h"
 #include <cmath>
 
+using Eigen::Vector;
+
 namespace Rotator {
     // State flags
-    bool tracking = false;
     bool diagnostic = false;
 
     // Motor state
@@ -28,10 +29,6 @@ namespace Rotator {
     float aziMaxPower = 0.15;
 
     // Tracking stuff
-    CombinedTracker tracker;
-    uint32_t trackingStartTime;
-    uint32_t trackingLaunchStartTime;
-    float trackingState[] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // Xpos, Xvel, Xaccel, Ypos, ...
     float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
 
     //Rocket stuff
@@ -51,27 +48,6 @@ namespace Rotator {
     uint32_t lastAccUpdate = 0;
     uint32_t lastAccDelay = 0;
 
-    void startTracking(){
-        launchState = 0;
-        tracking = true;
-        trackingStartTime = micros();
-        tracker.init();
-    }
-
-    void stopTracking(){
-        launchState = 0;
-        tracking = false;
-    }
-
-    /*float getTrackingState_X(){
-        return [trackingState[0],trackingState[1],trackingState[2]];
-    }
-    float getTrackingState_Y(){
-        return [trackingState[3],trackingState[4],trackingState[5]];
-    }
-    float getTrackingState_Z(){
-        return [trackingState[6],trackingState[7],trackingState[8]];
-    }*/
     void gpsToECEF(float gps[], float ecef[]) {
         const float a = 6378137.0f;           // WGS84 semi-major axis
         const float e2 = 6.69437999014e-3f;   // first eccentricity squared
@@ -115,14 +91,14 @@ namespace Rotator {
     }
     
     void trackingUpdate(){
-        tracker.extrapolate((float) (micros() - trackingStartTime)/1000000.0, trackingState);
+        Vector<float, 9> trackingState = Tracking::getState();
 
-        float x_position = trackingState[0];
-        float x_velocity = trackingState[1];
-        float y_position = trackingState[3];
-        float y_velocity = trackingState[4];
-        float z_position = trackingState[6];
-        float z_velocity = trackingState[7];
+        float x_position = trackingState(0);
+        float x_velocity = trackingState(1);
+        float y_position = trackingState(3);
+        float y_velocity = trackingState(4);
+        float z_position = trackingState(6);
+        float z_velocity = trackingState(7);
         
         float x_rotator = rotatorPosition[0];
         float y_rotator = rotatorPosition[1];
@@ -148,65 +124,6 @@ namespace Rotator {
 
         aziRefVel *= 180/M_PI;
         elvRefVel *= 180/M_PI;
-    }
-
-    void accelUpdate(Comms::Packet packet, uint8_t ip) {
-        uint32_t now = micros();
-        lastAccDelay = now - lastAccUpdate;
-        lastAccUpdate = now;
-
-        if (!tracking || launchState == 2) return;
-
-        PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
-        float accelX = parsed_packet.m_AccelX;
-        float threshold  = 2; // In g
-
-        // Check if we're in launch detect
-        if(launchState == 1){
-            if((micros() - trackingLaunchStartTime) >= 10 * 1000000){ // 10 seconds after launch
-                Serial.println("Launch completed.");
-                launchState = 2;
-                return;
-            }
-        } else if(accelX - 1.0 > threshold){
-            trackingLaunchStartTime = micros();
-            launchState = 1;
-            Serial.println("Launch detected!"); 
-        }
-
-        float acc = (accelX - 1.0)*9.81;
-        float accVals[] = {acc, acc, acc};
-        tracker.accelUpdate((float) (micros() - trackingStartTime)/1000000.0, accVals);
-       
-        Serial.print("Ran accel update with ");
-        Serial.println(acc);
-    }
-        
-    void GPSUpdate(Comms::Packet packet, uint8_t ip){
-        uint32_t now = micros();
-        lastGPSDelay = now - lastGPSUpdate;
-        lastGPSUpdate = now;
-
-        if (!tracking) return;
-
-        PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
-        
-        float lat = parsed_packet.m_Latitude;
-        float lon = parsed_packet.m_Longitude;
-        float alt = parsed_packet.m_Altitude;
-
-        float rocketPosition[] = {lat,lon,alt};
-        float enu[3];
-        gpsSeparationENU(rocketPosition, launchPosition, enu);
-
-        tracker.GPSUpdate((float) (micros() - trackingStartTime)/1000000.0, enu);
-
-        Serial.print("Ran GPS update with ");
-        Serial.print(enu[0]);
-        Serial.print(" ");
-        Serial.print(enu[1]);
-        Serial.print(" ");
-        Serial.println(enu[2]);
     }
 
     void startDiagnostic(){
@@ -239,7 +156,7 @@ namespace Rotator {
     }
 
     void setElvSetpoint(Comms::Packet packet, uint8_t ip){
-        stopTracking();
+        Tracking::stopTracking();
         stopDiagnostic();
         PacketRTSetElevation parsed_packet = PacketRTSetElevation::fromRawPacket(&packet);
         elvRefPos = parsed_packet.m_Degrees;
@@ -248,7 +165,7 @@ namespace Rotator {
     }
 
     void setAziSetpoint(Comms::Packet packet, uint8_t ip){
-        stopTracking();
+        Tracking::stopTracking();
         stopDiagnostic();
         PacketRTSetAzimuth parsed_packet = PacketRTSetAzimuth::fromRawPacket(&packet);
         aziRefPos = parsed_packet.m_Degrees;
@@ -258,7 +175,7 @@ namespace Rotator {
 
     void runDiagnostic(Comms::Packet packet, uint8_t ip){
         Serial.println("Beginning diagnostic");
-        stopTracking();
+        Tracking::stopTracking();
         startDiagnostic();
     }
 
@@ -266,17 +183,17 @@ namespace Rotator {
         stopDiagnostic();
         PacketRTEnableFlightTracking parsed_packet = PacketRTEnableFlightTracking::fromRawPacket(&packet);
         if (parsed_packet.m_Action) {
-            startTracking();
+            Tracking::startTracking();
             Serial.println("Starting tracking");
         } else {
-            stopTracking();
+            Tracking::stopTracking();
             Serial.println("Stopping tracking");
         }
     }
 
     void zeroAzimuth(Comms::Packet packet, uint8_t ip){
         stopDiagnostic();
-        stopTracking();
+        Tracking::stopTracking();
         aziOffset = fmod(aziOffset + 360.0 - aziPos, 360.0);
         aziRefPos = 0;
         Serial.print("Set azimuth offset to ");
@@ -334,24 +251,6 @@ namespace Rotator {
         }
         Serial.println();*/
     }
-
-    void sendTrackingState(){
-        PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
-            .withXPos(trackingState[0])
-            .withXVel(trackingState[1])
-            .withXAccel(trackingState[2])
-            .withYPos(trackingState[3])
-            .withYVel(trackingState[4])
-            .withYAccel(trackingState[5])
-            .withZPos(trackingState[6])
-            .withZVel(trackingState[7])
-            .withZAccel(trackingState[8])
-            .build();
-        Comms::Packet newpacket;
-        state.writeRawPacket(&newpacket);
-        //emit packet 
-        Comms::emitPacketToGS(&newpacket);
-    }
     
     // if we are at 330, and we want to go to 0, there are two options: go forward 30 degrees, or backward 330 degrees
     // this function checks which option is shorter, and returns the target angle adjusted for wraparound
@@ -382,7 +281,6 @@ namespace Rotator {
     }
 
     void init(){
-        tracking = false;
         diagnostic = false;
 
         Comms::registerCallback(PACKET_ID_RTSetElevation, setElvSetpoint);
@@ -390,14 +288,13 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTRunDiagnostic, runDiagnostic);
         Comms::registerCallback(PACKET_ID_RTEnableFlightTracking, switchTracking);
         Comms::registerCallback(PACKET_ID_RTZeroAzimuth, zeroAzimuth);
-        Comms::registerCallback(PACKET_ID_LowIMUValues, accelUpdate);
-        Comms::registerCallback(PACKET_ID_GPSValues, GPSUpdate);
+        Comms::registerCallback(PACKET_ID_LowIMUValues, Tracking::accelUpdate);
+        Comms::registerCallback(PACKET_ID_GPSValues, Tracking::GPSUpdate);
     }
 
     uint32_t updateAndMove(){
-        if (tracking) { // tracking mode
+        if (Tracking::getEnable()) { // tracking mode
             trackingUpdate();
-            sendTrackingState();
         } else if (diagnostic) { // diagnostic mode
             diagnosticUpdate();
         } else { // idle mode

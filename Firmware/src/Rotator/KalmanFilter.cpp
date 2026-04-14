@@ -2,7 +2,6 @@
 
 using Eigen::Matrix;
 using Eigen::Vector;
-using Eigen::Map;
 
 namespace KalmanFilter {
     float time;
@@ -48,24 +47,24 @@ namespace KalmanFilter {
         return state;
     }
 
-    void accelUpdate(float t, std::array<float, 3> accel) {
+    void accelUpdate(float t, Vector<float, 3> accel) {
         predict(t);
         Matrix<float, 9, 3> K = stateCov * accelObservation.transpose() * (accelObservation * stateCov * accelObservation.transpose() + accelNoiseCov).inverse();
-        state = state + K * (Map<Vector<float, 3>>(accel.data()) - accelObservation * state);
+        state = state + K * (accel - accelObservation * state);
         stateCov = (Matrix<float, 9, 9>::Identity() - K * accelObservation) * stateCov * (Matrix<float, 9, 9>::Identity() - K * accelObservation).transpose() + K * accelNoiseCov * K.transpose();
     }
 
-    void GPSUpdate(float t, std::array<float, 3> GPS) {
+    void GPSUpdate(float t, Vector<float, 3> GPS) {
         predict(t);
         Matrix<float, 9, 3> K = stateCov * GPSObservation.transpose() * (GPSObservation * stateCov * GPSObservation.transpose() + GPSNoiseCov).inverse();
-        state = state + K * (Map<Vector<float, 3>>(GPS.data()) - GPSObservation * state);
+        state = state + K * (GPS - GPSObservation * state);
         stateCov = (Matrix<float, 9, 9>::Identity() - K * GPSObservation) * stateCov * (Matrix<float, 9, 9>::Identity() - K * GPSObservation).transpose() + K * GPSNoiseCov * K.transpose();
     }
 
     void baroUpdate(float t, float baro) {
         predict(t);
         Matrix<float, 9, 1> K = stateCov * baroObservation.transpose() * (baroObservation * stateCov * baroObservation.transpose() + baroNoiseCov).inverse();
-        state = state + K * (Vector<float, 1>{baro} - baroObservation * state);
+        state = state + K * (baro - baroObservation * state);
         stateCov = (Matrix<float, 9, 9>::Identity() - K * baroObservation) * stateCov * (Matrix<float, 9, 9>::Identity() - K * baroObservation).transpose() + K * baroNoiseCov * K.transpose();
     }
 }
