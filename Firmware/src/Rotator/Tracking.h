@@ -11,6 +11,9 @@
 #include "../proto/include/Packet_BaroValues.h"
 
 namespace Tracking {
+    void startTracking();
+    void stopTracking();
+
     bool accelUpdate(Comms::Packet packet, uint8_t ip);
     bool GPSUpdate(Comms::Packet packet, uint8_t ip);
     bool baroUpdate(Comms::Packet packet, uint8_t ip);

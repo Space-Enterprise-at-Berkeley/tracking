@@ -4,6 +4,7 @@
 namespace Tracking {
     // Main state
     bool tracking = false;
+    uint32_t trackingStartTime;
     std::array<float, 9> trackingState;
     
     // Accelerometer variables
@@ -30,8 +31,10 @@ namespace Tracking {
     
     float dt = 0.1;
 
-    void resetTracking(){
+    void startTracking(){
         tracking = true;
+        trackingStartTime = micros();
+        trackingState = {0, 0, 0, 0, 0, 0, 0, 0, 0};
         KalmanFilter::init();
 
         //calibration samples reset
@@ -54,6 +57,10 @@ namespace Tracking {
     
     void stopTracking(){
         tracking = false;
+    }
+
+    inline float filterTime(){
+        return ((float) (micros() - trackingStartTime)) / (1000 * 1000); 
     }
 
     bool accelUpdate(Comms::Packet packet, uint8_t ip){
@@ -189,6 +196,15 @@ namespace Tracking {
             }
         }
         return false; //data not validated
+    }
+
+    uint32_t maintenance() {
+        if (tracking) {
+            KalmanFilter::predict(filterTime());
+            std::array<float, 9> state = KalmanFilter::extrapolate(filterTime());
+            
+        }
+        return 10 * 1000;
     }
 
     std::array<float, 3> gpsToECEF(std::array<float, 3> gps) {

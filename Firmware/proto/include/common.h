@@ -175,6 +175,13 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_PT_NOS_INJECTOR false
 #endif
 
+#define CHANNEL_PT_IPA_TANK 4
+#ifdef BOARD_PT_2
+#define IS_BOARD_FOR_PT_IPA_TANK true
+#else
+#define IS_BOARD_FOR_PT_IPA_TANK false
+#endif
+
 #define CHANNEL_PT_NOS_TANK 5
 #ifdef BOARD_PT_2
 #define IS_BOARD_FOR_PT_NOS_TANK true

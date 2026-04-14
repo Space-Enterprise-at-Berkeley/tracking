@@ -19,11 +19,12 @@ namespace Rotator {
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
-    float elvKp = 0.008;
+    float elvKp = 0.009;
     float elvKi = 0.0005;
+    float elvKd = 0.0006;
     float elvMaxPower = 0.15;
-    float aziKp = 0.008;
-    float aziKi = 0.0005;
+    float aziKp = 0.005;
+    float aziKi = 0.004;
     float aziMaxPower = 0.15;
 
     // Tracking stuff
@@ -366,8 +367,13 @@ namespace Rotator {
         }
     }
 
-    float PIController(float error, float Kp, float Ki, float maxPower, float &integral){
-        float power = Kp * error + integral;
+    inline float deadband(float in, float size){
+        if (in > 0) return in > size ? in - size : 0;
+        else return in < -size ? in + size : 0;
+    }
+
+    float PIDController(float error, float vel, float Kp, float Ki, float Kd, float maxPower, float &integral){
+        float power = Kp * error + integral - Kd * vel;
         float clipped = max(min(power, maxPower), -maxPower);
         float antiwindup = (clipped - power) / Kp;
         integral += (error + antiwindup) * Ki * (float) updatePeriod / (1000 * 1000);
@@ -404,7 +410,7 @@ namespace Rotator {
         elvVel = HAL::getSlope_0() * 1000 * 1000;
 
         elvError = elvRefPos - elvPos;
-        elvPower = PIController(elvError, elvKp, elvKi, elvMaxPower, elvIntegral);
+        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, elvKd, elvMaxPower, elvIntegral);
         HAL::sendPower_0(elvPower); 
         
         aziRefPos = fmod(aziRefPos, 360.0);
@@ -413,7 +419,7 @@ namespace Rotator {
         aziVel = HAL::getSlope_1() * 1000 * 1000;
 
         aziError = check_wraparound(aziRefPos, aziPos);
-        aziPower = PIController(aziError, aziKp, aziKi, aziMaxPower, aziIntegral);
+        aziPower = PIDController(aziError, 0, aziKp, aziKi, 0, aziMaxPower, aziIntegral); // Just PI (no D) bc I barely need I and also wraparound derivative
         HAL::sendPower_1(aziPower);
 
         /*Serial.print("Elv power: ");

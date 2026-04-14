@@ -9,6 +9,7 @@
 Task taskTable[] = {
   {HAL::pushToBuffers, 0, true},
   {Rotator::updateAndMove, 0, true},
+  {Tracking::maintenance, 0, true}
   //{sendStateFlags, 0, true}
 };
 
