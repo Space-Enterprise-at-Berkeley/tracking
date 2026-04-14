@@ -5,7 +5,7 @@ namespace Tracking {
     // Main state
     bool tracking = false;
     uint32_t trackingStartTime;
-    std::array<float, 9> trackingState;
+    Vector <float, 9> trackingState;
     
     // Accelerometer variables
     uint8_t accelCalSamples = 0;
@@ -28,6 +28,13 @@ namespace Tracking {
     float launchPressure;
     float launchAltitude;
 
+    float elvPos, elvVel, elvError, elvPower, aziPos, aziVel, aziError, aziPower;
+    float elvIntegral = 0;
+    float aziIntegral = 0;
+    
+    // Reference setpoints
+    float elvRefPos, elvRefVel, aziRefPos, aziRefVel;
+    float aziOffset = 0;
     
     float dt = 0.1;
 
@@ -123,9 +130,6 @@ namespace Tracking {
 
         KalmanFilter::accelUpdate(filterTime(), a_world);
 
-        if(trackingState[6] > apoAltThresh && trackingState[7] < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
-            apogeeReached = true;
-        }
         return true; //data validated
     }
 
@@ -153,9 +157,8 @@ namespace Tracking {
         std::array<float, 3> enu = gpsSeparationENU(rocketPosition, launchPosition);
         //Update the tracker with the new position
         //Something something Kalman Filter here
-        trackingState[0] = enu[0];
-        trackingState[3] = enu[1];
-        trackingState[6] = enu[2];
+        std::array<float, 3> gpsPos = {enu[0], enu[1], enu[2]};
+        KalmanFilter::GPSUpdate(filterTime(), gpsPos);
         return true; //data validated
     }
 
@@ -183,13 +186,19 @@ namespace Tracking {
                 //data validated, but we are using barometer data instead of GPS, so we only update the Z position
             }
         }
+        KalmanFilter::GPSUpdate(filterTime(), {trackingState(0), trackingState(3), altitude - launchAltitude});
         return false; //data not validated
     }
 
     uint32_t maintenance() {
         if (tracking) {
             KalmanFilter::predict(filterTime());
-            std::array<float, 9> state = KalmanFilter::extrapolate(filterTime());
+            Vector<float, 9> state = KalmanFilter::extrapolate(filterTime());
+            if(state(6) > apoAltThresh && state(7) < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
+                apogeeReached = true;
+            }
+            
+            
             
         }
         return 100 * 1000;
@@ -237,5 +246,56 @@ namespace Tracking {
         out[1] = -sinLat * cosLon * dx - sinLat * sinLon * dy + cosLat * dz; // North
         out[2] =  cosLat * cosLon * dx + cosLat * sinLon * dy + sinLat * dz; // Up
         return out;
+    }
+    void trackingUpdate(){
+        float x_position = trackingState(0);
+        float x_velocity = trackingState(1);
+        float y_position = trackingState(3);
+        float y_velocity = trackingState(4);
+        float z_position = trackingState(6);
+        float z_velocity = trackingState(7);
+        
+        float x_rotator = launchPosition[0];
+        float y_rotator = launchPosition[1];
+        float z_rotator = launchPosition[2];
+        
+        float delta_x = x_position-x_rotator;
+        float delta_y = y_position-y_rotator;
+        float delta_z = z_position-z_rotator;
+
+        float distance_from_rocket = sqrt(pow(delta_x,2.0)+pow(delta_y,2.0));
+        float total_distance_from_rocket = sqrt(pow(distance_from_rocket,2.0) + pow(delta_z,2.0));
+
+        const float MIN_DISTANCE_THRESHOLD = 0.01;
+        if (total_distance_from_rocket < MIN_DISTANCE_THRESHOLD) return;
+        
+        aziRefPos = 180/M_PI * atan2(delta_y,delta_x);
+        elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket);
+
+        aziRefPos = fmod(90 - aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
+        // elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
+        aziRefVel = -(y_velocity * delta_x - x_velocity * delta_y)/pow(distance_from_rocket,2.0);
+        elvRefVel = (z_velocity * distance_from_rocket)/(pow(total_distance_from_rocket,2.0)) - delta_z * (delta_x * x_velocity + delta_y * y_velocity)/(pow(total_distance_from_rocket,2.0) * distance_from_rocket);
+
+        aziRefVel *= 180/M_PI;
+        elvRefVel *= 180/M_PI;
+    }     
+
+    void sendTrackingState(){
+        PacketRTFlightTracking state = PacketRTFlightTracking::Builder()
+            .withXPos(trackingState(0))
+            .withXVel(trackingState(1))
+            .withXAccel(trackingState(2))
+            .withYPos(trackingState(3))
+            .withYVel(trackingState(4))
+            .withYAccel(trackingState(5))
+            .withZPos(trackingState(6))
+            .withZVel(trackingState(7))
+            .withZAccel(trackingState(8))
+            .build();
+        Comms::Packet newpacket;
+        state.writeRawPacket(&newpacket);
+        //emit packet 
+        Comms::emitPacketToGS(&newpacket);
     }
 }
