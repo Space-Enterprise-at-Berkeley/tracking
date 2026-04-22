@@ -289,11 +289,12 @@ def run_csv_replay():
         if has_imu:
             pkt = build_low_imu_packet(acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, ts_bytes)
             _send_packet(pkt, csv_t_sec=t_sec)
+            print(f"Sent IMU packet: acc=({acc_x:.2f}, {acc_y:.2f}, {acc_z:.2f}) m/s² gyro=({gyro_x:.2f}, {gyro_y:.2f}, {gyro_z:.2f}) °/s\n")
             
         if has_gps:
             pkt = build_gps_packet(gps_lat, gps_lon, gps_alt,last_gps_siv, ts_bytes)
             _send_packet(pkt, csv_t_sec=t_sec)
-            print(f"Sent GPS packet: lat={gps_lat:.6f} lon={gps_lon:.6f} alt={gps_alt:.2f} m SIV={last_gps_siv}\n")
+            #print(f"Sent GPS packet: lat={gps_lat:.6f} lon={gps_lon:.6f} alt={gps_alt:.2f} m SIV={last_gps_siv}\n")
     print("[csv] Replay finished.")
     if drift_n > 0:
         mean_drift = drift_sum / drift_n
