@@ -14,7 +14,7 @@ namespace Tracking {
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     bool apogeeReached = false;
-    Quaternion::quat q = {1, 0, 0, 0};
+    Quaternion::quat q = {sqrt(2)/2, 0, sqrt(2)/2, 0};
     uint32_t lastAccelTime;   
 
     // GPS variables
@@ -47,9 +47,6 @@ namespace Tracking {
         baroCalSamples = 0;
         launchPressure = 0;
         launchAltitude = 0;
-        
-        // TODO: reset all calibration constants (check all of them)
-        // Insert other preflight initialization (e.g. zeroing baro) here
     }
     
     void stopTracking(){
@@ -70,6 +67,8 @@ namespace Tracking {
         lastAccelTime = now;
 
         if(!enable || apogeeReached) return;// false;
+
+        Serial.print("Recieved accel packet");
 
         // Insert accel callback here
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
@@ -94,6 +93,22 @@ namespace Tracking {
             return;// false; //data validated, and we have set our launch acceleration and gyro
         }
 
+        if(accelCalSamples == accelCalThreshold) {
+            Serial.print("Calibrated accel with ");
+            Serial.print(launchAcceleration[0]);
+            Serial.print(" ");
+            Serial.print(launchAcceleration[1]);
+            Serial.print(" ");
+            Serial.print(launchAcceleration[2]);
+            Serial.print(" ");
+            Serial.print(launchGyro[0]);
+            Serial.print(" ");
+            Serial.print(launchGyro[1]);
+            Serial.print(" ");
+            Serial.println(launchGyro[2]);
+            accelCalSamples++;
+        }
+
         //reduce biases from launch accel and gyro
         accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655F; 
         accelY = (accelY - launchAcceleration[1]) * 9.80655F;
@@ -101,6 +116,19 @@ namespace Tracking {
         gyroX = (gyroX - launchGyro[0])*(PI/180);
         gyroY = (gyroY - launchGyro[1])*(PI/180);
         gyroZ = (gyroZ - launchGyro[2])*(PI/180);
+
+        Serial.print("accel/gyro XYZ: ");
+        Serial.print(accelX);
+        Serial.print(" ");
+        Serial.print(accelY);
+        Serial.print(" ");
+        Serial.print(accelZ);
+        Serial.print(" ");
+        Serial.print(gyroX);
+        Serial.print(" ");
+        Serial.print(gyroY);
+        Serial.print(" ");
+        Serial.println(gyroZ);
 
         Quaternion::quat qDot;
         qDot.w = 0.5 * (-q.x * gyroX - q.y * gyroY - q.z * gyroZ);
@@ -116,6 +144,15 @@ namespace Tracking {
 
         q = Quaternion::normalize(q);
 
+        Serial.print("Quaternion: ");
+        Serial.print(q.w);
+        Serial.print(" ");
+        Serial.print(q.x);
+        Serial.print(" ");
+        Serial.print(q.y);
+        Serial.print(" ");
+        Serial.println(q.z);
+
         Quaternion::quat accelQuat = {0, accelX, accelY, accelZ};
         Quaternion::quat qConj = Quaternion::conjugate(q);
         // rotated = q * accel * q^-1
@@ -124,13 +161,29 @@ namespace Tracking {
 
         Vector<float, 3> a_world = {rotated.x - 9.80655F, rotated.y, rotated.z};
 
+        Serial.print("Rotated: ");
+        Serial.print(rotated.x);
+        Serial.print(" ");
+        Serial.print(rotated.y);
+        Serial.print(" ");
+        Serial.println(a_world[2]);
+
         KalmanFilter::accelUpdate(filterTime(), a_world);
+
+        Serial.print("Ran accel update with ");
+        Serial.print(a_world[0]);
+        Serial.print(" ");
+        Serial.print(a_world[1]);
+        Serial.print(" ");
+        Serial.println(a_world[2]);
 
         return;// true; //data validated
     }
 
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
         if (!enable) return;// false;
+
+        Serial.print("Recieved GPS packet");
 
         // Insert GPS callback here
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
@@ -149,16 +202,38 @@ namespace Tracking {
             launchPosition[2] = (launchPosition[2] * (GPSCalSamples - 1) + alt) / GPSCalSamples;
             return;// false; //calibration
         }
+
+        if(GPSCalSamples == GPSCalThreshold) {
+            Serial.print("Calibrated GPS with ");
+            Serial.print(launchPosition[0]);
+            Serial.print(" ");
+            Serial.print(launchPosition[1]);
+            Serial.print(" ");
+            Serial.println(launchPosition[2]);
+            GPSCalSamples++;
+        }
+
         std::array<float, 3> rocketPosition = {lat,lon,alt};
         std::array<float, 3> enu = gpsSeparationENU(rocketPosition, launchPosition);
         //Update the tracker with the new position
         //Something something Kalman Filter here
-        Vector<float, 3> gpsPos = {enu[0], enu[1], enu[2]}; // TODO: could just Vector all this
+        Vector<float, 3> gpsPos = {enu[0], enu[1], enu[2]};
         KalmanFilter::GPSUpdate(filterTime(), gpsPos);
+
+        Serial.print("Ran GPS update with ");
+        Serial.print(enu[0]);
+        Serial.print(" ");
+        Serial.print(enu[1]);
+        Serial.print(" ");
+        Serial.println(enu[2]);
+
         return;// true; //data validated
     }
 
     void baroUpdate(Comms::Packet packet, uint8_t ip){
+        Serial.println("Recieved baro packet");
+
+
         if (!enable) return;// false;
 
         // Insert baro callback here
@@ -172,6 +247,12 @@ namespace Tracking {
             launchAltitude = (launchAltitude * (baroCalSamples - 1) + altitude) / baroCalSamples;
             return;// false;
         }
+        if(baroCalSamples == baroCalThreshold) {
+            Serial.print("Calibrated baro with ");
+            Serial.print(launchAltitude);
+            baroCalSamples++;
+        }
+
         //if barometer altitude doesn't differ by a huge amount according to our last update
         /*if(std::abs(altitude - trackingState[6]) < 500){
             if(trackingState[6] == 0.0 && trackingState[0] == 0.0 && trackingState[3] == 0.0){
@@ -184,7 +265,11 @@ namespace Tracking {
         }*/
         // TODO: better sanity check
         KalmanFilter::baroUpdate(filterTime(), altitude - launchAltitude);
-        return;// false; //data not validated
+
+        Serial.print("Ran baro update with ");
+        Serial.print(altitude - launchAltitude);
+
+        return;
     }
 
     uint32_t maintenance() {

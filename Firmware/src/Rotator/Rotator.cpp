@@ -290,6 +290,7 @@ namespace Rotator {
         Comms::registerCallback(PACKET_ID_RTZeroAzimuth, zeroAzimuth);
         Comms::registerCallback(PACKET_ID_LowIMUValues, Tracking::accelUpdate);
         Comms::registerCallback(PACKET_ID_GPSValues, Tracking::GPSUpdate);
+        Comms::registerCallback(PACKET_ID_BaroValues, Tracking::baroUpdate);
     }
 
     uint32_t updateAndMove(){
