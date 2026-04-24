@@ -9,22 +9,35 @@ namespace Tracking {
     // Accelerometer variables
     uint8_t accelCalSamples = 0;
     uint8_t accelCalThreshold = 30;
+    uint8_t accelDataRateTotalSamples = 0;
+    uint8_t accelDataRateValidSamples = 0;
+    float accelAcceptanceRate = 0;
+    uint32_t lastAccelDataTime = micros();
     std::array<float, 3> launchAcceleration;
     std::array<float, 3> launchGyro;
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     bool apogeeReached = false;
     Quaternion::quat q = {sqrt(2.0F)/2, 0, sqrt(2.0F)/2, 0};
-    uint32_t lastAccelTime;   
+    uint32_t lastAccelTime = micros();
 
     // GPS variables
     uint8_t GPSCalSamples = 0;
     uint8_t GPSCalThreshold = 10;
+    uint8_t gpsDataRateTotalSamples = 0;
+    uint8_t gpsDataRateValidSamples = 0;
+    uint32_t lastGPSDataTime = micros();
+    float gpsAcceptanceRate = 0;
     std::array<float, 3> launchPosition;
+
 
     // Baro variables
     uint8_t baroCalSamples = 0;
+    uint8_t baroDataRateTotalSamples = 0;
+    uint8_t baroDataRateValidSamples = 0;
+    uint32_t lastBaroDataTime = micros();
     uint8_t baroCalThreshold = 20;
+    float baroAcceptanceRate = 0;
     float launchPressure;
     float launchAltitude;
 
@@ -62,11 +75,12 @@ namespace Tracking {
     }
 
     void accelUpdate(Comms::Packet packet, uint8_t ip){
+        accelDataRateTotalSamples++;
         uint32_t now = micros();
         uint32_t dt_micro = now - lastAccelTime;
         lastAccelTime = now;
 
-        if(!enable || apogeeReached) return;// false;
+        if(apogeeReached) return;// false;
 
         Serial.print("Recieved accel packet: ");
         Serial.println(accelCalSamples);
@@ -91,8 +105,10 @@ namespace Tracking {
             launchGyro[0] = (launchGyro[0] * (accelCalSamples-1) + gyroX) / accelCalSamples;
             launchGyro[1] = (launchGyro[1] * (accelCalSamples-1) + gyroY) / accelCalSamples;
             launchGyro[2] = (launchGyro[2] * (accelCalSamples-1) + gyroZ) / accelCalSamples;
+
             return;// false; //data validated, and we have set our launch acceleration and gyro
         }
+        accelDataRateValidSamples++;
 
         if(accelCalSamples == accelCalThreshold) {
             Serial.print("Calibrated accel with ");
@@ -109,6 +125,7 @@ namespace Tracking {
             Serial.println(launchGyro[2]);
             accelCalSamples++;
         }
+        if(!enable) return;
 
         //reduce biases from launch accel and gyro
         accelX = (accelX - (launchAcceleration[0] - 1)) * 9.80655F; 
@@ -178,11 +195,18 @@ namespace Tracking {
         Serial.print(" ");
         Serial.println(a_world[2]);
 
+        if(micros() - lastAccelDataTime > 1000 * 1000){
+            accelAcceptanceRate = accelDataRateValidSamples/(float) accelDataRateTotalSamples;
+            lastAccelDataTime = micros();
+            accelDataRateTotalSamples = 0;
+            accelDataRateValidSamples = 0;
+        }
+
         return;// true; //data validated
     }
 
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
-        if (!enable) return;// false;
+        // false;
 
         Serial.print("Recieved GPS packet: ");
         Serial.println(GPSCalSamples);
@@ -193,7 +217,7 @@ namespace Tracking {
         float lon = parsed_packet.m_Longitude;
         float alt = parsed_packet.m_Altitude;
         uint8_t siv = parsed_packet.m_Siv;
-
+        gpsDataRateTotalSamples++;
         Serial.print(siv);
         if (siv < 10) return;// false;
 
@@ -205,7 +229,7 @@ namespace Tracking {
             launchPosition[2] = (launchPosition[2] * (GPSCalSamples - 1) + alt) / GPSCalSamples;
             return;// false; //calibration
         }
-
+        gpsDataRateValidSamples++;
         if(GPSCalSamples == GPSCalThreshold) {
             Serial.print("Calibrated GPS with ");
             Serial.print(launchPosition[0]);
@@ -215,6 +239,7 @@ namespace Tracking {
             Serial.println(launchPosition[2]);
             GPSCalSamples++;
         }
+        if (!enable) return;
 
         std::array<float, 3> rocketPosition = {lat,lon,alt};
         std::array<float, 3> enu = gpsSeparationENU(rocketPosition, launchPosition);
@@ -230,11 +255,17 @@ namespace Tracking {
         Serial.print(" ");
         Serial.println(enu[2]);
 
+        if(micros() - lastGPSDataTime > 1000 * 1000){
+            gpsAcceptanceRate = gpsDataRateValidSamples/(float) gpsDataRateTotalSamples;
+            lastGPSDataTime = micros();
+            gpsDataRateTotalSamples = 0;
+            gpsDataRateValidSamples = 0;
+        }
         return;// true; //data validated
     }
 
     void baroUpdate(Comms::Packet packet, uint8_t ip){
-        if (!enable) return;// false;
+        // false;
 
         Serial.println("Recieved baro packet: ");
         Serial.println(baroCalSamples);
@@ -243,13 +274,15 @@ namespace Tracking {
         PacketBaroValues parsed_packet = PacketBaroValues::fromRawPacket(&packet);
         float altitude = parsed_packet.m_Altitude;
         float pressure = parsed_packet.m_Pressure;
-
+        baroDataRateTotalSamples++;
         if(baroCalSamples < baroCalThreshold){
             baroCalSamples++;
             launchPressure = (launchPressure * (baroCalSamples - 1) + pressure) / baroCalSamples;
             launchAltitude = (launchAltitude * (baroCalSamples - 1) + altitude) / baroCalSamples;
             return;// false;
         }
+        baroDataRateValidSamples++;
+        if (!enable) return;
         if(baroCalSamples == baroCalThreshold) {
             Serial.print("Calibrated baro with ");
             Serial.print(launchAltitude);
@@ -272,6 +305,12 @@ namespace Tracking {
         Serial.print("Ran baro update with ");
         Serial.print(altitude - launchAltitude);
 
+        if(micros() - lastBaroDataTime > 1000 * 1000){
+            baroAcceptanceRate = baroDataRateValidSamples/(float) baroDataRateTotalSamples;
+            lastBaroDataTime = micros();
+            baroDataRateTotalSamples = 0;
+            baroDataRateValidSamples = 0;
+        }
         return;
     }
 
@@ -340,6 +379,17 @@ namespace Tracking {
             .withZPos(trackingState(6))
             .withZVel(trackingState(7))
             .withZAccel(trackingState(8))
+            .build();
+        Comms::Packet newpacket;
+        state.writeRawPacket(&newpacket);
+        //emit packet 
+        Comms::emitPacketToGS(&newpacket);
+    }
+    void sendDataAcceptState(){
+        PacketRTDataAcceptState state = PacketRTDataAcceptState::Builder()
+            .withGPSAcceptRate(gpsAcceptanceRate)
+            .withAccelAcceptRate(accelAcceptanceRate)
+            .withBaroAcceptRate(baroAcceptanceRate)
             .build();
         Comms::Packet newpacket;
         state.writeRawPacket(&newpacket);

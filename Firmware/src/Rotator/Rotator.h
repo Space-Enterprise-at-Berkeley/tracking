@@ -13,6 +13,7 @@
 #include "../proto/include/Packet_RTZeroAzimuth.h"
 #include "../proto/include/Packet_LowIMUValues.h"
 #include "../proto/include/Packet_GPSValues.h"
+#include "../proto/include/Packet_RTDataAcceptState.h"
 
 namespace Rotator {
     void init();

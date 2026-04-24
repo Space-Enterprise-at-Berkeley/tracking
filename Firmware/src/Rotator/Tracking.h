@@ -12,6 +12,7 @@
 #include "../proto/include/Packet_BaroValues.h"
 #include "../proto/include/Packet_RTFlightTracking.h"
 #include "../proto/include/Packet_RTEnableFlightTracking.h"
+#include "../proto/include/Packet_RTDataAcceptState.h"
 
 
 namespace Tracking {
