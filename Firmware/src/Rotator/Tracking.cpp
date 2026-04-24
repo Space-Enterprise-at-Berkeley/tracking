@@ -14,7 +14,7 @@ namespace Tracking {
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     bool apogeeReached = false;
-    Quaternion::quat q = {sqrt(2)/2, 0, sqrt(2)/2, 0};
+    Quaternion::quat q = {sqrt(2.0F)/2, 0, sqrt(2.0F)/2, 0};
     uint32_t lastAccelTime;   
 
     // GPS variables
@@ -38,7 +38,7 @@ namespace Tracking {
         launchAcceleration = {0, 0, 0};
         launchGyro = {0, 0, 0};
         apogeeReached = false;
-        q = {1, 0, 0, 0};
+        q = {sqrt(2.0F)/2, 0, -sqrt(2.0F)/2, 0};
         lastAccelTime = micros();
 
         GPSCalSamples = 0;
@@ -68,7 +68,8 @@ namespace Tracking {
 
         if(!enable || apogeeReached) return;// false;
 
-        Serial.print("Recieved accel packet");
+        Serial.print("Recieved accel packet: ");
+        Serial.println(accelCalSamples);
 
         // Insert accel callback here
         PacketLowIMUValues parsed_packet = PacketLowIMUValues::fromRawPacket(&packet);
@@ -84,12 +85,12 @@ namespace Tracking {
         if(accelCalSamples < accelCalThreshold){
             accelCalSamples ++;
             // Do initial averaging
-            launchAcceleration[0] = (1/accelCalSamples)*(launchAcceleration[0] * (accelCalSamples-1) + accelX);
-            launchAcceleration[1] = (1/accelCalSamples)*(launchAcceleration[1] * (accelCalSamples-1) + accelY);
-            launchAcceleration[2] = (1/accelCalSamples)*(launchAcceleration[2] * (accelCalSamples-1) + accelZ);
-            launchGyro[0] = (1/accelCalSamples)*(launchGyro[0] * (accelCalSamples-1) + gyroX);
-            launchGyro[1] = (1/accelCalSamples)*(launchGyro[1] * (accelCalSamples-1) + gyroY);
-            launchGyro[2] = (1/accelCalSamples)*(launchGyro[2] * (accelCalSamples-1) + gyroZ);
+            launchAcceleration[0] = (launchAcceleration[0] * (accelCalSamples-1) + accelX) / accelCalSamples;
+            launchAcceleration[1] = (launchAcceleration[1] * (accelCalSamples-1) + accelY) / accelCalSamples;
+            launchAcceleration[2] = (launchAcceleration[2] * (accelCalSamples-1) + accelZ) / accelCalSamples;
+            launchGyro[0] = (launchGyro[0] * (accelCalSamples-1) + gyroX) / accelCalSamples;
+            launchGyro[1] = (launchGyro[1] * (accelCalSamples-1) + gyroY) / accelCalSamples;
+            launchGyro[2] = (launchGyro[2] * (accelCalSamples-1) + gyroZ) / accelCalSamples;
             return;// false; //data validated, and we have set our launch acceleration and gyro
         }
 
@@ -159,7 +160,7 @@ namespace Tracking {
         Quaternion::quat temp = Quaternion::multiply(q, accelQuat);
         Quaternion::quat rotated = Quaternion::multiply(temp, qConj);
 
-        Vector<float, 3> a_world = {rotated.x - 9.80655F, rotated.y, rotated.z};
+        Vector<float, 3> a_world = {rotated.x, rotated.y, rotated.z - 9.80655F};
 
         Serial.print("Rotated: ");
         Serial.print(rotated.x);
@@ -183,7 +184,8 @@ namespace Tracking {
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
         if (!enable) return;// false;
 
-        Serial.print("Recieved GPS packet");
+        Serial.print("Recieved GPS packet: ");
+        Serial.println(GPSCalSamples);
 
         // Insert GPS callback here
         PacketGPSValues parsed_packet = PacketGPSValues::fromRawPacket(&packet);
@@ -192,6 +194,7 @@ namespace Tracking {
         float alt = parsed_packet.m_Altitude;
         uint8_t siv = parsed_packet.m_Siv;
 
+        Serial.print(siv);
         if (siv < 10) return;// false;
 
         if(GPSCalSamples < GPSCalThreshold){
@@ -231,10 +234,10 @@ namespace Tracking {
     }
 
     void baroUpdate(Comms::Packet packet, uint8_t ip){
-        Serial.println("Recieved baro packet");
-
-
         if (!enable) return;// false;
+
+        Serial.println("Recieved baro packet: ");
+        Serial.println(baroCalSamples);
 
         // Insert baro callback here
         PacketBaroValues parsed_packet = PacketBaroValues::fromRawPacket(&packet);

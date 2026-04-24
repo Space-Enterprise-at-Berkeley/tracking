@@ -124,9 +124,9 @@ def build_low_imu_packet(accel_x: float, accel_y: float, accel_z: float,
     return _make_packet(PKT_ID_LOW_IMU, ts_bytes, payload)
 
 def build_gps_packet(latitude: float, longitude: float, altitude: float, siv: int, ts_bytes: list[int]) -> list[int]:
-    # GPSValues: lat, long, alt (f32), siv, horizontalAccuracy, verticalAccuracy (u32), heading (f32), headingAccuracy (u32), fixType (u8)
-    payload = (_f32(latitude) + _f32(longitude) + _f32(altitude) + _u32(siv) +
-               _u32(0) + _u32(0) + _f32(0.0) + _u32(0) + _u8(0))
+    # GPSValues: lat, long, alt (f32), horizontalAccuracy, verticalAccuracy (u32), heading (f32), headingAccuracy (u32), fixType (u8), siv (u8)
+    payload = (_f32(latitude) + _f32(longitude) + _f32(altitude) +
+               _u32(0) + _u32(0) + _f32(0.0) + _u32(0) + _u8(0)) + _u8(siv)
     return _make_packet(PKT_ID_GPS, ts_bytes, payload)
 
 def _make_packet(pkt_id: int, ts_bytes: list[int], payload: bytes) -> list[int]:
@@ -206,8 +206,7 @@ def _send_packet(packet_bytes: list[int], csv_t_sec: float | None = None):
         udp_sock.sendto(len(args.source).to_bytes(1, "little") + args.source.encode("utf-8") + raw, (UDP_HOST, UDP_PORT))
     else:
         udp_sock.sendto(raw, (UDP_HOST, UDP_PORT))
-    if packet_bytes[0] in (8, 10):
-        udp_sock.sendto(raw, ("10.0.0.91", 42099))
+    udp_sock.sendto(raw, ("10.0.0.91", 42099))
     if args.do_print:
         time_prefix = f"{csv_t_sec:.3f} s  " if csv_t_sec is not None else ""
         print(f"{time_prefix}sent {len(raw)} bytes: id=0x{packet_bytes[0]:02X} len={packet_bytes[1]} ts={int.from_bytes(bytes(packet_bytes[2:6]), 'little')}")
@@ -288,13 +287,13 @@ def run_csv_replay():
             print(f"Sent Baro packet: alt={baro_alt:.2f} m\n")
         if has_imu:
             pkt = build_low_imu_packet(acc_x, acc_y, acc_z, gyro_x, gyro_y, gyro_z, ts_bytes)
-            #_send_packet(pkt, csv_t_sec=t_sec)
-            #print(f"Sent IMU packet: acc=({acc_x:.2f}, {acc_y:.2f}, {acc_z:.2f}) m/s² gyro=({gyro_x:.2f}, {gyro_y:.2f}, {gyro_z:.2f}) °/s\n")
+            _send_packet(pkt, csv_t_sec=t_sec)
+            print(f"Sent IMU packet: acc=({acc_x:.2f}, {acc_y:.2f}, {acc_z:.2f}) m/s² gyro=({gyro_x:.2f}, {gyro_y:.2f}, {gyro_z:.2f}) °/s\n")
             
         if has_gps:
             pkt = build_gps_packet(gps_lat, gps_lon, gps_alt,last_gps_siv, ts_bytes)
-            #_send_packet(pkt, csv_t_sec=t_sec)
-            #print(f"Sent GPS packet: lat={gps_lat:.6f} lon={gps_lon:.6f} alt={gps_alt:.2f} m SIV={last_gps_siv}\n")
+            _send_packet(pkt, csv_t_sec=t_sec)
+            print(f"Sent GPS packet: lat={gps_lat:.6f} lon={gps_lon:.6f} alt={gps_alt:.2f} m SIV={last_gps_siv}\n")
     print("[csv] Replay finished.")
     if drift_n > 0:
         mean_drift = drift_sum / drift_n

@@ -14,7 +14,7 @@ namespace KalmanFilter {
     Matrix<float, 1, 9> baroObservation {{0, 0, 0, 0, 0, 0, 1, 0, 0}};
     Matrix<float, 1, 1> baroNoiseCov {{5}};
 
-    Matrix<float, 9, 9> processNoiseCovRate = accelObservation.transpose() * Matrix<float, 3, 3>{{5, 0, 0}, {0, 5, 0}, {0, 0, 20}} * accelObservation; // Variance per second caused by changing forces
+    Matrix<float, 9, 9> processNoiseCovRate = accelObservation.transpose() * Matrix<float, 3, 3>{{0.5, 0, 0}, {0, 0.5, 0}, {0, 0, 2}} * accelObservation; // Variance per second caused by changing forces
 
     Matrix<float, 9, 9> stateTransition(float dt) {
         Matrix<float, 9, 9> out;
