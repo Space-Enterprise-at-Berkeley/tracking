@@ -307,7 +307,7 @@ namespace Tracking {
             } 
         }
 
-        return 1000 * 1000;
+        return 100 * 1000;
     }
 
     std::array<float, 3> gpsToECEF(std::array<float, 3> gps) {
