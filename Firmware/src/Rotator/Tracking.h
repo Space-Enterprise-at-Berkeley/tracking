@@ -25,6 +25,7 @@ namespace Tracking {
     void baroUpdate(Comms::Packet packet, uint8_t ip);
     uint32_t maintenance();
     Vector<float, 9> getState();
+    uint32_t sendDataAcceptState();
 
     std::array<float, 3> gpsToECEF(std::array<float, 3> gps);
     std::array<float, 3> gpsSeparationENU(std::array<float, 3> rocketPosition, std::array<float, 3> launchPosition);
