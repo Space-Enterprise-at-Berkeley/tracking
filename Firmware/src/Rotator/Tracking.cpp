@@ -75,7 +75,7 @@ namespace Tracking {
     }
 
     void accelUpdate(Comms::Packet packet, uint8_t ip){
-        
+        accelDataRateTotalSamples++;
         uint32_t now = micros();
         uint32_t dt_micro = now - lastAccelTime;
         lastAccelTime = now;
@@ -95,7 +95,7 @@ namespace Tracking {
         float gyroX = parsed_packet.m_GyroX;
         float gyroY = parsed_packet.m_GyroY;
         float gyroZ = parsed_packet.m_GyroZ;
-        accelDataRateTotalSamples++;
+        
         if(accelCalSamples < accelCalThreshold){
             accelCalSamples ++;
             // Do initial averaging
@@ -202,6 +202,7 @@ namespace Tracking {
 
     void GPSUpdate(Comms::Packet packet, uint8_t ip){
         // false;
+        gpsDataRateTotalSamples++;
         if (!enable) return;
         Serial.print("Recieved GPS packet: ");
         Serial.println(GPSCalSamples);
@@ -212,7 +213,7 @@ namespace Tracking {
         float lon = parsed_packet.m_Longitude;
         float alt = parsed_packet.m_Altitude;
         uint8_t siv = parsed_packet.m_Siv;
-        gpsDataRateTotalSamples++;
+        
         Serial.print(siv);
         if (siv < 10) return;// false;
 
@@ -255,6 +256,7 @@ namespace Tracking {
 
     void baroUpdate(Comms::Packet packet, uint8_t ip){
         // false;
+        baroDataRateTotalSamples++;
         if (!enable) return;
         Serial.println("Recieved baro packet: ");
         Serial.println(baroCalSamples);
@@ -263,7 +265,7 @@ namespace Tracking {
         PacketBaroValues parsed_packet = PacketBaroValues::fromRawPacket(&packet);
         float altitude = parsed_packet.m_Altitude;
         float pressure = parsed_packet.m_Pressure;
-        baroDataRateTotalSamples++;
+        
         if(baroCalSamples < baroCalThreshold){
             baroCalSamples++;
             launchPressure = (launchPressure * (baroCalSamples - 1) + pressure) / baroCalSamples;
@@ -372,9 +374,9 @@ namespace Tracking {
 
 uint32_t sendDataAcceptState(){
         PacketRTDataAcceptState state = PacketRTDataAcceptState::Builder()
-            .withGPSAcceptRate(gpsDataRateTotalSamples != 0 ? (float)gpsDataRateValidSamples/gpsDataRateTotalSamples : 0.0f)
-            .withAccelAcceptRate(accelDataRateTotalSamples != 0 ? (float)accelDataRateValidSamples/accelDataRateTotalSamples : 0.0f)
-            .withBaroAcceptRate(baroDataRateTotalSamples != 0 ? (float)baroDataRateValidSamples/baroDataRateTotalSamples : 0.0f)
+            .withGPSAcceptRate(gpsDataRateTotalSamples != 0 ? (float)100 * gpsDataRateValidSamples/gpsDataRateTotalSamples : 0.0f)
+            .withAccelAcceptRate(accelDataRateTotalSamples != 0 ? (float)100 * accelDataRateValidSamples/accelDataRateTotalSamples : 0.0f)
+            .withBaroAcceptRate(baroDataRateTotalSamples != 0 ? (float)100 * baroDataRateValidSamples/baroDataRateTotalSamples : 0.0f)
             .withGPSRate(gpsDataRateTotalSamples)
             .withAccelRate(accelDataRateTotalSamples)
             .withBaroRate(baroDataRateTotalSamples)
