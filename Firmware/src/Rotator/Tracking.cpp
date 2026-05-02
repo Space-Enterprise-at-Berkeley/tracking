@@ -1,6 +1,8 @@
 #include "Tracking.h"
 #include <cmath>
 
+using namespace Quaternion;
+
 namespace Tracking {
     // Main state
     uint32_t trackingStartTime;
@@ -18,7 +20,8 @@ namespace Tracking {
     float apoAltThresh = 100;
     float apoVelThresh = 5;
     bool apogeeReached = false;
-    Quaternion::quat q = {sqrt(2.0F)/2, 0, sqrt(2.0F)/2, 0};
+    quat q;
+    quat railHeading {cos(0.5*102*PI/180), sin(0.5*102*PI/180), 0, 0};
     uint32_t lastAccelTime = micros();
 
     // GPS variables
@@ -52,6 +55,7 @@ namespace Tracking {
         launchGyro = {0, 0, 0};
         apogeeReached = false;
         q = {sqrt(2.0F)/2, 0, -sqrt(2.0F)/2, 0};
+        q = multiply(q, railHeading);
         lastAccelTime = micros();
 
         GPSCalSamples = 0;
@@ -148,7 +152,7 @@ namespace Tracking {
         Serial.print(" ");
         Serial.println(gyroZ);
 
-        Quaternion::quat qDot;
+        quat qDot;
         qDot.w = 0.5 * (-q.x * gyroX - q.y * gyroY - q.z * gyroZ);
         qDot.x = 0.5 * (q.w * gyroX + q.y * gyroZ - q.z * gyroY);
         qDot.y = 0.5 * (q.w * gyroY - q.x * gyroZ + q.z * gyroX);
@@ -160,7 +164,7 @@ namespace Tracking {
         q.y += qDot.y * dt;
         q.z += qDot.z * dt;
 
-        q = Quaternion::normalize(q);
+        q = normalize(q);
 
         Serial.print("Quaternion: ");
         Serial.print(q.w);
@@ -171,11 +175,11 @@ namespace Tracking {
         Serial.print(" ");
         Serial.println(q.z);
 
-        Quaternion::quat accelQuat = {0, accelX, accelY, accelZ};
-        Quaternion::quat qConj = Quaternion::conjugate(q);
+        quat accelQuat = {0, accelX, accelY, accelZ};
+        quat qConj = conjugate(q);
         // rotated = q * accel * q^-1
-        Quaternion::quat temp = Quaternion::multiply(q, accelQuat);
-        Quaternion::quat rotated = Quaternion::multiply(temp, qConj);
+        quat temp = multiply(q, accelQuat);
+        quat rotated = multiply(temp, qConj);
 
         Vector<float, 3> a_world = {rotated.x, rotated.y, rotated.z - 9.80655F};
 
@@ -304,6 +308,7 @@ namespace Tracking {
             Vector<float, 9> state = KalmanFilter::predict(filterTime());
             if(state(6) > apoAltThresh && state(7) < apoVelThresh){ //if vertical velocity is negative for some time, we have reached apogee
                 apogeeReached = true;
+                KalmanFilter::CVmode(true);
             } 
         }
 
@@ -398,5 +403,9 @@ uint32_t sendDataAcceptState(){
         Vector<float, 9> trackingState = KalmanFilter::extrapolate(filterTime());
         sendTrackingState(trackingState);
         return trackingState;
+    }
+
+    uint8_t getApogeeReached(){
+        return apogeeReached ? 1 : 0;
     }
 }

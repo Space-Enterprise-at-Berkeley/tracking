@@ -24,7 +24,9 @@ namespace Tracking {
     void GPSUpdate(Comms::Packet packet, uint8_t ip);
     void baroUpdate(Comms::Packet packet, uint8_t ip);
     uint32_t maintenance();
+
     Vector<float, 9> getState();
+    uint8_t getApogeeReached();
     uint32_t sendDataAcceptState();
 
     std::array<float, 3> gpsToECEF(std::array<float, 3> gps);

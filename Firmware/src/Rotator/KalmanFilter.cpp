@@ -15,10 +15,17 @@ namespace KalmanFilter {
     Matrix<float, 1, 1> baroNoiseCov {{5}};
 
     Matrix<float, 9, 9> processNoiseCovRate = accelObservation.transpose() * Matrix<float, 3, 3>{{0.5, 0, 0}, {0, 0.5, 0}, {0, 0, 2}} * accelObservation; // Variance per second caused by changing forces
+    bool constantVel;
 
     Matrix<float, 9, 9> stateTransition(float dt) {
         Matrix<float, 9, 9> out;
-        Matrix<float, 3, 3> block {{1, dt, 0.5F*dt*dt}, {0, 1, dt}, {0, 0, 1}};
+        Matrix<float, 3, 3> block;
+        if (constantVel) {
+            block = Matrix<float, 3, 3>{{1, dt, 0}, {0, 1, 0}, {0, 0, 1}};
+        }
+        else {
+            block = Matrix<float, 3, 3>{{1, dt, 0.5F*dt*dt}, {0, 1, dt}, {0, 0, 1}};
+        }
         Matrix<float, 3, 3> zero = Matrix<float, 3, 3>::Zero();
         out << block, zero, zero, zero, block, zero, zero, zero, block;
         return out;
@@ -26,6 +33,7 @@ namespace KalmanFilter {
 
     void reset() {
         time = 0;
+        constantVel = false;
         state = Vector<float, 9>::Zero();
         stateCov = Matrix<float, 9, 9>::Zero();
     }
@@ -63,5 +71,9 @@ namespace KalmanFilter {
         Matrix<float, 9, 1> K = stateCov * baroObservation.transpose() * (baroObservation * stateCov * baroObservation.transpose() + baroNoiseCov).inverse();
         state = state + K * (baro - baroObservation * state);
         stateCov = (Matrix<float, 9, 9>::Identity() - K * baroObservation) * stateCov * (Matrix<float, 9, 9>::Identity() - K * baroObservation).transpose() + K * baroNoiseCov * K.transpose();
+    }
+
+    void CVmode(bool enable) {
+        constantVel = enable;
     }
 }

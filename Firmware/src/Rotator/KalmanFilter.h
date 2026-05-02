@@ -4,6 +4,7 @@ using Eigen::Matrix;
 using Eigen::Vector;
 
 namespace KalmanFilter {
+    void CVmode(bool enable);
     void reset();
     Vector<float, 9> extrapolate(float t);
     Vector<float, 9> predict(float t);

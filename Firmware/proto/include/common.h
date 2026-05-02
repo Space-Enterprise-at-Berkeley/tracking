@@ -49,13 +49,6 @@ typedef enum EnableDisableEnum {
     DISABLE = 0,
 } EnableDisableEnum;
 
-#define CHANNEL_AC_BURNWIRE 0
-#ifdef BOARD_AC_1
-#define IS_BOARD_FOR_AC_BURNWIRE true
-#else
-#define IS_BOARD_FOR_AC_BURNWIRE false
-#endif
-
 #define CHANNEL_AC_BREAKWIRE 1
 #ifdef BOARD_AC_1
 #define IS_BOARD_FOR_AC_BREAKWIRE true
@@ -91,11 +84,11 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_NOS_EMERGENCY_VENT false
 #endif
 
-#define CHANNEL_AC_NOS_RQD 6
+#define CHANNEL_AC_BURNWIRE 6
 #ifdef BOARD_AC_1
-#define IS_BOARD_FOR_AC_NOS_RQD true
+#define IS_BOARD_FOR_AC_BURNWIRE true
 #else
-#define IS_BOARD_FOR_AC_NOS_RQD false
+#define IS_BOARD_FOR_AC_BURNWIRE false
 #endif
 
 #define CHANNEL_AC_NOS_GEMS 0
@@ -154,6 +147,13 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_PT_PNEUMATICS false
 #endif
 
+#define CHANNEL_PT_IPA_TANK 5
+#ifdef BOARD_PT_1
+#define IS_BOARD_FOR_PT_IPA_TANK true
+#else
+#define IS_BOARD_FOR_PT_IPA_TANK false
+#endif
+
 #define CHANNEL_PT_NOS_FILL_LINE 6
 #ifdef BOARD_PT_1
 #define IS_BOARD_FOR_PT_NOS_FILL_LINE true
@@ -173,13 +173,6 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_PT_NOS_INJECTOR true
 #else
 #define IS_BOARD_FOR_PT_NOS_INJECTOR false
-#endif
-
-#define CHANNEL_PT_IPA_TANK 4
-#ifdef BOARD_PT_2
-#define IS_BOARD_FOR_PT_IPA_TANK true
-#else
-#define IS_BOARD_FOR_PT_IPA_TANK false
 #endif
 
 #define CHANNEL_PT_NOS_TANK 5

@@ -20,20 +20,16 @@ namespace Rotator {
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
-    float elvKp = 0.009;
-    float elvKi = 0.0005;
-    float elvKd = 0.0006;
-    float elvMaxPower = 0.15;
-    float aziKp = 0.005;
-    float aziKi = 0.004;
-    float aziMaxPower = 0.15;
+    float elvKp = 0.003;
+    float elvKi = 0.0003; //0.0005;
+    float elvKd = 0; //0.0006;
+    float elvMaxPower = 0.1;
+    float aziKp = 0.003;
+    float aziKi = 0; //0.001;
+    float aziMaxPower = 0.1;
 
     // Tracking stuff
     float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
-
-    //Rocket stuff
-    uint8_t launchState = 0;
-    float launchPosition[] = {35.34770595331676, -117.80915328050497, 626.1}; // in terms of longitude, latitude, and altitude
 
     // Diagnostic stuff
     uint8_t diagnosticStep = 0;
@@ -115,7 +111,7 @@ namespace Rotator {
         if (total_distance_from_rocket < MIN_DISTANCE_THRESHOLD) return;
         
         aziRefPos = 180/M_PI * atan2(delta_y,delta_x);
-        elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket);
+        elvRefPos = 180/M_PI * asin(delta_z/total_distance_from_rocket) - 3;
 
         aziRefPos = fmod(90 - aziRefPos, 360.0); //convert from -180 to 180 to 0 to 360
         // elvRefPos = 90 - elvRefPos;//convert from -90 to 90 to 0 to 180
@@ -236,7 +232,7 @@ namespace Rotator {
             .withEnableState(HAL::getMotorEnable())
             .withElvEncoderFault(HAL::getFault_0())
             .withAziEncoderFault(HAL::getFault_1())
-            .withLaunchDetectState(launchState)
+            .withLaunchDetectState(Tracking::getApogeeReached())
             .withGpsRate(gpsRate)
             .withAccelRate(accRate)
             .build();
@@ -308,7 +304,8 @@ namespace Rotator {
         elvVel = HAL::getSlope_0() * 1000 * 1000;
 
         elvError = elvRefPos - elvPos;
-        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, elvKd, elvMaxPower, elvIntegral);
+        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, elvKd, elvMaxPower, elvIntegral) + 0.06*cos(elvPos*PI/180.0);
+        elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower);
         HAL::sendPower_0(elvPower); 
         
         aziRefPos = fmod(aziRefPos, 360.0);
