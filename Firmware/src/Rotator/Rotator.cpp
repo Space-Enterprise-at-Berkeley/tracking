@@ -25,7 +25,7 @@ namespace Rotator {
     float elvKd = 0; //0.0006;
     float elvMaxPower = 0.1;
     float aziKp = 0.003;
-    float aziKi = 0; //0.001;
+    float aziKi = 0.0003; //0.001;
     float aziMaxPower = 0.1;
 
     // Tracking stuff

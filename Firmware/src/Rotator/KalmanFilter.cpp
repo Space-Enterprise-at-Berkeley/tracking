@@ -21,7 +21,7 @@ namespace KalmanFilter {
         Matrix<float, 9, 9> out;
         Matrix<float, 3, 3> block;
         if (constantVel) {
-            block = Matrix<float, 3, 3>{{1, dt, 0}, {0, 1, 0}, {0, 0, 1}};
+            block = Matrix<float, 3, 3>{{1, dt, 0}, {0, 1, 0}, {0, 0, 0}};
         }
         else {
             block = Matrix<float, 3, 3>{{1, dt, 0.5F*dt*dt}, {0, 1, dt}, {0, 0, 1}};
