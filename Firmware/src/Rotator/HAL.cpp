@@ -301,7 +301,7 @@ namespace HAL {
     }
 
     uint32_t pushToBuffers(){
-        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 286.4, 360.0));
+        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 289.9, 360.0));
         degreeBuff_1->insert(micros(), 360.0 - readDegrees(pulseWidth_1));
         return PULSE_MAX + 1;
     }
