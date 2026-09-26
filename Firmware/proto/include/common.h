@@ -126,25 +126,25 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_AC_NOS_DRAIN false
 #endif
 
-#define CHANNEL_PT_NOS_POPPET 0
+#define CHANNEL_PT_NOS_POPPET_UPSTREAM 0
 #ifdef BOARD_PT_1
-#define IS_BOARD_FOR_PT_NOS_POPPET true
+#define IS_BOARD_FOR_PT_NOS_POPPET_UPSTREAM true
 #else
-#define IS_BOARD_FOR_PT_NOS_POPPET false
+#define IS_BOARD_FOR_PT_NOS_POPPET_UPSTREAM false
 #endif
 
-#define CHANNEL_PT_IPA_POPPET 3
+#define CHANNEL_PT_IPA_POPPET_UPSTREAM 3
 #ifdef BOARD_PT_1
-#define IS_BOARD_FOR_PT_IPA_POPPET true
+#define IS_BOARD_FOR_PT_IPA_POPPET_UPSTREAM true
 #else
-#define IS_BOARD_FOR_PT_IPA_POPPET false
+#define IS_BOARD_FOR_PT_IPA_POPPET_UPSTREAM false
 #endif
 
-#define CHANNEL_PT_PNEUMATICS 4
+#define CHANNEL_PT_NOS_POPPET_DOWNSTREAM 4
 #ifdef BOARD_PT_1
-#define IS_BOARD_FOR_PT_PNEUMATICS true
+#define IS_BOARD_FOR_PT_NOS_POPPET_DOWNSTREAM true
 #else
-#define IS_BOARD_FOR_PT_PNEUMATICS false
+#define IS_BOARD_FOR_PT_NOS_POPPET_DOWNSTREAM false
 #endif
 
 #define CHANNEL_PT_IPA_TANK 5
@@ -159,6 +159,13 @@ typedef enum EnableDisableEnum {
 #define IS_BOARD_FOR_PT_NOS_FILL_LINE true
 #else
 #define IS_BOARD_FOR_PT_NOS_FILL_LINE false
+#endif
+
+#define CHANNEL_PT_IPA_POPPET_DOWNSTREAM 7
+#ifdef BOARD_PT_1
+#define IS_BOARD_FOR_PT_IPA_POPPET_DOWNSTREAM true
+#else
+#define IS_BOARD_FOR_PT_IPA_POPPET_DOWNSTREAM false
 #endif
 
 #define CHANNEL_PT_IPA_INJECTOR 2

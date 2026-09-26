@@ -39,3 +39,4 @@ Simulations/IMU_Analysis/prospect_flight_gps.csv
 Simulations/IMU_Analysis/rocketutils.py
 Simulations/IMU_Analysis/rotatordatanew.csv
 Simulations/IMU_Analysis/rotatordataplot.py
+/Firmware/proto/include

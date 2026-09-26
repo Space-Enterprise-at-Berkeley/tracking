@@ -254,7 +254,7 @@ namespace HAL {
             power = max(min(power, 0.025), -0.025);
         }
         if (encoderFault_0) power = 0;
-        sendPwm(pwm_0, power);
+        sendPwm(pwm_0, -power);
     }
 
     void sendPower_1(float power){
@@ -301,7 +301,7 @@ namespace HAL {
     }
 
     uint32_t pushToBuffers(){
-        degreeBuff_0->insert(micros(), fmod(-readDegrees(pulseWidth_0) + 289.9, 360.0));
+        degreeBuff_0->insert(micros(), fmod(readDegrees(pulseWidth_0) - 109.9, 360.0));
         degreeBuff_1->insert(micros(), 360.0 - readDegrees(pulseWidth_1));
         return PULSE_MAX + 1;
     }

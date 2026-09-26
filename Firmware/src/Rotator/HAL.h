@@ -34,8 +34,8 @@ namespace HAL {
     extern volatile int encoderTicks_0;
     extern volatile int encoderTicks_1; 
 
-    const float minDegrees_0 = 26;
-    const float maxDegrees_0 = 154;
+    const float minDegrees_0 = 19;
+    const float maxDegrees_0 = 150;
 
     int init();
 
