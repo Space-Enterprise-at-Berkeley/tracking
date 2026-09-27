@@ -21,7 +21,7 @@ namespace Rotator {
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
     float elvKp = 0.003;
-    float elvKi = 0.00045; //0.0005;
+    float elvKi = 0.0005; //0.0005;
     float elvKd = 0; //0.0006;
     float elvMaxPower = 0.1;
     float aziKp = 0.003;
