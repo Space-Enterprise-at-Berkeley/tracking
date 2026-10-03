@@ -22,14 +22,21 @@ namespace Rotator {
     uint32_t updatePeriod = 5 * 1000; // microseconds
     float elvKp = 0.003;
     float elvKi = 0.0005; //0.0005;
-    float elvKd = 0; //0.0006;
+    float elvKd = 0.0006; //0.0006;
     float elvMaxPower = 0.1;
     float aziKp = 0.003;
     float aziKi = 0.0003; //0.001;
     float aziMaxPower = 0.1;
 
+    // Trajectory generation
+    float elvTrajPos, aziTrajPos;
+    float elvSpeedRising = 35.0; // degrees/second
+    float elvSpeedHigh = 10.0;
+    float elvSpeedFalling = 25.0;
+    float aziSpeed = 30.0;
+
     // Tracking stuff
-    float rotatorPosition[] = {-860.651, -167.334, -18.1722}; // XYZ (ENU) position (m) relative to launch site
+    float rotatorPosition[] = {-100, 0, 8}; // XYZ (ENU) position (m) relative to launch site
 
     // Diagnostic stuff
     uint8_t diagnosticStep = 0;
@@ -192,6 +199,7 @@ namespace Rotator {
         Tracking::stopTracking();
         aziOffset = fmod(aziOffset + 360.0 - aziPos, 360.0);
         aziRefPos = 0;
+        aziTrajPos = 0;
         Serial.print("Set azimuth offset to ");
         Serial.println(aziOffset);
     }
@@ -221,14 +229,16 @@ namespace Rotator {
         PacketRTRotatorState state = PacketRTRotatorState::Builder()
             .withElvPos(elvPos)
             .withElvRefPos(elvRefPos)
+            .withElvTrajPos(elvTrajPos)
             .withElvVel(elvVel)
             .withElvRefVel(elvRefVel)
             .withElvPower(elvPower*100)
             .withAziPos(aziPos)
             .withAziRefPos(aziRefPos)
+            .withAziTrajPos(aziTrajPos)
             .withAziVel(aziVel)
             .withAziRefVel(aziRefVel)
-            .withAziPower(aziPower*100)
+            .withAziPower(0.03*cos(elvPos*PI/180.0)*100)
             .withEnableState(HAL::getMotorEnable())
             .withElvEncoderFault(HAL::getFault_0())
             .withAziEncoderFault(HAL::getFault_1())
@@ -303,8 +313,25 @@ namespace Rotator {
         elvPos = HAL::getEncoderDegrees_0();
         elvVel = HAL::getSlope_0() * 1000 * 1000;
 
-        elvError = elvRefPos - elvPos;
-        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, elvKd, elvMaxPower, elvIntegral) + 0.038*cos(elvPos*PI/180.0);
+        // Trajectory smoothing
+        float elvStep = elvRefPos - elvTrajPos;
+        float elvSpeed;
+        if (HAL::getMotorEnable()) {
+            if (elvTrajPos > 70 && elvTrajPos < 110) {
+                elvSpeed = elvSpeedHigh;
+            } else if ((elvStep > 0) == (elvTrajPos < 90)) {
+                elvSpeed = elvSpeedRising;
+            } else {
+                elvSpeed = elvSpeedFalling;
+            }
+            float adjustedElvSpeed = elvSpeed * ((float) updatePeriod) / (1000.0 * 1000.0);
+            elvTrajPos += min(max(elvStep, -adjustedElvSpeed), adjustedElvSpeed);
+        } else {
+            elvTrajPos = elvPos;
+        }
+
+        elvError = elvTrajPos - elvPos;
+        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, elvKd, elvMaxPower, elvIntegral) + 0.03*cos(elvPos*PI/180.0);
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower);
         HAL::sendPower_0(elvPower); 
         
@@ -313,7 +340,18 @@ namespace Rotator {
         aziPos = fmod(HAL::getEncoderDegrees_1() + aziOffset, 360.0);
         aziVel = HAL::getSlope_1() * 1000 * 1000;
 
-        aziError = check_wraparound(aziRefPos, aziPos);
+        // Trajectory smoothing
+        float aziStep = check_wraparound(aziRefPos, aziTrajPos);
+        float adjustedAziSpeed = aziSpeed * ((float) updatePeriod) / (1000.0 * 1000.0);
+        if (HAL::getMotorEnable()) {
+            aziTrajPos += min(max(aziStep, -adjustedAziSpeed), adjustedAziSpeed);
+            aziTrajPos = fmod(aziTrajPos, 360.0);
+            if (aziTrajPos < 0) aziTrajPos += 360; 
+        } else {
+            aziTrajPos = aziPos;
+        }
+
+        aziError = check_wraparound(aziTrajPos, aziPos);
         aziPower = PIDController(aziError, 0, aziKp, aziKi, 0, aziMaxPower, aziIntegral); // Just PI (no D) bc I barely need I and also wraparound derivative
         HAL::sendPower_1(aziPower);
 
