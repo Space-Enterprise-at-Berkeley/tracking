@@ -22,7 +22,7 @@ namespace Rotator {
     uint32_t updatePeriod = 5 * 1000; // microseconds
     float elvKp = 0.003;
     float elvKi = 0.0005; //0.0005;
-    float elvKd = 0.0015; //0.0006;
+    float elvKd = 0.0001; //0.0006;
     float elvMaxPower = 0.1;
     float aziKp = 0.003;
     float aziKi = 0.0003; //0.001;
@@ -332,36 +332,68 @@ namespace Rotator {
 
         elvError = elvTrajPos - elvPos;
         float actualKd = elvKd;
-        if(elvPos > 84){
-            actualKd = elvKd * 4.0/3.0;
+        float actualKp = elvKp;
+        float actualKi = elvKi;
+        if(elvPos > 70){
+            actualKp = elvKp * 0.5;
         }
-        '''
+        if(elvPos > 84){
+            actualKd = elvKd * 2;
+        }
+        
         if(abs(elvVel) < 1){
             actualKd = elvKd / 6.0; //from * 1/3
         }
         if(abs(elvVel) < 1){
-            actualKi = elvKi / 3.0; //from * 1
+            actualKi = elvKi / 2.0; //from * 1
         }
-        '''
-        float a1 = 0;
-        float feedforward = 0;
+        //the above only activates if we are not at target yet
+        
+        float a1 = 0.0;
+        float feedforward = 0.0;
+        float errormargin = 0.4;
+        //there should be no feedforward to overcome static friction if the system is already kinetic
         if(abs(elvVel) < 1){
-            if (abs(elvError) < 5){
+            //the following if/else calculates a1 using a piecewise function
+            if (abs(elvError) > 5){
                 a1 = int(elvError < 0)*2-1;
             }else{
-                a1 = 2.0/0.85*atan(-0.83306*elvError)/PI;
+                if (elvError < -1 * errormargin ){
+                    a1 = 2.0/0.85*atan(-0.83306*(elvError+errormargin))/PI;
+                }else if (elvError > errormargin){
+                    a1 = 2.0/0.85*atan(-0.83306*(elvError-errormargin))/PI;
+                }else{
+                    a1 = 0;
+                }   
             }
             feedforward = (0.0320776+a1*-0.0244359)*cos(elvPos*PI/180.0)+a1*(-0.00115246);
         }else{
             feedforward = (0.0320776)*cos(elvPos*PI/180.0);
         }
         /*
-        future tests
-        1. test current configuration. If this doesnt work turn off feedforward first.
-        1b. if oscillating, try unquoting the actualKd line above.
-        2. change elvKi to actualKi below and test
+        if(abs(elvError) > 3 && abs(elvVel) > 1){
+            elvIntegral = 0;
+        }
         */
-        elvPower = PIDController(elvError, deadband(elvVel, 3), elvKp, elvKi, actualKd, elvMaxPower, elvIntegral)+feedforward;
+        if(abs(elvError) <= errormargin){
+            elvPower = feedforward;
+            elvIntegral = 0;
+        }else{
+            float deadbanded_elvError = elvError;
+            if (elvError < 0){
+                deadbanded_elvError = elvError + errormargin;
+            }else{
+                deadbanded_elvError = elvError - errormargin;
+            }
+            /*
+            if(abs(elvError) > 3){
+                elvIntegral = 0;
+            }*/
+            //deadbanding may not be needed if elvintegral=0 fixes the bug entirely
+            //Serial.print(std::to_string(elvError)+" "+std::to_string( elvKp)+" "+std::to_string( actualKi) + " "+std::to_string( actualKd ));
+            elvPower = PIDController(deadbanded_elvError, deadband(elvVel, 3), actualKp, actualKi, actualKd, elvMaxPower, elvIntegral)+feedforward;
+        }
+        
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower);
         HAL::sendPower_0(elvPower); 
         
