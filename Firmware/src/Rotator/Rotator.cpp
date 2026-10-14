@@ -20,9 +20,9 @@ namespace Rotator {
 
     // Dynamics constants
     uint32_t updatePeriod = 5 * 1000; // microseconds
-    float elvKp = 0.003;
+    float elvKp = 0.0045;
     float elvKi = 0.0005; //0.0005;
-    float elvKd = 0.0001; //0.0006;
+    float elvKd = 0.00005; //0.0006;
     float elvMaxPower = 0.1;
     float aziKp = 0.003;
     float aziKi = 0.0003; //0.001;
@@ -34,7 +34,7 @@ namespace Rotator {
     float elvSpeedHigh = 10.0;
     float elvSpeedFalling = 25.0;
     float aziSpeed = 30.0;
-
+    bool last_elvError_was_positive = true;
     // Tracking stuff
     float rotatorPosition[] = {-100, 0, 8}; // XYZ (ENU) position (m) relative to launch site
 
@@ -238,7 +238,7 @@ namespace Rotator {
             .withAziTrajPos(aziTrajPos)
             .withAziVel(aziVel)
             .withAziRefVel(aziRefVel)
-            .withAziPower(0.03*cos(elvPos*PI/180.0)*100)
+            .withAziPower(aziPower*100)
             .withEnableState(HAL::getMotorEnable())
             .withElvEncoderFault(HAL::getFault_0())
             .withAziEncoderFault(HAL::getFault_1())
@@ -334,24 +334,27 @@ namespace Rotator {
         float actualKd = elvKd;
         float actualKp = elvKp;
         float actualKi = elvKi;
-        if(elvPos > 70){
-            actualKp = elvKp * 0.5;
+        if(elvPos > 80){
+            actualKp = elvKp * 0.2;
+        }else if(elvPos > 70){
+            actualKp = elvKp * 0.4;
         }
         if(elvPos > 84){
             actualKd = elvKd * 2;
         }
         
         if(abs(elvVel) < 1){
-            actualKd = elvKd / 6.0; //from * 1/3
+            actualKd = elvKd / 3.0; //from * 1/3
         }
+        
         if(abs(elvVel) < 1){
-            actualKi = elvKi / 2.0; //from * 1
+            actualKi = elvKi * 4.0; //from * 1
         }
         //the above only activates if we are not at target yet
         
         float a1 = 0.0;
         float feedforward = 0.0;
-        float errormargin = 0.4;
+        float errormargin = 0.2;
         //there should be no feedforward to overcome static friction if the system is already kinetic
         if(abs(elvVel) < 1){
             //the following if/else calculates a1 using a piecewise function
@@ -377,21 +380,24 @@ namespace Rotator {
         */
         if(abs(elvError) <= errormargin){
             elvPower = feedforward;
-            elvIntegral = 0;
         }else{
-            float deadbanded_elvError = elvError;
+            if((elvError > 0) != last_elvError_was_positive){
+                elvIntegral = 0;
+            }
+            last_elvError_was_positive = (elvError > 0);
+            /*
             if (elvError < 0){
                 deadbanded_elvError = elvError + errormargin;
             }else{
                 deadbanded_elvError = elvError - errormargin;
             }
-            /*
+            
             if(abs(elvError) > 3){
                 elvIntegral = 0;
             }*/
             //deadbanding may not be needed if elvintegral=0 fixes the bug entirely
             //Serial.print(std::to_string(elvError)+" "+std::to_string( elvKp)+" "+std::to_string( actualKi) + " "+std::to_string( actualKd ));
-            elvPower = PIDController(deadbanded_elvError, deadband(elvVel, 3), actualKp, actualKi, actualKd, elvMaxPower, elvIntegral)+feedforward;
+            elvPower = PIDController(elvError, deadband(elvVel, 3), actualKp, actualKi, actualKd, elvMaxPower, elvIntegral)+feedforward;
         }
         
         elvPower = min(max(elvPower, -elvMaxPower), elvMaxPower);
